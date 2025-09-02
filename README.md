@@ -1,16 +1,9 @@
 # quikle_rider
 
-A new Flutter project.
+A Delivery Related Project Based on India 
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+This project has 3 module one is user another one is rider and lastly the vandors
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+So, this repo is based on Rider Based Application.
