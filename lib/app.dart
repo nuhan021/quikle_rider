@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
       builder: (_, child) {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
-          initialRoute: AppRoute.getLoginScreen(),
+          initialRoute: AppRoute.getSplashScreen(), // Changed to splash screen
           getPages: AppRoute.routes,
           initialBinding: ControllerBinder(),
           themeMode: ThemeMode.system,

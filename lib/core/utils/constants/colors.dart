@@ -2,18 +2,47 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   AppColors._();
+
+
+
   // logo background color
   static const Color logoBg = Color(0xFF57C773);
   // Brand Colors
-  static const Color primary = Color(
-    0xFF1E3A5F,
+  static const Color primarywhite = Color(
+    0xFFF8F8F8,
   ); // Darker primary for a more professional look
-  static const Color secondary = Color(
-    0xFFFEC601,
+  static const Color primaryblack = Color(
+    0xFF000000
+  ); 
+  static const Color primaryyellow = Color(
+    0xFFFFC200
+  ); 
+    static const Color primarygreen = Color(
+    0xFF06BD4C
+  );
+    static const Color primarygreenactive = Color(
+    0xFF05973D
+  );
+
+
+
+ 
+  static const Color secondarygrey= Color(
+    0xFFCFCFCF,
   ); // Bright yellow for highlights and accents
+  static const Color secondaryred= Color(
+    0xFFE03E1A,
+  );
   static const Color accent = Color(
     0xFF89A7FF,
   ); // Softer blue for a modern touch
+
+
+
+
+
+
+
 
   // Gradient Colors
   static const Gradient linearGradient = LinearGradient(
@@ -40,7 +69,6 @@ class AppColors {
   static const Color primaryBackground = Color(
     0xFFFFFFFF,
   ); // Pure white for primary content areas
-
   // Surface Colors
   static const Color surfaceLight = Color(
     0xFFE0E0E0,
@@ -48,11 +76,18 @@ class AppColors {
   static const Color surfaceDark = Color(
     0xFF2C2C2C,
   ); // Dark grey for elevated surfaces in dark mode
-
   // Container Colors
   static const Color lightContainer = Color(
     0xFFF1F8E9,
   ); // Soft green for a subtle highlight
+
+
+
+
+
+
+
+
 
   // Utility Colors
   static const Color success = Color(0xFF4CAF50);
