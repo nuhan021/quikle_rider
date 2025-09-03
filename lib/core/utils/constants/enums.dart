@@ -16,3 +16,5 @@ enum PaymentMethods {
   razorPay,
   paytm
 }
+
+enum CustomFonts { obviouslyVariable }
