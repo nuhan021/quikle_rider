@@ -13,6 +13,6 @@ TextStyle getTextStyle({
     fontWeight: fontWeight,
     height: lineHeight,
     color: color,
-    fontFamily: "assets/fonts/ObviouslyVariable.ttf",
+    fontFamily: "assets/fonts/Obviously-Regular.otf",
   );
 }

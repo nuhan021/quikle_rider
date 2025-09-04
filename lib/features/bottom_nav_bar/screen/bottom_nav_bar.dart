@@ -30,7 +30,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     return Scaffold(
       body: IndexedStack(index: currentIndex, children: screens),
       bottomNavigationBar: Container(
-        height: 85.h,
+        height: 105.h,
         decoration: BoxDecoration(
           color: const Color(0xFF1A1A1A),
           boxShadow: [
@@ -95,7 +95,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
             // Icon
             Container(
               width: 24.w,
-              height: 24.h,
+              height: 32.h,
               child: isProfile && isSelected
                   ? Container(
                       decoration: BoxDecoration(

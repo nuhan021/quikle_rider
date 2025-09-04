@@ -120,7 +120,7 @@ flutter:
   fonts:
     - family: ObviouslyVariable
       fonts:
-        - asset: assets/fonts/ObviouslyVariable.ttf
+        - asset: assets/fonts/Obviously-Regular.otf
 
   
   # For details regarding fonts from package dependencies,
