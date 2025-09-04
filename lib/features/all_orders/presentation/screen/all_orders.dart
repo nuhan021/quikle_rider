@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:quikle_rider/features/all_orders/presentation/screen/all_order_single.dart';
 import 'all_orders_combined.dart';
 

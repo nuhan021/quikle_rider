@@ -7,9 +7,9 @@ import '../features/authentication/presentation/screens/login_screen.dart';
 import '../features/authentication/presentation/screens/login_otp.dart';
 import '../features/authentication/presentation/screens/create_account.dart';
 import '../features/welcomescreen/welcomescreen.dart';
-import '../features/map/map.dart';
-import '../features/categories/categories.dart';
-import '../features/profile/profile.dart';
+import '../features/map/presentation/screen/map.dart';
+import '../features/wallet/presentation/screen/wallet.dart';
+import '../features/profile/presentation/screen/profile.dart';
 
 class AppRoute {
   // Route names
@@ -19,11 +19,11 @@ class AppRoute {
   static String createAccount = "/createAccount";
   static String welcomeScreen = "/welcomeScreen";
   static String bottomNavBar = "/bottomNavBar";
-  static String homePage = "/homePage";
+  static String homeScreen = "/homeScreen";
   static String allOrders = "/allOrders";
-  static String mapPage = "/mapPage";
-  static String categories = "/categories";
-  static String profilePage = "/profilePage";
+  static String mapScreen = "/mapScreen";
+  static String walletScreen = "/walletScreen";
+  static String profileScreen = "/profileScreen";
 
   // Route getters
   static String getSplashScreen() => splashScreen;
@@ -32,11 +32,11 @@ class AppRoute {
   static String getCreateAccount() => createAccount;
   static String getWelcomeScreen() => welcomeScreen;
   static String getBottomNavBar() => bottomNavBar;
-  static String getHomePage() => homePage;
+  static String getHomeScreen() => homeScreen;
   static String getAllOrders() => allOrders;
-  static String getMapPage() => mapPage;
-  static String getCategories() => categories;
-  static String getProfilePage() => profilePage;
+  static String getMapScreen() => mapScreen;
+  static String getWalletScreen() => walletScreen;
+  static String getProfileScreen() => profileScreen;
 
   // Routes list
   static List<GetPage> routes = [
@@ -46,10 +46,10 @@ class AppRoute {
     GetPage(name: createAccount, page: () => const CreateAccount()),
     GetPage(name: welcomeScreen, page: () => const WelcomeScreen()),
     GetPage(name: bottomNavBar, page: () => const BottomNavBar()),
-    GetPage(name: homePage, page: () => const HomePage()),
+    GetPage(name: homeScreen, page: () => const HomeScreen()),
     GetPage(name: allOrders, page: () => const AllOrders()),
-    GetPage(name: mapPage, page: () => const MapPage()),
-    GetPage(name: categories, page: () => const Categories()),
-    GetPage(name: profilePage, page: () => const ProfilePage()),
+    GetPage(name: mapScreen, page: () => const MapScreen()),
+    GetPage(name: walletScreen, page: () => const WalletScreen()),
+    GetPage(name: profileScreen, page: () => const ProfileScreen()),
   ];
 }

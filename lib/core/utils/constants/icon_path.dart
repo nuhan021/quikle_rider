@@ -8,4 +8,5 @@ class IconPath {
   static const String allOrders = 'assets/icons/allorders.png';
   static const String map = 'assets/icons/map.png';
   static const String profile = 'assets/icons/profile.png';
+  static const String wallet = 'assets/icons/wallet.png';
 }

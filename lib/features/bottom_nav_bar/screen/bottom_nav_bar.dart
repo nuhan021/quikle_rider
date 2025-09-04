@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:quikle_rider/core/utils/constants/icon_path.dart';
 import 'package:quikle_rider/features/all_orders/presentation/screen/all_orders.dart';
-import 'package:quikle_rider/features/categories/categories.dart';
+import 'package:quikle_rider/features/wallet/presentation/screen/wallet.dart';
 import 'package:quikle_rider/features/home/presentation/screen/homepage.dart';
-import 'package:quikle_rider/features/map/map.dart';
-import 'package:quikle_rider/features/profile/profile.dart';
+import 'package:quikle_rider/features/map/presentation/screen/map.dart';
+import 'package:quikle_rider/features/profile/presentation/screen/profile.dart';
 
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({super.key});
@@ -18,11 +18,11 @@ class _BottomNavBarState extends State<BottomNavBar> {
   int currentIndex = 0;
 
   final List<Widget> screens = [
-    const HomePage(),
-    const AllOrders(),
-    const MapPage(),
-    const Categories(),
-    const ProfilePage(),
+     HomeScreen(),
+     AllOrders(),
+   MapScreen(),
+     WalletScreen(),
+    ProfileScreen(),
   ];
 
   @override
@@ -30,7 +30,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
     return Scaffold(
       body: IndexedStack(index: currentIndex, children: screens),
       bottomNavigationBar: Container(
-        height: 85.h,
+        height: 110.h,
         decoration: BoxDecoration(
           color: const Color(0xFF1A1A1A),
           boxShadow: [
@@ -56,8 +56,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
                 _buildNavItem(index: 2, icon: IconPath.map, label: 'Map'),
                 _buildNavItem(
                   index: 3,
-                  icon: IconPath.categories,
-                  label: 'Categories',
+                  icon: IconPath.wallet,
+                  label: 'Wallet',
                 ),
                 _buildNavItem(
                   index: 4,
@@ -95,7 +95,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
             // Icon
             Container(
               width: 24.w,
-              height: 24.h,
+              height: 32.h,
               child: isProfile && isSelected
                   ? Container(
                       decoration: BoxDecoration(
@@ -171,7 +171,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
       case 2:
         return Icons.map;
       case 3:
-        return Icons.category;
+        return Icons.wallet;
       case 4:
         return Icons.person;
       default:

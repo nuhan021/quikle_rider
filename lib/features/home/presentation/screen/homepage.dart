@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomeScreenState extends State<HomeScreen> {
   bool isOnline = false;
 
   @override
@@ -69,6 +69,7 @@ class _HomePageState extends State<HomePage> {
             'Go Online To Get\nRequests',
             textAlign: TextAlign.center,
             style: TextStyle(
+              fontFamily: 'Obviously',
               fontSize: 20.sp,
               fontWeight: FontWeight.w500,
               color: Colors.grey[600],
