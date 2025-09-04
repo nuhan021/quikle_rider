@@ -118,7 +118,7 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-    - family: ObviouslyVariable
+    - family: Obviously
       fonts:
         - asset: assets/fonts/Obviously-Regular.otf
 
