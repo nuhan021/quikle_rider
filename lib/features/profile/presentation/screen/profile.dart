@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:quikle_rider/features/home/presentation/screen/my_profile.dart';
+import 'package:quikle_rider/features/profile/presentation/screen/rider_editprofile.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -73,7 +76,10 @@ class ProfileScreen extends StatelessWidget {
             _buildMenuItem(
               icon: Icons.person_outline,
               title: 'My Profile',
-              onTap: () {},
+              onTap: () {
+                // Navigate to My Profile screen
+                Get.to(() => MyProfilePage());
+              },
             ),
             _buildMenuItem(
               icon: Icons.directions_car_outlined,
