@@ -70,26 +70,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // Logo
-                          Container(
-                            width: 80.w,
-                            height: 80.h,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFB800),
-                              borderRadius: BorderRadius.circular(20.r),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(
-                                    0xFFFFB800,
-                                  ).withOpacity(0.3),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.delivery_dining,
-                              size: 40.sp,
-                              color: Colors.black,
+                        Container(
+                            width: 64.w,
+                            height: 64.h,
+                            child: Image.asset(
+                              // Changed from Icon to Image.asset
+                              'assets/images/welcomeimage.png',
+                              fit: BoxFit.contain,
+                              width: 32
+                                  .sp, // Using sp for consistency with original Icon size
+                              height: 32.sp,
                             ),
                           ),
 
@@ -102,16 +92,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 TextSpan(
                                   text: "Welcome To ",
                                   style: TextStyle(
-                                    fontSize: 32.sp,
-                                    fontWeight: FontWeight.w700,
+                                    fontSize: 24.sp,
+                                    fontWeight: FontWeight.w500,
                                     color: Colors.black,
                                   ),
                                 ),
                                 TextSpan(
                                   text: "Quikle",
                                   style: TextStyle(
-                                    fontSize: 32.sp,
-                                    fontWeight: FontWeight.w700,
+                                    fontSize: 24.sp,
+                                    fontWeight: FontWeight.w500,
                                     color: const Color(0xFFFFB800),
                                   ),
                                 ),
@@ -119,10 +109,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             ),
                           ),
 
-                          SizedBox(height: 60.h),
+                         SizedBox(height: 60.h),
 
-                          // Loading Animation
-                          Container(
+                         Container(
                             width: 60.w,
                             height: 60.h,
                             child: CircularProgressIndicator(
@@ -133,39 +122,6 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             ),
                           ),
                         ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Background Image (Optional)
-                Positioned.fill(
-                  child: Opacity(
-                    opacity: 0.05,
-                    child: Image.asset(
-                      'assets/images/welcomeimage.png',
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                ),
-
-                // Skip Button (Optional)
-                Positioned(
-                  top: 20.h,
-                  right: 20.w,
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: TextButton(
-                      onPressed: () {
-                        Get.offAllNamed(AppRoute.getBottomNavBar());
-                      },
-                      child: Text(
-                        "Skip",
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          color: Colors.grey[600],
-                          fontWeight: FontWeight.w500,
-                        ),
                       ),
                     ),
                   ),

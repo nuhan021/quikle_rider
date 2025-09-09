@@ -9,7 +9,7 @@ TextStyle getTextStyle({
   FontWeight fontWeight = FontWeight.w400,
   double lineHeight = 1,
   TextAlign textAlign = TextAlign.center,
-  Color color = Colors.black,
+  Color? color ,
 }) {
   switch (font) {
     case CustomFonts.obviously:
@@ -43,4 +43,18 @@ TextStyle getTextStyle({
         color: color,
       );
   }
+}
+TextStyle getTextStyle2({
+  double fontSize = 14.0,
+  FontWeight fontWeight = FontWeight.w400,
+  double lineHeight = 1,
+  TextAlign textAlign = TextAlign.center,
+  Color color = Colors.black,
+}) {
+  return GoogleFonts.poppins(
+    fontSize: fontSize.sp,
+    fontWeight: fontWeight,
+    height: lineHeight,
+    color: color,
+  );
 }
