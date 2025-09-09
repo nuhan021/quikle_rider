@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-
+import 'package:quikle_rider/features/profile/presentation/screen/help_support.dart';
+import 'package:quikle_rider/features/profile/presentation/screen/my_profile.dart';
+import 'package:quikle_rider/features/profile/presentation/screen/payment_method.dart';
+import 'package:quikle_rider/features/profile/presentation/screen/vehicle_information.dart';
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
@@ -71,47 +74,88 @@ class ProfileScreen extends StatelessWidget {
 
             // Menu Items
             _buildMenuItem(
+              context: context,
               icon: Icons.person_outline,
               title: 'My Profile',
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => MyProfilePage()),
+                );
+              },
             ),
             _buildMenuItem(
+              context: context,
               icon: Icons.directions_car_outlined,
               title: 'Vehicle Information',
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => VehicleInformationPage(),
+                  ),
+                );
+              },
             ),
             _buildMenuItem(
+              context: context,
               icon: Icons.location_on_outlined,
               title: 'Delivery Zone',
-              onTap: () {},
+              onTap: () {
+                // TODO: Implement navigation for Delivery Zone
+              },
             ),
             _buildMenuItem(
+              context: context,
               icon: Icons.payment_outlined,
               title: 'Payment Method',
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => PaymentMethodPage(),
+                  ),
+                );
+              },
             ),
             _buildMenuItem(
+              context: context,
               icon: Icons.access_time_outlined,
               title: 'Availability Settings',
-              onTap: () {},
+              onTap: () {
+                // TODO: Implement navigation for Availability Settings
+              },
             ),
+            // _buildMenuItem(
+            //   context: context,
+            //   icon: Icons.notifications_outlined,
+            //   title: 'Notification Settings',
+            //   onTap: () {
+            //     Navigator.of(context).push(
+            //       MaterialPageRoute(
+            //         builder: (context) => NotificationSettingsScreen(),
+            //       ),
+            //     );
+            //   },
+            // ),
             _buildMenuItem(
-              icon: Icons.notifications_outlined,
-              title: 'Notification Settings',
-              onTap: () {},
-            ),
-            _buildMenuItem(
+              context: context,
               icon: Icons.language_outlined,
               title: 'Language Settings',
-              onTap: () {},
+              onTap: () {
+                // TODO: Implement navigation for Language Settings
+              },
             ),
             _buildMenuItem(
+              context: context,
               icon: Icons.help_outline,
               title: 'Help & Support',
-              onTap: () {},
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => HelpSupportPage()),
+                );
+              },
             ),
             SizedBox(height: 20),
             _buildMenuItem(
+              context: context,
               icon: Icons.logout,
               title: 'Sign out',
               onTap: () {
@@ -126,6 +170,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildMenuItem({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required VoidCallback onTap,
@@ -226,3 +271,23 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 }
+
+// TODO: You will need to create these files in the specified paths.
+// Example of a placeholder screen
+/*
+class MyProfileScreen extends StatelessWidget {
+  const MyProfileScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('My Profile'),
+      ),
+      body: Center(
+        child: Text('My Profile Screen Content'),
+      ),
+    );
+  }
+}
+*/
