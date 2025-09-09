@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
+import 'package:quikle_rider/core/utils/constants/enums.dart' show CustomFonts;
 import '../../../core/common/styles/global_text_style.dart';
 
 class CommonAppbar extends StatelessWidget implements PreferredSizeWidget {
@@ -12,7 +13,7 @@ class CommonAppbar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Text(
         title,
-        style: getTextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+        style: getTextStyle(font: CustomFonts.obviously, fontSize: 20, fontWeight: FontWeight.w600),
       ),
       centerTitle: false,
       shape: RoundedRectangleBorder(

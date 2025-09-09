@@ -6,7 +6,7 @@ import '../features/splash_screen/presentation/screens/splash_screen.dart';
 import '../features/authentication/presentation/screens/login_screen.dart';
 import '../features/authentication/presentation/screens/login_otp.dart';
 import '../features/authentication/presentation/screens/create_account.dart';
-import '../features/welcomescreen/welcomescreen.dart';
+import '../features/welcomescreen/presentation/screens/welcomescreen.dart';
 import '../features/map/presentation/screen/map.dart';
 import '../features/wallet/presentation/screen/wallet.dart';
 import '../features/profile/presentation/screen/profile.dart';
