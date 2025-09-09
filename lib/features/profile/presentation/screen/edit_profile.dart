@@ -1,10 +1,28 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
-import 'package:quikle_rider/features/profile/presentation/screen/rider_editprofile.dart';
 
-class MyProfilePage extends StatelessWidget {
-  const MyProfilePage({super.key});
+class EditProfilePage extends StatefulWidget {
+  const EditProfilePage({Key? key}) : super(key: key);
+
+  @override
+  State<EditProfilePage> createState() => _EditProfilePageState();
+}
+
+class _EditProfilePageState extends State<EditProfilePage> {
+  final TextEditingController _nameController = TextEditingController(
+    text: 'Vikram Rajput',
+  );
+  final TextEditingController _emailController = TextEditingController(
+    text: 'vikramrajput@gmail.com',
+  );
+  final TextEditingController _phoneController = TextEditingController(
+    text: '+1 (555) 123-4567',
+  );
+  final TextEditingController _licenseController = TextEditingController(
+    text: '1234567891011',
+  );
+  final TextEditingController _identityController = TextEditingController(
+    text: '1234567981011',
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +32,7 @@ class MyProfilePage extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         title: const Text(
-          'My Profile',
+          'Edit Profile',
           style: TextStyle(
             color: Colors.black,
             fontSize: 18,
@@ -43,7 +61,6 @@ class MyProfilePage extends StatelessWidget {
             const SizedBox(height: 30),
             // Profile Image and Info
             Container(
-              width: double.infinity,
               margin: const EdgeInsets.symmetric(horizontal: 20),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -64,12 +81,17 @@ class MyProfilePage extends StatelessWidget {
                     radius: 50,
                     backgroundColor: Colors.grey[300],
                     backgroundImage: const AssetImage(
-                      'assets/images/loginriderimage.png',
+                      'assets/profile_image.jpg',
                     ),
                     child: Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        // 
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.orange.withOpacity(0.3),
+                            Colors.yellow.withOpacity(0.3),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -91,7 +113,7 @@ class MyProfilePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 30),
-            // Profile Details
+            // Edit Profile Form
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
@@ -109,62 +131,26 @@ class MyProfilePage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'My Profile',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const EditProfileScreen(),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Text(
-                              'Edit',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                  const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Text(
+                      'Edit Profile',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
-                  _buildProfileItem('Name', 'Vikram Rajput'),
-                  _buildDivider(),
-                  _buildProfileItem('Email Address', 'vikramrajput@gmail.com'),
-                  _buildDivider(),
-                  _buildProfileItem('Phone Number', '+1 (555) 123-4567'),
-                  _buildDivider(),
-                  _buildProfileItem('Driving License Number', '1234567891011'),
-                  _buildDivider(),
-                  _buildProfileItem(
+                  _buildEditField('Name', _nameController),
+                  _buildEditField('Email Address', _emailController),
+                  _buildEditField('Phone Number', _phoneController),
+                  _buildEditField('Driving License Number', _licenseController),
+                  _buildEditField(
                     'National Identity Number',
-                    '12345679814564011',
+                    _identityController,
                   ),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -175,9 +161,9 @@ class MyProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileItem(String label, String value) {
+  Widget _buildEditField(String label, TextEditingController controller) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -190,19 +176,42 @@ class MyProfilePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Text(value, style: TextStyle(fontSize: 14, color: Colors.grey[600])),
+          TextFormField(
+            controller: controller,
+            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            decoration: InputDecoration(
+              hintText: controller.text,
+              hintStyle: TextStyle(color: Colors.grey[400]),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: const BorderSide(color: Colors.orange),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildDivider() {
-    return Divider(
-      height: 1,
-      thickness: 1,
-      color: Colors.grey[200],
-      indent: 20,
-      endIndent: 20,
-    );
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _licenseController.dispose();
+    _identityController.dispose();
+    super.dispose();
   }
 }
