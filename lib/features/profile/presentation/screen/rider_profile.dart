@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
-import 'package:quikle_rider/features/home/presentation/screen/my_profile.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/rider_editprofile.dart';
 import 'package:quikle_rider/features/profile/presentation/widgets/common_button.dart';
 import 'package:quikle_rider/features/profile/presentation/widgets/profile_field.dart';
