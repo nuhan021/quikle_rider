@@ -163,7 +163,7 @@ class MyProfilePage extends StatelessWidget {
                   _buildDivider(),
                   _buildProfileItem(
                     'National Identity Number',
-                    '1234567981011',
+                    '12345679814564011',
                   ),
                 ],
               ),
