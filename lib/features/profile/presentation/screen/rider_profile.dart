@@ -43,7 +43,8 @@ class RiderProfile extends StatelessWidget {
                   SizedBox(height: 12),
                   Text(
                     "Vikram Rajput",
-                    style: getTextStyle(
+                    style: getTextStyle2(
+                      
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
@@ -52,7 +53,7 @@ class RiderProfile extends StatelessWidget {
                   SizedBox(height: 4),
                   Text(
                     "vikramrajput@gmail.com",
-                    style: getTextStyle(fontSize: 14, color: Colors.black54),
+                    style: getTextStyle2(fontSize: 14, color: Colors.black54),
                   ),
                 ],
               ),
@@ -83,7 +84,7 @@ class RiderProfile extends StatelessWidget {
                     children: [
                       Text(
                         "My Profile",
-                        style: getTextStyle(
+                        style: getTextStyle2(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
                         ),
@@ -92,7 +93,7 @@ class RiderProfile extends StatelessWidget {
                         width: 50,
                         height: 26,
                         text: "Edit",
-                        style: getTextStyle(
+                        style: getTextStyle2(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
                           color: Colors.white,

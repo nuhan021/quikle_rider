@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
+import 'package:quikle_rider/features/home/presentation/screen/goonline.dart';
+import 'package:quikle_rider/features/home/presentation/screen/gooffline.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,49 +15,44 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   bool isOnline = false;
 
+  void _onToggleSwitch() async {
+    if (!isOnline) {
+      // Show go online dialog
+      final result = await Get.to(
+        () => const GoOnlinePage(),
+        opaque: false,
+        fullscreenDialog: true,
+        transition: Transition.fade,
+      );
+      if (result == true) {
+        setState(() {
+          isOnline = true;
+        });
+      }
+    } else {
+      // Show go offline dialog
+      final result = await Get.to(
+        () => const GoOfflinePage(),
+        opaque: false,
+        fullscreenDialog: true,
+        transition: Transition.fade,
+      );
+      if (result == true) {
+        setState(() {
+          isOnline = false;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: Text(
-          'Home',
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
-          ),
-        ),
-        actions: [
-          // Online/Offline Toggle
-          Container(
-            margin: EdgeInsets.only(right: 16.w),
-            child: Row(
-              children: [
-                Switch(
-                  value: isOnline,
-                  onChanged: (value) {
-                    setState(() {
-                      isOnline = value;
-                    });
-                  },
-                  activeColor: const Color(0xFFFFB800),
-                  inactiveThumbColor: Colors.grey,
-                  inactiveTrackColor: Colors.grey[300],
-                ),
-                SizedBox(width: 8.w),
-                Icon(
-                  Icons.notifications_outlined,
-                  color: Colors.black,
-                  size: 24.sp,
-                ),
-              ],
-            ),
-          ),
-        ],
+      appBar: CustomTabBar(
+        title: 'Home',
+        isOnline: isOnline,
+        onToggle: _onToggleSwitch,
       ),
       body: isOnline ? _buildOnlineView() : _buildOfflineView(),
     );

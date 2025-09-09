@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:quikle_rider/core/common/styles/global_text_style.dart';
+import 'package:quikle_rider/core/utils/constants/enums.dart';
 import '../../../../routes/app_routes.dart';
 
 class CreateAccount extends StatefulWidget {
@@ -19,7 +21,6 @@ class _CreateAccountState extends State<CreateAccount> {
       TextEditingController();
 
   final _formKey = GlobalKey<FormState>();
-  bool acceptedTerms = false;
 
   @override
   Widget build(BuildContext context) {
@@ -49,16 +50,15 @@ class _CreateAccountState extends State<CreateAccount> {
                     child: Column(
                       children: [
                         Container(
-                          width: 60.w,
-                          height: 60.h,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFB800),
-                            borderRadius: BorderRadius.circular(15.r),
-                          ),
-                          child: Icon(
-                            Icons.delivery_dining,
-                            size: 32.sp,
-                            color: Colors.black,
+                          width: 64.w,
+                          height: 64.h,
+                          child: Image.asset(
+                            // Changed from Icon to Image.asset
+                            'assets/images/welcomeimage.png',
+                            fit: BoxFit.contain,
+                            width: 32
+                                .sp, // Using sp for consistency with original Icon size
+                            height: 32.sp,
                           ),
                         ),
 
@@ -69,17 +69,19 @@ class _CreateAccountState extends State<CreateAccount> {
                             children: [
                               TextSpan(
                                 text: "Join ",
-                                style: TextStyle(
-                                  fontSize: 28.sp,
-                                  fontWeight: FontWeight.w600,
+                                style: getTextStyle(
+                                  font: CustomFonts.obviously,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w500,
                                   color: Colors.black,
                                 ),
                               ),
                               TextSpan(
                                 text: "Quikle",
-                                style: TextStyle(
-                                  fontSize: 28.sp,
-                                  fontWeight: FontWeight.w600,
+                                style: getTextStyle(
+                                  font: CustomFonts.obviously,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w500,
                                   color: const Color(0xFFFFB800),
                                 ),
                               ),
@@ -91,10 +93,11 @@ class _CreateAccountState extends State<CreateAccount> {
 
                         Text(
                           "The premier platform for riders",
-                          style: TextStyle(
-                            fontSize: 16.sp,
+                          style: getTextStyle(
+                            font: CustomFonts.inter,
+                            fontSize: 16,
                             color: Colors.grey[600],
-                            fontWeight: FontWeight.w400,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
@@ -108,7 +111,7 @@ class _CreateAccountState extends State<CreateAccount> {
                   SizedBox(height: 8.h),
                   _buildTextField(
                     controller: fullNameController,
-                    hintText: "John Doe",
+                    hintText: "S. M. Mahedi Hasan",
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your full name';
@@ -124,7 +127,7 @@ class _CreateAccountState extends State<CreateAccount> {
                   SizedBox(height: 8.h),
                   _buildTextField(
                     controller: phoneController,
-                    hintText: "(555) 123-4567",
+                    hintText: "(+880) 123-4567",
                     keyboardType: TextInputType.phone,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -171,7 +174,7 @@ class _CreateAccountState extends State<CreateAccount> {
                   // Create Account Button
                   SizedBox(
                     width: double.infinity,
-                    height: 56.h,
+                    height: 48.h,
                     child: ElevatedButton(
                       onPressed: _createAccount,
                       style: ElevatedButton.styleFrom(
@@ -183,8 +186,9 @@ class _CreateAccountState extends State<CreateAccount> {
                       ),
                       child: Text(
                         "Create Account",
-                        style: TextStyle(
-                          fontSize: 18.sp,
+                        style: getTextStyle(
+                          font: CustomFonts.manrope,
+                          fontSize: 18,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFFFFB800),
                         ),
@@ -202,35 +206,39 @@ class _CreateAccountState extends State<CreateAccount> {
                         children: [
                           TextSpan(
                             text: "By creating an account, you agree to our ",
-                            style: TextStyle(
-                              fontSize: 14.sp,
+                            style: getTextStyle(
+                              font: CustomFonts.inter,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
                               color: Colors.grey[600],
                             ),
                           ),
                           TextSpan(
                             text: "Terms of Services",
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              color: Colors.black,
+                            style: getTextStyle(
+                              font: CustomFonts.inter,
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              decoration: TextDecoration.underline,
-                            ),
+                              color: Colors.black,
+                            ).copyWith(decoration: TextDecoration.underline),
                           ),
                           TextSpan(
                             text: " and ",
-                            style: TextStyle(
-                              fontSize: 14.sp,
+                            style: getTextStyle(
+                              font: CustomFonts.inter,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
                               color: Colors.grey[600],
                             ),
                           ),
                           TextSpan(
                             text: "Privacy Policy",
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              color: Colors.black,
+                            style: getTextStyle(
+                              font: CustomFonts.inter,
+                              fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              decoration: TextDecoration.underline,
-                            ),
+                              color: Colors.black,
+                            ).copyWith(decoration: TextDecoration.underline),
                           ),
                         ],
                       ),
@@ -250,9 +258,10 @@ class _CreateAccountState extends State<CreateAccount> {
   Widget _buildLabel(String text) {
     return Text(
       text,
-      style: TextStyle(
-        fontSize: 16.sp,
-        fontWeight: FontWeight.w500,
+      style: getTextStyle(
+        font: CustomFonts.inter,
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
         color: Colors.black,
       ),
     );
@@ -264,26 +273,42 @@ class _CreateAccountState extends State<CreateAccount> {
     TextInputType? keyboardType,
     String? Function(String?)? validator,
   }) {
-    return Container(
-      height: 56.h,
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(12.r),
-      ),
+    return SizedBox(
+      height: 52.h,
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
         validator: validator,
+        style: getTextStyle(
+          font: CustomFonts.inter,
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          color: Colors.black,
+        ),
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: TextStyle(fontSize: 16.sp, color: Colors.grey[500]),
-          border: InputBorder.none,
+          hintStyle: getTextStyle(
+            font: CustomFonts.inter,
+            fontSize: 16,
+            color: Colors.grey[500],
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.r),
+            borderSide: const BorderSide(color: Color(0xFF7C7C7C), width: 1.0),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.r),
+            borderSide: const BorderSide(color: Color(0xFF7C7C7C), width: 1.0),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.r),
+            borderSide: const BorderSide(color: Colors.black, width: 1.0),
+          ),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
             vertical: 16.h,
           ),
         ),
-        style: TextStyle(fontSize: 16.sp, color: Colors.black),
       ),
     );
   }
@@ -311,7 +336,21 @@ class _CreateAccountState extends State<CreateAccount> {
           "Your account has been created successfully!",
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: const Color(0xFFFFB800),
-          colorText: Colors.black,
+          titleText: const Text(
+            "Account Created",
+            style: TextStyle(
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          messageText: const Text(
+            "Your account has been created successfully!",
+            style: TextStyle(
+              fontSize: 16.0,
+              color: Colors.black,
+            ),
+          ),
           duration: const Duration(seconds: 3),
         );
 

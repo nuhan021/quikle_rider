@@ -22,14 +22,14 @@ class ProfileField extends StatelessWidget {
         children: [
           Text(
             label,
-            style: getTextStyle(
+            style: getTextStyle2(
               fontSize: 16,
               fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
           ),
           const SizedBox(height: 8),
-          Text(value, style: getTextStyle(fontSize: 14, color: Colors.black54)),
+          Text(value, style: getTextStyle2(fontSize: 14, color: Colors.black54)),
           if (showDivider) const Divider(height: 20),
         ],
       ),

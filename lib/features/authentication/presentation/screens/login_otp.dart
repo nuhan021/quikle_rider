@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:quikle_rider/core/common/styles/global_text_style.dart';
+import 'package:quikle_rider/core/utils/constants/enums.dart';
 import '../../../../routes/app_routes.dart';
 
 class LoginOtp extends StatefulWidget {
@@ -61,184 +63,200 @@ class _LoginOtpState extends State<LoginOtp> with TickerProviderStateMixin {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
-          child: Column(
-            children: [
-              SizedBox(height: 20.h),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.w),
+            child: Column(
+              children: [
+                SizedBox(height: 20.h),
 
-              // Rider Image
-              Expanded(
-                flex: 2,
-                child: Container(
+                // Rider Image
+                Image.asset(
+                  'assets/images/loginriderimage.png',
+                  fit: BoxFit.contain,
                   width: double.infinity,
-                  child: Image.asset(
-                    'assets/images/loginriderimage.png',
-                    fit: BoxFit.contain,
+                  height: 330.h,
+                ),
+
+                SizedBox(height: 40.h),
+
+                // Enter Code Title
+                Text(
+                  "Enter Code",
+                  style: getTextStyle(
+                    font: CustomFonts.obviously,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
                   ),
                 ),
-              ),
 
-              SizedBox(height: 40.h),
+                SizedBox(height: 12.h),
 
-              // Enter Code Title
-              Text(
-                "Enter Code",
-                style: TextStyle(
-                  fontSize: 28.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
-              ),
-
-              SizedBox(height: 12.h),
-
-              // Description
-              RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
+                // Description
+                Column(
                   children: [
-                    TextSpan(
-                      text: "We've sent a 6-digit code to\n",
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        color: Colors.grey[600],
+                    Text(
+                      "We've sent a 6-digit code to",
+                      textAlign: TextAlign.center,
+                      style: getTextStyle(
+                        font: CustomFonts.inter,
+                        fontSize: 14,
+                        color: Colors.grey[600]!,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
-                    TextSpan(
-                      text: phoneNumber,
-                      style: TextStyle(
-                        fontSize: 16.sp,
+                    SizedBox(height: 8.h),
+                    Text(
+                      phoneNumber,
+                      textAlign: TextAlign.center,
+                      style: getTextStyle(
+                        font: CustomFonts.inter,
+                        fontSize: 16,
                         color: const Color(0xFFFFB800),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
                 ),
-              ),
 
-              SizedBox(height: 40.h),
+                SizedBox(height: 40.h),
 
-              // OTP Input Fields
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(6, (index) {
-                  return Container(
-                    width: 45.w,
-                    height: 56.h,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: otpControllers[index].text.isNotEmpty
-                            ? Colors.black
-                            : Colors.grey[300]!,
-                        width: otpControllers[index].text.isNotEmpty ? 2 : 1,
-                      ),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: TextFormField(
-                      controller: otpControllers[index],
-                      focusNode: focusNodes[index],
-                      textAlign: TextAlign.center,
-                      keyboardType: TextInputType.number,
-                      maxLength: 1,
-                      style: TextStyle(
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        counterText: "",
-                      ),
-                      onChanged: (value) {
-                        setState(() {});
-                        if (value.isNotEmpty && index < 5) {
-                          focusNodes[index + 1].requestFocus();
-                        } else if (value.isEmpty && index > 0) {
-                          focusNodes[index - 1].requestFocus();
-                        }
-
-                        // Check if all fields are filled
-                        if (index == 5 && value.isNotEmpty) {
-                          String otp = otpControllers
-                              .map((controller) => controller.text)
-                              .join();
-                          if (otp.length == 6) {
-                            // Verify OTP
-                            _verifyOtp(otp);
-                          }
-                        }
-                      },
-                    ),
-                  );
-                }),
-              ),
-
-              SizedBox(height: 40.h),
-
-              // Verify Code Button
-              SizedBox(
-                width: double.infinity,
-                height: 56.h,
-                child: ElevatedButton(
-                  onPressed: () {
-                    String otp = otpControllers
-                        .map((controller) => controller.text)
-                        .join();
-                    if (otp.length == 6) {
-                      _verifyOtp(otp);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    "Verify Code",
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w600,
-                      color: const Color(0xFFFFB800),
-                    ),
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 20.h),
-
-              // Resend Code
-              GestureDetector(
-                onTap: canResend ? _resendCode : null,
-                child: RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "Resend code in ",
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                      TextSpan(
-                        text: canResend ? "Resend now" : "${resendTimer}s",
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          color: canResend
-                              ? const Color(0xFFFFB800)
-                              : Colors.grey[600],
+                // OTP Input Fields
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(6, (index) {
+                    return SizedBox(
+                      width: 45.w,
+                      height: 56.h,
+                      child: TextFormField(
+                        controller: otpControllers[index],
+                        focusNode: focusNodes[index],
+                        textAlign: TextAlign.center,
+                        keyboardType: TextInputType.number,
+                        maxLength: 1,
+                        style: getTextStyle(
+                          font: CustomFonts.inter,
+                          fontSize: 20,
                           fontWeight: FontWeight.w600,
+                          color: Colors.black,
                         ),
+                        decoration: InputDecoration(
+                          counterText: "",
+                          contentPadding: EdgeInsets.symmetric(vertical: 16.h),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF7C7C7C),
+                              width: 1.0,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                            borderSide: const BorderSide(
+                              color: Color(0xFF7C7C7C),
+                              width: 1.0,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                            borderSide: const BorderSide(
+                              color: Colors.black,
+                              width: 2.0,
+                            ),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          setState(() {});
+                          if (value.isNotEmpty && index < 5) {
+                            focusNodes[index + 1].requestFocus();
+                          } else if (value.isEmpty && index > 0) {
+                            focusNodes[index - 1].requestFocus();
+                          }
+
+                          if (index == 5 && value.isNotEmpty) {
+                            String otp = otpControllers
+                                .map((controller) => controller.text)
+                                .join();
+                            if (otp.length == 6) {
+                              _verifyOtp(otp);
+                            }
+                          }
+                        },
                       ),
-                    ],
+                    );
+                  }),
+                ),
+
+                SizedBox(height: 40.h),
+
+                // Verify Code Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      String otp = otpControllers
+                          .map((controller) => controller.text)
+                          .join();
+                      if (otp.length == 6) {
+                        _verifyOtp(otp);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      "Verify Code",
+                      style: getTextStyle(
+                        font: CustomFonts.manrope,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFFFFB800),
+                      ),
+                    ),
                   ),
                 ),
-              ),
 
-              SizedBox(height: 40.h),
-            ],
+                SizedBox(height: 20.h),
+
+                // Resend Code
+                GestureDetector(
+                  onTap: canResend ? _resendCode : null,
+                  child: RichText(
+                    text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "Resend code in ",
+                          style: getTextStyle(
+                            font: CustomFonts.inter,
+                            fontSize: 14,
+                            color: Colors.grey[600]!,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        TextSpan(
+                          text: canResend ? "Resend now" : "${resendTimer}s",
+                          style: getTextStyle(
+                            font: CustomFonts.inter,
+                            fontSize: 14,
+                            color: canResend
+                                ? const Color(0xFFFFB800)
+                                : Colors.grey[600]!,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 40.h),
+              ],
+            ),
           ),
         ),
       ),
