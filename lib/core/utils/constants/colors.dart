@@ -124,4 +124,16 @@ class AppColors {
   static const Color orrengecontainer = Color(0xFFEF6820);
   static const Color orrengebackground = Color(0xFFFEF6EE);
   static const Color greencontainer = Color(0xFFD3F8DF);
+
+
+
+//Rider Edit profile
+ static const Color primary = Color(
+    0xFFFFC200,
+  ); // Darker primary for a more professional look
+ static const Color background = Color(
+    0xFFF5F5F5,
+  ); // Softer blue for a modern touch
+
+
 }

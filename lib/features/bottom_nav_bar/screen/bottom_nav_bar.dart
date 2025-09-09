@@ -18,10 +18,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
   int currentIndex = 0;
 
   final List<Widget> screens = [
-     HomeScreen(),
-     AllOrders(),
-   MapScreen(),
-     WalletScreen(),
+    HomeScreen(),
+    AllOrders(),
+    MapScreen(),
+    WalletScreen(),
     ProfileScreen(),
   ];
 
@@ -54,11 +54,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
                   label: 'All Orders',
                 ),
                 _buildNavItem(index: 2, icon: IconPath.map, label: 'Map'),
-                _buildNavItem(
-                  index: 3,
-                  icon: IconPath.wallet,
-                  label: 'Wallet',
-                ),
+                _buildNavItem(index: 3, icon: IconPath.wallet, label: 'Wallet'),
                 _buildNavItem(
                   index: 4,
                   icon: IconPath.profile,
