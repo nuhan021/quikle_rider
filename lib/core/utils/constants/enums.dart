@@ -17,4 +17,4 @@ enum PaymentMethods {
   paytm
 }
 
-enum CustomFonts { obviouslyVariable }
+enum CustomFonts { obviously, poppins, inter, manrope }
