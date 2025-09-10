@@ -110,7 +110,7 @@ class BottomNavBar extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(
+ Widget _buildNavItem(
     BuildContext context, {
     required BottomNavbarController controller,
     required int index,
@@ -130,33 +130,26 @@ class BottomNavBar extends StatelessWidget {
             Container(
               width: 24.w,
               height: 32.h,
-              child: isProfile && isSelected
+              alignment: Alignment.center,
+              child: isProfile
                   ? Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: const Color(0xFFFFB800),
+                          color: isSelected
+                              ? const Color(0xFFFFB800)
+                              : Colors.transparent,
                           width: 2,
                         ),
                       ),
                       child: CircleAvatar(
-                        radius: 10.r,
+                        radius: 12.r,
                         backgroundColor: Colors.grey[300],
                         child: Icon(
                           Icons.person,
                           size: 14.sp,
                           color: Colors.grey[600],
                         ),
-                      ),
-                    )
-                  : isProfile
-                  ? CircleAvatar(
-                      radius: 12.r,
-                      backgroundColor: Colors.grey[300],
-                      child: Icon(
-                        Icons.person,
-                        size: 14.sp,
-                        color: Colors.grey[600],
                       ),
                     )
                   : Image.asset(
@@ -187,16 +180,18 @@ class BottomNavBar extends StatelessWidget {
                 color: isSelected ? const Color(0xFFFFB800) : Colors.grey[400],
               ),
             ),
-            if (isSelected)
-              Container(
-                margin: EdgeInsets.only(top: 6.h),
-                width: 45.w,
-                height: 2.h,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFB800),
-                  borderRadius: BorderRadius.circular(100),
-                ),
+            // Always render the indicator, but make it transparent if not selected
+            Container(
+              margin: EdgeInsets.only(top: 6.h),
+              width: 45.w,
+              height: 2.h,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? const Color(0xFFFFB800)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(100),
               ),
+            ),
           ],
         ),
       ),

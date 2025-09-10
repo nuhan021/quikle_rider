@@ -40,12 +40,12 @@ class _MapScreenState extends State<MapScreen> {
               width: double.infinity,
               child: Stack(
                 children: [
-                  // Map background (placeholder)
+                  // Map background
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.grey[100],
                       image: const DecorationImage(
-                        image: AssetImage('assets/map_placeholder.png'),
+                        image: AssetImage('assets/images/mapdemo.png'),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -92,6 +92,10 @@ class _MapScreenState extends State<MapScreen> {
             padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
               color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20.r),
+                topRight: Radius.circular(20.r),
+              ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.1),
@@ -121,7 +125,7 @@ class _MapScreenState extends State<MapScreen> {
                         vertical: 6.h,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.orange[50],
+                        color: Colors.white10,
                         borderRadius: BorderRadius.circular(15.r),
                       ),
                       child: Text(
@@ -129,7 +133,8 @@ class _MapScreenState extends State<MapScreen> {
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
-                          color: Colors.orange[700],
+                          color: Colors.black,
+                          fontFamily: 'Obviously',
                         ),
                       ),
                     ),
@@ -141,7 +146,7 @@ class _MapScreenState extends State<MapScreen> {
                     CircleAvatar(
                       radius: 25.r,
                       backgroundImage: const AssetImage(
-                        'assets/driver_avatar.png',
+                        'assets/images/avatar.png',
                       ),
                       backgroundColor: Colors.grey[300],
                     ),
@@ -176,7 +181,11 @@ class _MapScreenState extends State<MapScreen> {
                             border: Border.all(color: Colors.grey[300]!),
                             borderRadius: BorderRadius.circular(8.r),
                           ),
-                          child: Icon(Icons.chat_bubble_outline, size: 20.sp),
+                          child: Image.asset(
+                            'assets/images/message.png',
+                            width: 20.sp,
+                            height: 20.sp,
+                          ),
                         ),
                         SizedBox(width: 10.w),
                         Container(
@@ -185,7 +194,11 @@ class _MapScreenState extends State<MapScreen> {
                             border: Border.all(color: Colors.grey[300]!),
                             borderRadius: BorderRadius.circular(8.r),
                           ),
-                          child: Icon(Icons.phone_outlined, size: 20.sp),
+                          child: Image.asset(
+                            'assets/images/call.png',
+                            width: 20.sp,
+                            height: 20.sp,
+                          ),
                         ),
                       ],
                     ),
@@ -214,8 +227,9 @@ class _MapScreenState extends State<MapScreen> {
                   'Items to Deliver',
                   style: TextStyle(
                     fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                     color: Colors.black87,
+                    fontFamily: 'Obviously',
                   ),
                 ),
                 SizedBox(height: 10.h),
@@ -223,7 +237,7 @@ class _MapScreenState extends State<MapScreen> {
                   'Sushi Express',
                   style: TextStyle(
                     fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w700,
                     color: Colors.grey[700],
                   ),
                 ),
@@ -244,7 +258,9 @@ class _MapScreenState extends State<MapScreen> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8.r),
                               image: const DecorationImage(
-                                image: AssetImage('assets/dragon_roll.png'),
+                                image: AssetImage(
+                                  'assets/images/foodimage.png',
+                                ),
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -283,7 +299,9 @@ class _MapScreenState extends State<MapScreen> {
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8.r),
                               image: const DecorationImage(
-                                image: AssetImage('assets/miso_soup.png'),
+                                image: AssetImage(
+                                  'assets/images/foodimage.png',
+                                ),
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -322,10 +340,11 @@ class _MapScreenState extends State<MapScreen> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {},
-                        icon: Icon(
-                          Icons.phone,
+                        icon: Image.asset(
+                          'assets/images/call.png',
                           color: Colors.black87,
-                          size: 20.sp,
+                          width: 20.sp,
+                          height: 20.sp,
                         ),
                         label: Text(
                           'Call Customer',
@@ -353,6 +372,7 @@ class _MapScreenState extends State<MapScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.r),
                           ),
+                          elevation: 0, // Remove border/shadow effect
                         ),
                         child: Text(
                           'Mark as Delivered',
