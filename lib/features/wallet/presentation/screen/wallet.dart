@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';// Adjust the import path
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -11,6 +13,7 @@ class _WalletScreenState extends State<WalletScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String selectedPeriod = 'All';
+  bool _isOnline = true; // State for toggle switch
 
   @override
   void initState() {
@@ -24,35 +27,34 @@ class _WalletScreenState extends State<WalletScreen>
     super.dispose();
   }
 
+  void _toggleOnlineStatus() {
+    setState(() {
+      _isOnline = !_isOnline;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Initialize ScreenUtil if not already done in your app
+    ScreenUtil.init(context, designSize: const Size(375, 812));
+
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'Wallet',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        actions: [
-          Icon(Icons.notifications_outlined, color: Colors.black),
-          SizedBox(width: 16),
-        ],
+      appBar: CustomTabBar(
+        title: 'Wallet',
+        isOnline: _isOnline,
+        onToggle: _toggleOnlineStatus,
+        currentIndex: 3, // Assuming WalletScreen is the second tab
       ),
       body: Column(
         children: [
           // Time Period Selector
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(25),
+                borderRadius: BorderRadius.circular(25.r),
               ),
               child: Row(
                 children: ['All', 'Week', 'Month', 'Year'].map((period) {
@@ -60,17 +62,17 @@ class _WalletScreenState extends State<WalletScreen>
                   return Expanded(
                     child: GestureDetector(
                       onTap: () {
-                        // Handle period selection
-                        // In a real app, you would use a state management solution
-                        // or pass a callback to update the parent widget
+                        setState(() {
+                          selectedPeriod = period;
+                        });
                       },
                       child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 8),
+                        padding: EdgeInsets.symmetric(vertical: 8.h),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? Colors.yellow[600]
                               : Colors.transparent,
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(20.r),
                         ),
                         child: Text(
                           period,
@@ -80,7 +82,7 @@ class _WalletScreenState extends State<WalletScreen>
                             fontWeight: isSelected
                                 ? FontWeight.w600
                                 : FontWeight.normal,
-                            fontSize: 14,
+                            fontSize: 14.sp,
                           ),
                         ),
                       ),
@@ -90,21 +92,21 @@ class _WalletScreenState extends State<WalletScreen>
               ),
             ),
           ),
-          SizedBox(height: 25),
+          SizedBox(height: 25.h),
 
           // Current Balance Card
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 20),
-            padding: EdgeInsets.all(25),
+            margin: EdgeInsets.symmetric(horizontal: 20.w),
+            padding: EdgeInsets.all(25.w),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(15.r),
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.1),
                   spreadRadius: 1,
                   blurRadius: 10,
-                  offset: Offset(0, 2),
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
@@ -113,42 +115,42 @@ class _WalletScreenState extends State<WalletScreen>
                 Text(
                   'Current Balance',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     color: Colors.grey[600],
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Text(
                   '\$459',
                   style: TextStyle(
-                    fontSize: 36,
+                    fontSize: 36.sp,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
                 ),
-                SizedBox(height: 5),
+                SizedBox(height: 5.h),
                 Text(
                   'Last updated: Today, 9:15 AM',
-                  style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                  style: TextStyle(fontSize: 12.sp, color: Colors.grey[500]),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 20.h),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {},
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black87,
-                      padding: EdgeInsets.symmetric(vertical: 15),
+                      padding: EdgeInsets.symmetric(vertical: 15.h),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(10.r),
                       ),
                     ),
                     child: Text(
                       'Withdraw',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 16,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -157,48 +159,48 @@ class _WalletScreenState extends State<WalletScreen>
               ],
             ),
           ),
-          SizedBox(height: 25),
+          SizedBox(height: 25.h),
 
           // Stats Row
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 20),
+            margin: EdgeInsets.symmetric(horizontal: 20.w),
             child: Row(
               children: [
                 Expanded(child: _buildStatCard('Total Deliveries', '42')),
-                SizedBox(width: 15),
+                SizedBox(width: 15.w),
                 Expanded(child: _buildStatCard('Avg. Delivery Time', '18 min')),
               ],
             ),
           ),
-          SizedBox(height: 15),
+          SizedBox(height: 15.h),
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 20),
+            margin: EdgeInsets.symmetric(horizontal: 20.w),
             child: Row(
               children: [
                 Expanded(child: _buildStatCard('Customer Rating', '4.8')),
-                SizedBox(width: 15),
+                SizedBox(width: 15.w),
                 Expanded(child: _buildStatCard('Completion Rate', '98%')),
               ],
             ),
           ),
-          SizedBox(height: 25),
+          SizedBox(height: 25.h),
 
           // Past Deliveries Section
           Expanded(
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Past Deliveries',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
                     ),
                   ),
-                  SizedBox(height: 15),
+                  SizedBox(height: 15.h),
                   Expanded(
                     child: ListView(
                       children: [
@@ -246,10 +248,10 @@ class _WalletScreenState extends State<WalletScreen>
 
   Widget _buildStatCard(String title, String value) {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,16 +259,16 @@ class _WalletScreenState extends State<WalletScreen>
           Text(
             title,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 12.sp,
               color: Colors.grey[600],
               fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             value,
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 20.sp,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),
@@ -287,11 +289,11 @@ class _WalletScreenState extends State<WalletScreen>
     Color statusColor,
   ) {
     return Container(
-      margin: EdgeInsets.only(bottom: 15),
-      padding: EdgeInsets.all(15),
+      margin: EdgeInsets.only(bottom: 15.h),
+      padding: EdgeInsets.all(15.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: Colors.grey[200]!),
       ),
       child: Column(
@@ -304,22 +306,25 @@ class _WalletScreenState extends State<WalletScreen>
                   Text(
                     'Order $orderId',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
                     ),
                   ),
-                  SizedBox(width: 8),
+                  SizedBox(width: 8.w),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 2.h,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: Text(
                       status,
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: 10.sp,
                         color: statusColor,
                         fontWeight: FontWeight.w500,
                       ),
@@ -330,21 +335,21 @@ class _WalletScreenState extends State<WalletScreen>
               Text(
                 amount,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 10),
+          SizedBox(height: 10.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 customerName,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   color: Colors.black87,
                   fontWeight: FontWeight.w500,
                 ),
@@ -352,7 +357,7 @@ class _WalletScreenState extends State<WalletScreen>
               Text(
                 subtitle,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 12.sp,
                   color: status == 'Delivered'
                       ? Colors.green[600]
                       : Colors.red[600],
@@ -361,20 +366,20 @@ class _WalletScreenState extends State<WalletScreen>
               ),
             ],
           ),
-          SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'Delivered on $datetime',
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
               ),
               GestureDetector(
                 onTap: () {},
                 child: Text(
                   'View Details',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     color: Colors.blue[600],
                     fontWeight: FontWeight.w500,
                   ),
@@ -384,14 +389,14 @@ class _WalletScreenState extends State<WalletScreen>
           ),
           if (distance != null)
             Padding(
-              padding: EdgeInsets.only(top: 5),
+              padding: EdgeInsets.only(top: 5.h),
               child: Row(
                 children: [
-                  Icon(Icons.location_on, size: 12, color: Colors.grey[500]),
-                  SizedBox(width: 2),
+                  Icon(Icons.location_on, size: 12.sp, color: Colors.grey[500]),
+                  SizedBox(width: 2.w),
                   Text(
                     distance,
-                    style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
                   ),
                 ],
               ),

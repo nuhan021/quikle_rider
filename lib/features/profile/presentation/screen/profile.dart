@@ -1,76 +1,90 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/help_support.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/my_profile.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/payment_method.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/vehicle_information.dart';
-class ProfileScreen extends StatelessWidget {
+import 'package:quikle_rider/features/profile/presentation/screen/delivery_zone.dart';
+import 'package:quikle_rider/features/profile/presentation/screen/availability_settings.dart';
+import 'package:quikle_rider/features/profile/presentation/screen/notification_settings.dart';
+
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  bool _isOnline = true; // State for toggle switch
+
+  void _toggleOnlineStatus() {
+    setState(() {
+      _isOnline = !_isOnline;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Initialize ScreenUtil if not already done in your app
+    ScreenUtil.init(context, designSize: const Size(375, 812));
+
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'Profile',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        actions: [
-          Icon(Icons.notifications_outlined, color: Colors.black),
-          SizedBox(width: 16),
-        ],
+      appBar: CustomTabBar(
+        title: 'Profile',
+        isOnline: _isOnline,
+        onToggle: _toggleOnlineStatus,
+        currentIndex: 3, // Assuming ProfileScreen is the fourth tab
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
+        padding: EdgeInsets.all(20.w),
         child: Column(
           children: [
             // Profile Header
             Container(
               width: double.infinity,
-              padding: EdgeInsets.all(25),
+              padding: EdgeInsets.all(25.w),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(15.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.1),
                     spreadRadius: 1,
                     blurRadius: 10,
-                    offset: Offset(0, 2),
+                    offset: const Offset(0, 2),
                   ),
                 ],
               ),
               child: Column(
                 children: [
                   CircleAvatar(
-                    radius: 50,
-                    backgroundImage: AssetImage('assets/profile_avatar.png'),
+                    radius: 50.r,
+                    backgroundImage: const AssetImage(
+                      'assets/profile_avatar.png',
+                    ),
                     backgroundColor: Colors.grey[300],
                   ),
-                  SizedBox(height: 15),
+                  SizedBox(height: 15.h),
                   Text(
                     'Vikram Rajput',
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 22.sp,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),
                   ),
-                  SizedBox(height: 5),
+                  SizedBox(height: 5.h),
                   Text(
                     'vikramrajput@gmail.com',
-                    style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                    style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 30),
+            SizedBox(height: 30.h),
 
             // Menu Items
             _buildMenuItem(
@@ -79,7 +93,9 @@ class ProfileScreen extends StatelessWidget {
               title: 'My Profile',
               onTap: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => MyProfilePage()),
+                  MaterialPageRoute(
+                    builder: (context) => const MyProfilePage(),
+                  ),
                 );
               },
             ),
@@ -90,7 +106,7 @@ class ProfileScreen extends StatelessWidget {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => VehicleInformationPage(),
+                    builder: (context) => const VehicleInformationPage(),
                   ),
                 );
               },
@@ -100,7 +116,11 @@ class ProfileScreen extends StatelessWidget {
               icon: Icons.location_on_outlined,
               title: 'Delivery Zone',
               onTap: () {
-                // TODO: Implement navigation for Delivery Zone
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const DeliveryZonePage(),
+                  ),
+                );
               },
             ),
             _buildMenuItem(
@@ -110,7 +130,7 @@ class ProfileScreen extends StatelessWidget {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) => PaymentMethodPage(),
+                    builder: (context) => const PaymentMethodPage(),
                   ),
                 );
               },
@@ -120,21 +140,25 @@ class ProfileScreen extends StatelessWidget {
               icon: Icons.access_time_outlined,
               title: 'Availability Settings',
               onTap: () {
-                // TODO: Implement navigation for Availability Settings
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const AvailabilitySettingsPage(),
+                  ),
+                );
               },
             ),
-            // _buildMenuItem(
-            //   context: context,
-            //   icon: Icons.notifications_outlined,
-            //   title: 'Notification Settings',
-            //   onTap: () {
-            //     Navigator.of(context).push(
-            //       MaterialPageRoute(
-            //         builder: (context) => NotificationSettingsScreen(),
-            //       ),
-            //     );
-            //   },
-            // ),
+            _buildMenuItem(
+              context: context,
+              icon: Icons.edit_notifications,
+              title: 'Notification Settings',
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const NotificationSettingsPage(),
+                  ),
+                );
+              },
+            ),
             _buildMenuItem(
               context: context,
               icon: Icons.language_outlined,
@@ -149,11 +173,13 @@ class ProfileScreen extends StatelessWidget {
               title: 'Help & Support',
               onTap: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (context) => HelpSupportPage()),
+                  MaterialPageRoute(
+                    builder: (context) => const HelpSupportPage(),
+                  ),
                 );
               },
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 20.h),
             _buildMenuItem(
               context: context,
               icon: Icons.logout,
@@ -177,32 +203,32 @@ class ProfileScreen extends StatelessWidget {
     bool isSignOut = false,
   }) {
     return Container(
-      margin: EdgeInsets.only(bottom: 5),
+      margin: EdgeInsets.only(bottom: 5.h),
       child: ListTile(
-        contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+        contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 5.h),
         leading: Container(
-          padding: EdgeInsets.all(8),
+          padding: EdgeInsets.all(8.w),
           decoration: BoxDecoration(
             color: isSignOut ? Colors.red[50] : Colors.grey[50],
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
           ),
           child: Icon(
             icon,
             color: isSignOut ? Colors.red[600] : Colors.grey[700],
-            size: 20,
+            size: 20.sp,
           ),
         ),
         title: Text(
           title,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 16.sp,
             fontWeight: FontWeight.w500,
             color: isSignOut ? Colors.red[600] : Colors.black87,
           ),
         ),
         trailing: Icon(
           Icons.arrow_forward_ios,
-          size: 16,
+          size: 16.sp,
           color: Colors.grey[400],
         ),
         onTap: onTap,
@@ -216,19 +242,19 @@ class ProfileScreen extends StatelessWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(15.r),
           ),
           title: Text(
             'Sign Out',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 20.sp,
               fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
           ),
           content: Text(
             'Are you sure you want to sign out of your account?',
-            style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+            style: TextStyle(fontSize: 16.sp, color: Colors.grey[700]),
           ),
           actions: [
             TextButton(
@@ -238,7 +264,7 @@ class ProfileScreen extends StatelessWidget {
               child: Text(
                 'Cancel',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   color: Colors.grey[600],
                   fontWeight: FontWeight.w500,
                 ),
@@ -252,15 +278,15 @@ class ProfileScreen extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red[600],
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
               ),
               child: Text(
                 'Sign Out',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -271,23 +297,3 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 }
-
-// TODO: You will need to create these files in the specified paths.
-// Example of a placeholder screen
-/*
-class MyProfileScreen extends StatelessWidget {
-  const MyProfileScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('My Profile'),
-      ),
-      body: Center(
-        child: Text('My Profile Screen Content'),
-      ),
-    );
-  }
-}
-*/

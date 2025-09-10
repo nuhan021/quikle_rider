@@ -1,94 +1,132 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:quikle_rider/core/utils/constants/icon_path.dart';
 import 'package:quikle_rider/features/all_orders/presentation/screen/all_orders.dart';
-import 'package:quikle_rider/features/wallet/presentation/screen/wallet.dart';
+import 'package:quikle_rider/features/bottom_nav_bar/controller/bottom_nav_bar_controller.dart';
 import 'package:quikle_rider/features/home/presentation/screen/homepage.dart';
 import 'package:quikle_rider/features/map/presentation/screen/map.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/profile.dart';
+import 'package:quikle_rider/features/wallet/presentation/screen/wallet.dart';
 
-class BottomNavBar extends StatefulWidget {
+class BottomNavBar extends StatelessWidget {
   const BottomNavBar({super.key});
 
   @override
-  State<BottomNavBar> createState() => _BottomNavBarState();
-}
-
-class _BottomNavBarState extends State<BottomNavBar> {
-  int currentIndex = 0;
-
-  final List<Widget> screens = [
-    HomeScreen(),
-    AllOrders(),
-    MapScreen(),
-    WalletScreen(),
-    ProfileScreen(),
-  ];
-
-  @override
   Widget build(BuildContext context) {
+    final BottomNavbarController controller = Get.put(BottomNavbarController());
+    final List<Widget> screens = [
+      const HomeScreen(),
+      const AllOrders(),
+      const MapScreen(),
+      const WalletScreen(),
+      const ProfileScreen(),
+    ];
+
     return Scaffold(
-      body: IndexedStack(index: currentIndex, children: screens),
-      bottomNavigationBar: Container(
-        height: 110.h,
-        decoration: BoxDecoration(
-          color: const Color(0xFF1A1A1A),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
+      body: Obx(() => screens[controller.selectedIndex.value]),
+      bottomNavigationBar: Obx(
+        () => Stack(
+          clipBehavior: Clip.none, // Allows the line to "peek" above
+          children: [
+            Container(
+              height: 117.h,
+              decoration: BoxDecoration(
+                color: const Color(0xFF1A1A1A),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20.r),
+                  topRight: Radius.circular(20.r),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, -5),
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 8.h,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _buildNavItem(
+                        context,
+                        controller: controller,
+                        index: 0,
+                        icon: IconPath.home,
+                        label: 'Home',
+                      ),
+                      _buildNavItem(
+                        context,
+                        controller: controller,
+                        index: 1,
+                        icon: IconPath.allOrders,
+                        label: 'All Orders',
+                      ),
+                      _buildNavItem(
+                        context,
+                        controller: controller,
+                        index: 2,
+                        icon: IconPath.map,
+                        label: 'Map',
+                      ),
+                      _buildNavItem(
+                        context,
+                        controller: controller,
+                        index: 3,
+                        icon: IconPath.wallet,
+                        label: 'Wallet',
+                      ),
+                      _buildNavItem(
+                        context,
+                        controller: controller,
+                        index: 4,
+                        icon: IconPath.profile,
+                        label: 'Aanya',
+                        isProfile: true,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: -2.h, // Use a small negative value to position it above
+              left: 0,
+              right: 0,
+              child: ClipPath(
+                clipper: CurvedLineClipper(radius: 20.r),
+                child: Container(height: 2.h, color: const Color(0xFFFFB800)),
+              ),
             ),
           ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(index: 0, icon: IconPath.home, label: 'Home'),
-                _buildNavItem(
-                  index: 1,
-                  icon: IconPath.allOrders,
-                  label: 'All Orders',
-                ),
-                _buildNavItem(index: 2, icon: IconPath.map, label: 'Map'),
-                _buildNavItem(index: 3, icon: IconPath.wallet, label: 'Wallet'),
-                _buildNavItem(
-                  index: 4,
-                  icon: IconPath.profile,
-                  label: 'Aanya',
-                  isProfile: true,
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );
   }
 
-  Widget _buildNavItem({
+  Widget _buildNavItem(
+    BuildContext context, {
+    required BottomNavbarController controller,
     required int index,
     required String icon,
     required String label,
     bool isProfile = false,
   }) {
-    final isSelected = currentIndex == index;
+    final isSelected = controller.selectedIndex.value == index;
 
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          currentIndex = index;
-        });
-      },
+      onTap: () => controller.changeIndex(index),
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 4.h),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Icon
             Container(
               width: 24.w,
               height: 32.h,
@@ -129,7 +167,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
                           ? const Color(0xFFFFB800)
                           : Colors.grey[400],
                       errorBuilder: (context, error, stackTrace) {
-                        // Fallback to icons if images don't exist
                         return Icon(
                           _getIconData(index),
                           size: 24.sp,
@@ -140,18 +177,26 @@ class _BottomNavBarState extends State<BottomNavBar> {
                       },
                     ),
             ),
-
             SizedBox(height: 4.h),
-
-            // Label
             Text(
               label,
               style: TextStyle(
-                fontSize: 10.sp,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                fontFamily: 'Inter',
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w400,
                 color: isSelected ? const Color(0xFFFFB800) : Colors.grey[400],
               ),
             ),
+            if (isSelected)
+              Container(
+                margin: EdgeInsets.only(top: 6.h),
+                width: 45.w,
+                height: 2.h,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFB800),
+                  borderRadius: BorderRadius.circular(100),
+                ),
+              ),
           ],
         ),
       ),
@@ -173,5 +218,33 @@ class _BottomNavBarState extends State<BottomNavBar> {
       default:
         return Icons.help_outline;
     }
+  }
+}
+
+// Custom Clipper to create the curved line shape
+class CurvedLineClipper extends CustomClipper<Path> {
+  final double radius;
+
+  CurvedLineClipper({required this.radius});
+
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    path.lineTo(radius, 0); // Start the line after the curve begins
+    path.arcToPoint(
+      Offset(size.width - radius, 0),
+      radius: Radius.circular(radius),
+      clockwise: false,
+    );
+    path.lineTo(size.width, 0);
+    path.lineTo(size.width, size.height);
+    path.lineTo(0, size.height);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
+    return false;
   }
 }

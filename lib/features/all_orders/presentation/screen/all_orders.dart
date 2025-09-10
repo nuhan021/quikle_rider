@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart'; // Import the custom tab bar
 import 'package:quikle_rider/features/all_orders/presentation/screen/all_order_single.dart';
 import 'all_orders_combined.dart';
 
@@ -13,6 +14,7 @@ class AllOrders extends StatefulWidget {
 class _AllOrdersState extends State<AllOrders>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool _isOnline = true; // Add state for the toggle switch
 
   @override
   void initState() {
@@ -20,35 +22,26 @@ class _AllOrdersState extends State<AllOrders>
     _tabController = TabController(length: 2, vsync: this);
   }
 
+  void _handleToggle() {
+    setState(() {
+      _isOnline = !_isOnline; // Toggle the state
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: Row(
-          children: [
-            Text(
-              'Orders',
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
-            ),
-            const Spacer(),
-            Icon(
-              Icons.notifications_outlined,
-              color: Colors.black,
-              size: 24.sp,
-            ),
-          ],
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(50.h),
-          child: Container(
+      appBar: CustomTabBar(
+        currentIndex: 1,
+        title: 'Orders',
+        isOnline: _isOnline,
+        onToggle: _handleToggle,
+      ),
+      body: Column(
+        children: [
+          // This section is for the TabBar
+          Container(
             margin: EdgeInsets.symmetric(horizontal: 16.w),
             decoration: BoxDecoration(
               color: Colors.grey[100],
@@ -77,11 +70,14 @@ class _AllOrdersState extends State<AllOrders>
               ],
             ),
           ),
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const [AllOrdersCombined(), AllOrdersSingle()],
+          // This is the TabBarView which will take the rest of the space
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: const [AllOrdersCombined(), AllOrdersSingle()],
+            ),
+          ),
+        ],
       ),
     );
   }

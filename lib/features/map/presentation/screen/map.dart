@@ -1,28 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
 
-class MapScreen extends StatelessWidget {
+class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
 
   @override
+  _MapScreenState createState() => _MapScreenState();
+}
+
+class _MapScreenState extends State<MapScreen> {
+  bool _isOnline = true; // State for toggle switch
+
+  void _toggleOnlineStatus() {
+    setState(() {
+      _isOnline = !_isOnline;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Initialize ScreenUtil if not already done in your app
+    ScreenUtil.init(context, designSize: const Size(375, 812));
+
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: Text(
-          'Map',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        leading: Icon(Icons.arrow_back_ios, color: Colors.black),
-        actions: [
-          Icon(Icons.notifications_outlined, color: Colors.black),
-          SizedBox(width: 16),
-        ],
+      appBar: CustomTabBar(
+        title: 'Map',
+        isOnline: _isOnline,
+        onToggle: _toggleOnlineStatus,
+        currentIndex: 2, // Assuming MapScreen is the first tab
       ),
       body: Column(
         children: [
@@ -37,18 +44,18 @@ class MapScreen extends StatelessWidget {
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.grey[100],
-                      image: DecorationImage(
+                      image: const DecorationImage(
                         image: AssetImage('assets/map_placeholder.png'),
                         fit: BoxFit.cover,
                       ),
                     ),
                   ),
-                  // Route line and markers would go here
+                  // Route line and markers
                   Positioned(
-                    top: 50,
-                    right: 20,
+                    top: 50.h,
+                    right: 20.w,
                     child: Container(
-                      padding: EdgeInsets.all(8),
+                      padding: EdgeInsets.all(8.w),
                       decoration: BoxDecoration(
                         color: Colors.yellow[700],
                         shape: BoxShape.circle,
@@ -56,15 +63,15 @@ class MapScreen extends StatelessWidget {
                       child: Icon(
                         Icons.location_on,
                         color: Colors.white,
-                        size: 20,
+                        size: 20.sp,
                       ),
                     ),
                   ),
                   Positioned(
-                    bottom: 80,
-                    left: 20,
+                    bottom: 80.h,
+                    left: 20.w,
                     child: Container(
-                      padding: EdgeInsets.all(8),
+                      padding: EdgeInsets.all(8.w),
                       decoration: BoxDecoration(
                         color: Colors.yellow[700],
                         shape: BoxShape.circle,
@@ -72,7 +79,7 @@ class MapScreen extends StatelessWidget {
                       child: Icon(
                         Icons.location_on,
                         color: Colors.white,
-                        size: 20,
+                        size: 20.sp,
                       ),
                     ),
                   ),
@@ -82,7 +89,7 @@ class MapScreen extends StatelessWidget {
           ),
           // Delivery Information
           Container(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
               color: Colors.white,
               boxShadow: [
@@ -90,7 +97,7 @@ class MapScreen extends StatelessWidget {
                   color: Colors.grey.withOpacity(0.1),
                   spreadRadius: 1,
                   blurRadius: 10,
-                  offset: Offset(0, -2),
+                  offset: const Offset(0, -2),
                 ),
               ],
             ),
@@ -103,24 +110,24 @@ class MapScreen extends StatelessWidget {
                     Text(
                       'Delivery Address',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                         color: Colors.black87,
                       ),
                     ),
                     Container(
                       padding: EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
+                        horizontal: 12.w,
+                        vertical: 6.h,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.orange[50],
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(15.r),
                       ),
                       child: Text(
                         '09:45 min',
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
                           color: Colors.orange[700],
                         ),
@@ -128,15 +135,17 @@ class MapScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 15),
+                SizedBox(height: 15.h),
                 Row(
                   children: [
                     CircleAvatar(
-                      radius: 25,
-                      backgroundImage: AssetImage('assets/driver_avatar.png'),
+                      radius: 25.r,
+                      backgroundImage: const AssetImage(
+                        'assets/driver_avatar.png',
+                      ),
                       backgroundColor: Colors.grey[300],
                     ),
-                    SizedBox(width: 15),
+                    SizedBox(width: 15.w),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,7 +153,7 @@ class MapScreen extends StatelessWidget {
                           Text(
                             'Aanya Desai',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                               color: Colors.black87,
                             ),
@@ -152,7 +161,7 @@ class MapScreen extends StatelessWidget {
                           Text(
                             '123 Main St, Bangkok',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 14.sp,
                               color: Colors.grey[600],
                             ),
                           ),
@@ -162,78 +171,85 @@ class MapScreen extends StatelessWidget {
                     Row(
                       children: [
                         Container(
-                          padding: EdgeInsets.all(10),
+                          padding: EdgeInsets.all(10.w),
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey[300]!),
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(8.r),
                           ),
-                          child: Icon(Icons.chat_bubble_outline, size: 20),
+                          child: Icon(Icons.chat_bubble_outline, size: 20.sp),
                         ),
-                        SizedBox(width: 10),
+                        SizedBox(width: 10.w),
                         Container(
-                          padding: EdgeInsets.all(10),
+                          padding: EdgeInsets.all(10.w),
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey[300]!),
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(8.r),
                           ),
-                          child: Icon(Icons.phone_outlined, size: 20),
+                          child: Icon(Icons.phone_outlined, size: 20.sp),
                         ),
                       ],
                     ),
                   ],
                 ),
-                SizedBox(height: 15),
+                SizedBox(height: 15.h),
                 Row(
                   children: [
-                    Icon(Icons.location_on, color: Colors.grey[600], size: 16),
-                    SizedBox(width: 5),
+                    Icon(
+                      Icons.location_on,
+                      color: Colors.grey[600],
+                      size: 16.sp,
+                    ),
+                    SizedBox(width: 5.w),
                     Text(
                       '789 River Rd, Apartment 3B, Riverside Mohakhali',
-                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: Colors.grey[600],
+                      ),
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 20.h),
                 Text(
                   'Items to Deliver',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                     color: Colors.black87,
                   ),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 10.h),
                 Text(
                   'Sushi Express',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
                     color: Colors.grey[700],
                   ),
                 ),
-                SizedBox(height: 15),
+                SizedBox(height: 15.h),
                 Container(
-                  padding: EdgeInsets.all(15),
+                  padding: EdgeInsets.all(15.w),
                   decoration: BoxDecoration(
                     color: Colors.grey[50],
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10.r),
                   ),
                   child: Column(
                     children: [
                       Row(
                         children: [
                           Container(
-                            width: 40,
-                            height: 40,
+                            width: 40.w,
+                            height: 40.h,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              image: DecorationImage(
+                              borderRadius: BorderRadius.circular(8.r),
+                              image: const DecorationImage(
                                 image: AssetImage('assets/dragon_roll.png'),
                                 fit: BoxFit.cover,
                               ),
                             ),
                           ),
-                          SizedBox(width: 12),
+                          SizedBox(width: 12.w),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,7 +257,7 @@ class MapScreen extends StatelessWidget {
                                 Text(
                                   'Dragon Roll Set X 1',
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 14.sp,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.black87,
                                   ),
@@ -249,7 +265,7 @@ class MapScreen extends StatelessWidget {
                                 Text(
                                   '8 pieces, extra wasabi',
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 12.sp,
                                     color: Colors.grey[600],
                                   ),
                                 ),
@@ -258,21 +274,21 @@ class MapScreen extends StatelessWidget {
                           ),
                         ],
                       ),
-                      SizedBox(height: 10),
+                      SizedBox(height: 10.h),
                       Row(
                         children: [
                           Container(
-                            width: 40,
-                            height: 40,
+                            width: 40.w,
+                            height: 40.h,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              image: DecorationImage(
+                              borderRadius: BorderRadius.circular(8.r),
+                              image: const DecorationImage(
                                 image: AssetImage('assets/miso_soup.png'),
                                 fit: BoxFit.cover,
                               ),
                             ),
                           ),
-                          SizedBox(width: 12),
+                          SizedBox(width: 12.w),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,7 +296,7 @@ class MapScreen extends StatelessWidget {
                                 Text(
                                   'Miso Soup X 1',
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 14.sp,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.black87,
                                   ),
@@ -288,7 +304,7 @@ class MapScreen extends StatelessWidget {
                                 Text(
                                   'Regular size',
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 12.sp,
                                     color: Colors.grey[600],
                                   ),
                                 ),
@@ -300,35 +316,42 @@ class MapScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 20.h),
                 Row(
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {},
-                        icon: Icon(Icons.phone, color: Colors.black87),
+                        icon: Icon(
+                          Icons.phone,
+                          color: Colors.black87,
+                          size: 20.sp,
+                        ),
                         label: Text(
                           'Call Customer',
-                          style: TextStyle(color: Colors.black87),
+                          style: TextStyle(
+                            color: Colors.black87,
+                            fontSize: 14.sp,
+                          ),
                         ),
                         style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 12),
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
                           side: BorderSide(color: Colors.grey[300]!),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(8.r),
                           ),
                         ),
                       ),
                     ),
-                    SizedBox(width: 15),
+                    SizedBox(width: 15.w),
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black87,
-                          padding: EdgeInsets.symmetric(vertical: 12),
+                          padding: EdgeInsets.symmetric(vertical: 12.h),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(8.r),
                           ),
                         ),
                         child: Text(
@@ -336,6 +359,7 @@ class MapScreen extends StatelessWidget {
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w500,
+                            fontSize: 14.sp,
                           ),
                         ),
                       ),

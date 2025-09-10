@@ -50,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomTabBar(
+        currentIndex: 0,
         title: 'Home',
         isOnline: isOnline,
         onToggle: _onToggleSwitch,
