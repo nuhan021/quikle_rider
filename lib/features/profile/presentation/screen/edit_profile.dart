@@ -1,7 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/features/profile/presentation/widgets/upload_dialog.dart';
+
 
 class EditProfilePage extends StatefulWidget {
-  const EditProfilePage({Key? key}) : super(key: key);
+  const EditProfilePage({super.key});
 
   @override
   State<EditProfilePage> createState() => _EditProfilePageState();
@@ -28,37 +35,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'Edit Profile',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      appBar: UnifiedProfileAppBar(title: "Edit Profile"),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Container(
-              width: double.infinity,
-              height: 3,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.orange, Colors.yellow],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-              ),
-            ),
-            const SizedBox(height: 30),
+          SizedBox(height: 16.h),
             // Profile Image and Info
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -77,21 +58,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
               child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.grey[300],
-                    backgroundImage: const AssetImage(
-                      'assets/profile_image.jpg',
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.orange.withOpacity(0.3),
-                            Colors.yellow.withOpacity(0.3),
-                          ],
-                        ),
+                  InkWell(
+                 
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => const UpdateProfilePictureDialog(),
+                      );
+                    },
+                    child: CircleAvatar(
+                      
+                      radius: 50,
+                      backgroundColor: Colors.grey[300],
+                      backgroundImage: const AssetImage(
+                        'assets/images/loginriderimage.png',
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(shape: BoxShape.circle),
                       ),
                     ),
                   ),
@@ -155,11 +138,55 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ),
             ),
             const SizedBox(height: 30),
+            InkWell(
+              onTap: (){
+                Get.back();
+              },
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20,right: 20),
+                child: Container(
+                  width: 360.w,
+                
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  clipBehavior: Clip.antiAlias,
+                  decoration: ShapeDecoration(
+                    color: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    spacing: 10,
+                    children: [
+                      SizedBox(
+                        width: 312,
+                        child: Text(
+                          'Save Changes',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontFamily: 'Manrope',
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
           ],
         ),
       ),
     );
   }
+/// Call: await showUploadAvatarDialog(context, (bytes, name) { ... });
+
 
   Widget _buildEditField(String label, TextEditingController controller) {
     return Padding(

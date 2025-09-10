@@ -1,33 +1,93 @@
+// ...existing code...
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
-import '../../../core/common/styles/global_text_style.dart';
 
-class CommonAppbar extends StatelessWidget implements PreferredSizeWidget {
+class UnifiedProfileAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
+  final String? action;
+  final VoidCallback? onActionPressed;
+  final bool showActionButton;
+  final double height;
 
-  const CommonAppbar({super.key, required this.title});
+  const UnifiedProfileAppBar({
+    super.key,
+    required this.title,
+    this.action,
+    this.onActionPressed,
+    this.showActionButton = false,
+    this.height = 72.0, // design height in logical pixels; will be adapted with ScreenUtil
+  });
+
+  @override
+  Size get preferredSize => Size.fromHeight(height.h);
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(
-      title: Text(
-        title,
-        style: getTextStyle2(fontSize: 20, fontWeight: FontWeight.w600),
-      ),
-      centerTitle: false,
-      shape: RoundedRectangleBorder(
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(20),
-          bottomRight: Radius.circular(20),
+    return Container(
+      height: preferredSize.height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(20.r)),
+        border: Border(
+          bottom: BorderSide(color: AppColors.gradientColor, width: 2.w),
         ),
-        side: BorderSide(
-          color: AppColors.primary, // yellow line
-          width: 1,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0x0A616161),
+            blurRadius: 8.r,
+            offset: Offset(0, 2.h),
+            spreadRadius: 0,
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
+        child: Row(
+          children: [
+            // Back button
+            GestureDetector(
+              onTap: () => Get.back(),
+              child: Container(
+                padding: EdgeInsets.all(8.w),
+                child: Icon(
+                  Icons.arrow_back_ios,
+                  color: AppColors.blackText,
+                  size: 20.sp,
+                ),
+              ),
+            ),
+
+            SizedBox(width: 8.w),
+
+            // Title
+            Expanded(
+              child: Text(
+                title,
+                style: getTextStyle2(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.blackText,
+                ),
+              ),
+            ),
+
+            // Action button
+            if (showActionButton && action != null)
+              IconButton(
+                icon: Image.asset(
+                  'assets/images/notification.png',
+                  width: 24.w,
+                  height: 24.h,
+                ),
+                onPressed: onActionPressed,
+              ),
+          ],
         ),
       ),
     );
   }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
+// ...existing code...

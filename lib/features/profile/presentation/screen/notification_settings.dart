@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/core/utils/constants/colors.dart';
 
 class NotificationSettingsPage extends StatefulWidget {
-  const NotificationSettingsPage({Key? key}) : super(key: key);
+  const NotificationSettingsPage({super.key});
 
   @override
   State<NotificationSettingsPage> createState() =>
@@ -18,35 +20,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text(
-          'Notification Settings',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(
-            height: 3,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.amber, Colors.orange],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-            ),
-          ),
-        ),
-      ),
+      appBar: UnifiedProfileAppBar(title: "Notification Settings"),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -145,10 +119,16 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
             ),
           ),
           Switch(
+            trackOutlineColor: WidgetStateProperty.all(AppColors.greenbutton2),
+            focusColor: AppColors.greenbutton2,
+            hoverColor: AppColors.greenbutton2,
+            inactiveTrackColor: AppColors.primaryBackground,
+            inactiveThumbColor: AppColors.greenbutton2,
+            activeThumbColor: AppColors.primaryBackground,
             value: value,
             onChanged: onChanged,
-            activeColor: Colors.green,
-            activeTrackColor: Colors.green.withOpacity(0.3),
+
+            activeTrackColor: AppColors.greenbutton2,
           ),
         ],
       ),

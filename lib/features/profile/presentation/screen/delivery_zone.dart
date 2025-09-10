@@ -1,7 +1,13 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quikle_rider/core/common/styles/global_text_style.dart';
+import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/core/utils/constants/enums.dart';
 
 class DeliveryZonePage extends StatefulWidget {
-  const DeliveryZonePage({Key? key}) : super(key: key);
+  const DeliveryZonePage({super.key});
 
   @override
   State<DeliveryZonePage> createState() => _DeliveryZonePageState();
@@ -14,21 +20,11 @@ class _DeliveryZonePageState extends State<DeliveryZonePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text(
-          'Delivery Zone',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+      appBar: UnifiedProfileAppBar(
+        title: "Delivery Zone",
+        onActionPressed: () {
+          
+        },
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -52,19 +48,38 @@ class _DeliveryZonePageState extends State<DeliveryZonePage> {
             children: [
               Row(
                 children: [
-                  Icon(Icons.location_on, color: Colors.grey[600], size: 20),
+                 
                   const SizedBox(width: 8),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          selectedLocation,
-                          style: const TextStyle(
+                          'Delivery Location',
+                          style: getTextStyle(
+                            font: CustomFonts.inter,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color: Colors.black87,
+                        
                           ),
+                        ),
+                        SizedBox(height: 12),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Image(
+                                height: 24.h,
+                              image: AssetImage("assets/icons/location.png")),
+                              SizedBox(width: 8),
+                            Text(
+                              selectedLocation,
+                              style:  getTextStyle(
+                                font: CustomFonts.inter,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -89,7 +104,7 @@ class _DeliveryZonePageState extends State<DeliveryZonePage> {
                         borderRadius: BorderRadius.circular(12),
                         color: Colors.blue[50],
                       ),
-                      child: CustomPaint(painter: MapPainter()),
+                      child: Image(image: AssetImage("assets/images/map.png")),
                     ),
                     // Location markers
                     const Positioned(
@@ -232,70 +247,3 @@ class _DeliveryZonePageState extends State<DeliveryZonePage> {
   }
 }
 
-class MapPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.blue.withOpacity(0.3)
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
-
-    // Draw some simple road-like paths
-    final path1 = Path();
-    path1.moveTo(0, size.height * 0.3);
-    path1.quadraticBezierTo(
-      size.width * 0.3,
-      size.height * 0.2,
-      size.width * 0.6,
-      size.height * 0.4,
-    );
-    path1.quadraticBezierTo(
-      size.width * 0.8,
-      size.height * 0.5,
-      size.width,
-      size.height * 0.3,
-    );
-
-    final path2 = Path();
-    path2.moveTo(size.width * 0.2, 0);
-    path2.quadraticBezierTo(
-      size.width * 0.3,
-      size.height * 0.3,
-      size.width * 0.4,
-      size.height * 0.7,
-    );
-    path2.quadraticBezierTo(
-      size.width * 0.5,
-      size.height * 0.9,
-      size.width * 0.7,
-      size.height,
-    );
-
-    canvas.drawPath(path1, paint);
-    canvas.drawPath(path2, paint);
-
-    // Draw some area boundaries
-    paint.color = Colors.grey.withOpacity(0.2);
-    paint.style = PaintingStyle.fill;
-
-    final area1 = Path();
-    area1.moveTo(size.width * 0.1, size.height * 0.1);
-    area1.lineTo(size.width * 0.4, size.height * 0.1);
-    area1.lineTo(size.width * 0.4, size.height * 0.4);
-    area1.lineTo(size.width * 0.1, size.height * 0.4);
-    area1.close();
-
-    final area2 = Path();
-    area2.moveTo(size.width * 0.6, size.height * 0.6);
-    area2.lineTo(size.width * 0.9, size.height * 0.6);
-    area2.lineTo(size.width * 0.9, size.height * 0.9);
-    area2.lineTo(size.width * 0.6, size.height * 0.9);
-    area2.close();
-
-    canvas.drawPath(area1, paint);
-    canvas.drawPath(area2, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}

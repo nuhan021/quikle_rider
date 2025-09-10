@@ -1,6 +1,9 @@
+// ignore_for_file: deprecated_member_use, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
+import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/help_support.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/my_profile.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/payment_method.dart';
@@ -17,27 +20,21 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  bool _isOnline = true; // State for toggle switch
 
-  void _toggleOnlineStatus() {
-    setState(() {
-      _isOnline = !_isOnline;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
-    // Initialize ScreenUtil if not already done in your app
     ScreenUtil.init(context, designSize: const Size(375, 812));
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: CustomTabBar(
-        title: 'Profile',
-        isOnline: _isOnline,
-        onToggle: _toggleOnlineStatus,
-        currentIndex: 3, // Assuming ProfileScreen is the fourth tab
-      ),
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: UnifiedProfileAppBar(
+        showActionButton: true,
+        title: "Profile",
+      action: "Notification",
+      onActionPressed: () {
+        
+      },),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20.w),
         child: Column(
@@ -51,8 +48,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 borderRadius: BorderRadius.circular(15.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    spreadRadius: 1,
+                    color: Colors.black.withOpacity(0.05),
+                    spreadRadius: 0,
                     blurRadius: 10,
                     offset: const Offset(0, 2),
                   ),
@@ -62,9 +59,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   CircleAvatar(
                     radius: 50.r,
-                    backgroundImage: const AssetImage(
-                      'assets/profile_avatar.png',
-                    ),
+                    backgroundImage: const AssetImage('assets/images/loginriderimage.png'),
                     backgroundColor: Colors.grey[300],
                   ),
                   SizedBox(height: 15.h),
@@ -72,122 +67,98 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     'Vikram Rajput',
                     style: TextStyle(
                       fontSize: 22.sp,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                       color: Colors.black87,
                     ),
                   ),
                   SizedBox(height: 5.h),
                   Text(
                     'vikramrajput@gmail.com',
-                    style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: Colors.grey[600],
+                    ),
                   ),
                 ],
               ),
             ),
             SizedBox(height: 30.h),
 
-            // Menu Items
-            _buildMenuItem(
-              context: context,
-              icon: Icons.person_outline,
-              title: 'My Profile',
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const MyProfilePage(),
+            // Menu Items Container
+            Container(
+              padding: EdgeInsets.symmetric(vertical: 10.h),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    spreadRadius: 0,
+                    blurRadius: 10,
+                    offset: const Offset(0, 2),
                   ),
-                );
-              },
-            ),
-            _buildMenuItem(
-              context: context,
-              icon: Icons.directions_car_outlined,
-              title: 'Vehicle Information',
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const VehicleInformationPage(),
+                ],
+              ),
+              child: Column(
+                children: [
+                  _buildMenuItem(
+                    imagepath: "assets/icons/profileicon.png",
+                    title: 'My Profile',
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MyProfilePage())),
                   ),
-                );
-              },
-            ),
-            _buildMenuItem(
-              context: context,
-              icon: Icons.location_on_outlined,
-              title: 'Delivery Zone',
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const DeliveryZonePage(),
+                  _buildDivider(),
+                  _buildMenuItem(
+              imagepath: "assets/icons/vehicle.png",
+                    title: 'Vehicle Information',
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const VehicleInformationPage())),
                   ),
-                );
-              },
-            ),
-            _buildMenuItem(
-              context: context,
-              icon: Icons.payment_outlined,
-              title: 'Payment Method',
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const PaymentMethodPage(),
+                  _buildDivider(),
+                  _buildMenuItem(
+                 imagepath: "assets/icons/location.png",
+                    title: 'Delivery Zone',
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DeliveryZonePage())),
                   ),
-                );
-              },
-            ),
-            _buildMenuItem(
-              context: context,
-              icon: Icons.access_time_outlined,
-              title: 'Availability Settings',
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const AvailabilitySettingsPage(),
+                  _buildDivider(),
+                  _buildMenuItem(
+                    imagepath: "assets/icons/payment.png",
+                    title: 'Payment Method',
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PaymentMethodPage())),
                   ),
-                );
-              },
-            ),
-            _buildMenuItem(
-              context: context,
-              icon: Icons.edit_notifications,
-              title: 'Notification Settings',
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const NotificationSettingsPage(),
+                  _buildDivider(),
+                  _buildMenuItem(
+                imagepath: "assets/icons/avaiability.png",
+                    title: 'Availability Settings',
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AvailabilitySettingsPage())),
                   ),
-                );
-              },
-            ),
-            _buildMenuItem(
-              context: context,
-              icon: Icons.language_outlined,
-              title: 'Language Settings',
-              onTap: () {
-                // TODO: Implement navigation for Language Settings
-              },
-            ),
-            _buildMenuItem(
-              context: context,
-              icon: Icons.help_outline,
-              title: 'Help & Support',
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const HelpSupportPage(),
+                  _buildDivider(),
+                  _buildMenuItem(
+                imagepath: "assets/icons/notification.png",
+                    title: 'Notification Settings',
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationSettingsPage())),
                   ),
-                );
-              },
-            ),
-            SizedBox(height: 20.h),
-            _buildMenuItem(
-              context: context,
-              icon: Icons.logout,
-              title: 'Sign out',
-              onTap: () {
-                _showSignOutDialog(context);
-              },
-              isSignOut: true,
+                  _buildDivider(),
+                  _buildMenuItem(
+                 imagepath: "assets/icons/language.png",
+                    title: 'Language Settings',
+                    onTap: () {
+                      _showLanguageDialog(context);
+                    },
+                  ),
+                  _buildDivider(),
+                  _buildMenuItem(
+                 imagepath: "assets/icons/help.png",
+                    title: 'Help & Support',
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpSupportPage())),
+                  ),
+                  _buildDivider(),
+                  _buildMenuItem(
+            imagepath: "assets/icons/signout.png",
+                    title: 'Sign out',
+                    onTap: () => _showSignOutDialog(context),
+                    isSignOut: true,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -196,54 +167,143 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildMenuItem({
-    required BuildContext context,
-    required IconData icon,
+    required String imagepath,
     required String title,
     required VoidCallback onTap,
     bool isSignOut = false,
   }) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 5.h),
-      child: ListTile(
-        contentPadding: EdgeInsets.symmetric(horizontal: 0, vertical: 5.h),
-        leading: Container(
-          padding: EdgeInsets.all(8.w),
-          decoration: BoxDecoration(
-            color: isSignOut ? Colors.red[50] : Colors.grey[50],
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          child: Icon(
-            icon,
-            color: isSignOut ? Colors.red[600] : Colors.grey[700],
-            size: 20.sp,
-          ),
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+        child: Row(
+          children: [
+            Image.asset(
+              imagepath,
+              width: 24.sp,
+              height: 24.sp,
+              color: isSignOut ? Colors.red[600] : Colors.grey[700],
+            ),
+            SizedBox(width: 15.w),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
+                  color: isSignOut ? Colors.red[600] : Colors.black87,
+                ),
+              ),
+            ),
+            if (!isSignOut)
+              Icon(
+                Icons.arrow_forward_ios,
+                size: 16.sp,
+                color: Colors.grey[400],
+              ),
+          ],
         ),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
-            color: isSignOut ? Colors.red[600] : Colors.black87,
-          ),
-        ),
-        trailing: Icon(
-          Icons.arrow_forward_ios,
-          size: 16.sp,
-          color: Colors.grey[400],
-        ),
-        onTap: onTap,
       ),
     );
   }
+
+  Widget _buildDivider() {
+    return Divider(
+      height: 1.h,
+      thickness: 0.5,
+      color: Colors.grey[200],
+      indent: 60.w,
+      endIndent: 20.w,
+    );
+  }
+  void _showLanguageDialog(BuildContext context) {
+  final List<String> languages = ["English", "Spanish", "French", "German"];
+  String selectedLang = languages.first;
+
+  showDialog(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return Dialog(
+            backgroundColor: AppColors.background,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Language Settings",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    "Choose Language",
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  const SizedBox(height: 8),
+                  DropdownButtonFormField<String>(
+                    value: selectedLang,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                    ),
+                    items: languages
+                        .map((lang) => DropdownMenuItem(
+                              value: lang,
+                              child: Text(lang),
+                            ))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() => selectedLang = value!);
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Language set to $selectedLang")),
+                        );
+                      },
+                      child: const Text("Save Language"),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
+}
 
   void _showSignOutDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.r),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.r)),
           title: Text(
             'Sign Out',
             style: TextStyle(
@@ -258,9 +318,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.pop(context),
               child: Text(
                 'Cancel',
                 style: TextStyle(
@@ -272,14 +330,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.pop(context);
                 // Handle sign out logic here
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red[600],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
                 padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
               ),
               child: Text(
