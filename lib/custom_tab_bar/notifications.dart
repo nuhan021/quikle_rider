@@ -40,6 +40,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Get screen width for responsive design
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
@@ -75,35 +78,46 @@ class _NotificationsPageState extends State<NotificationsPage> {
         children: [
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
               itemCount: notifications.length,
               itemBuilder: (context, index) {
                 final notification = notifications[index];
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: _buildNotificationTile(notification),
+                  child: _buildNotificationTile(notification, screenWidth),
                 );
               },
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(
+              16,
+              0,
+              16,
+              20,
+            ), // Adjusted padding to move the button up
             child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
+              width: screenWidth * 0.9, // Responsive width
+              height: 56, // Fixed height
+              child: OutlinedButton(
                 onPressed: _markAllAsRead,
-                style: ElevatedButton.styleFrom(
+                style: OutlinedButton.styleFrom(
                   backgroundColor: Colors.white,
-                  foregroundColor: Colors.black87,
+                  foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: const BorderSide(color: Colors.black, width: 1.5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(color: Colors.grey[300]!),
                   ),
                 ),
                 child: const Text(
                   'Mark All As Read',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Manrope',
+                    color: Colors.black,
+                  ),
                 ),
               ),
             ),
@@ -113,12 +127,21 @@ class _NotificationsPageState extends State<NotificationsPage> {
     );
   }
 
-  Widget _buildNotificationTile(NotificationItem notification) {
+  Widget _buildNotificationTile(
+    NotificationItem notification,
+    double screenWidth,
+  ) {
     return Container(
+      width: screenWidth * 0.9, // Responsive width
+      height: 120, // Fixed height
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFFFFFFFF), // Border color specified
+          width: 0.5,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
@@ -151,10 +174,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 Text(
                   notification.title,
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: notification.isRead
-                        ? FontWeight.w400
-                        : FontWeight.w500,
+                    fontSize: 18, // Font size changed to 18
+                    fontWeight:
+                        FontWeight.w500, // Font weight changed to Medium (500)
+                    fontFamily: 'Inter', // Font changed to Inter
                     color: notification.isRead
                         ? Colors.grey[600]
                         : Colors.black87,
