@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
+import 'package:quikle_rider/features/map/presentation/screen/parcel_done.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -365,14 +366,24 @@ class _MapScreenState extends State<MapScreen> {
                     SizedBox(width: 15.w),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                         Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ParcelDone(),
+                            ),
+                          );
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black87,
                           padding: EdgeInsets.symmetric(vertical: 12.h),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.r),
                           ),
-                          elevation: 0, // Remove border/shadow effect
+                          elevation: 0, 
+                           side: BorderSide.none, // ✅ remove border
+                          overlayColor:
+                              Colors.transparent, // Remove border/shadow effect
                         ),
                         child: Text(
                           'Mark as Delivered',

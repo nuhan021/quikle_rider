@@ -11,7 +11,7 @@ class ParcelDone extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -25,20 +25,21 @@ class ParcelDone extends StatelessWidget {
               Container(
                 width: 80,
                 height: 80,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Colors.green,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.check, color: Colors.white, size: 40),
+                child: const Icon(Icons.check, color: Colors.white, size: 40),
               ),
 
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
 
               // Success Message
-              Text(
+              const Text(
                 'Parcel Has Been\nSuccessfully Delivered',
                 textAlign: TextAlign.center,
                 style: TextStyle(
+                  fontFamily: 'Obviously',
                   fontSize: 24,
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,
@@ -46,35 +47,38 @@ class ParcelDone extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 48),
+              const SizedBox(height: 48),
 
-              // Optional: Add action buttons
+              // Action button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigate back to home or main screen
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                     elevation: 0,
                   ),
-                  child: Text(
+                  child: const Text(
                     'Back to Home',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      fontFamily: 'Obviously',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
 
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-              // Optional: Secondary button
+              // Secondary button
               SizedBox(
                 width: double.infinity,
                 child: TextButton(
@@ -83,14 +87,18 @@ class ParcelDone extends StatelessWidget {
                   },
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.green,
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Track Another Parcel',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      fontFamily: 'Obviously',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
@@ -102,7 +110,7 @@ class ParcelDone extends StatelessWidget {
   }
 }
 
-// Alternative version with animation
+// Animated version
 class ParcelDoneAnimated extends StatefulWidget {
   const ParcelDoneAnimated({Key? key}) : super(key: key);
 
@@ -122,12 +130,12 @@ class _ParcelDoneAnimatedState extends State<ParcelDoneAnimated>
     super.initState();
 
     _scaleController = AnimationController(
-      duration: Duration(milliseconds: 600),
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
 
     _fadeController = AnimationController(
-      duration: Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
@@ -139,9 +147,8 @@ class _ParcelDoneAnimatedState extends State<ParcelDoneAnimated>
       CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
     );
 
-    // Start animations
     _scaleController.forward();
-    Future.delayed(Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 300), () {
       _fadeController.forward();
     });
   }
@@ -161,7 +168,7 @@ class _ParcelDoneAnimatedState extends State<ParcelDoneAnimated>
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -180,17 +187,21 @@ class _ParcelDoneAnimatedState extends State<ParcelDoneAnimated>
                     child: Container(
                       width: 80,
                       height: 80,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: Colors.green,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(Icons.check, color: Colors.white, size: 40),
+                      child: const Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 40,
+                      ),
                     ),
                   );
                 },
               ),
 
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
 
               // Animated Success Message
               AnimatedBuilder(
@@ -200,7 +211,7 @@ class _ParcelDoneAnimatedState extends State<ParcelDoneAnimated>
                     opacity: _fadeAnimation.value,
                     child: Transform.translate(
                       offset: Offset(0, 20 * (1 - _fadeAnimation.value)),
-                      child: Text(
+                      child: const Text(
                         'Parcel Has Been\nSuccessfully Delivered',
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -216,7 +227,7 @@ class _ParcelDoneAnimatedState extends State<ParcelDoneAnimated>
                 },
               ),
 
-              SizedBox(height: 48),
+              const SizedBox(height: 48),
 
               // Animated Buttons
               AnimatedBuilder(
@@ -237,15 +248,16 @@ class _ParcelDoneAnimatedState extends State<ParcelDoneAnimated>
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
                               foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(vertical: 16),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               elevation: 0,
                             ),
-                            child: Text(
+                            child: const Text(
                               'Back to Home',
                               style: TextStyle(
+                                fontFamily: 'Obviously',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -253,24 +265,23 @@ class _ParcelDoneAnimatedState extends State<ParcelDoneAnimated>
                           ),
                         ),
 
-                        SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
                         SizedBox(
                           width: double.infinity,
                           child: TextButton(
-                            onPressed: () {
-                              // Navigate to order history or track another parcel
-                            },
+                            onPressed: () {},
                             style: TextButton.styleFrom(
                               foregroundColor: Colors.green,
-                              padding: EdgeInsets.symmetric(vertical: 16),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: Text(
+                            child: const Text(
                               'Track Another Parcel',
                               style: TextStyle(
+                                fontFamily: 'Obviously',
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
