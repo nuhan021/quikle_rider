@@ -1,44 +1,23 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'edit_profile.dart';
 
 class MyProfilePage extends StatelessWidget {
-  const MyProfilePage({Key? key}) : super(key: key);
+  const MyProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'My Profile',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      appBar: UnifiedProfileAppBar(title: "My Profile"),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Container(
-              width: double.infinity,
-              height: 3,
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.orange, Colors.yellow],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-              ),
-            ),
-            const SizedBox(height: 30),
+           
+             SizedBox(height: 16.h),
             // Profile Image and Info
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -59,23 +38,18 @@ class MyProfilePage extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    backgroundColor: Colors.grey[300],
+                   backgroundColor: Colors.grey.shade200,
                     backgroundImage: const AssetImage(
-                      'assets/profile_image.jpg',
+                      'assets/images/loginriderimage.png',
                     ),
                     child: Container(
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.orange.withOpacity(0.3),
-                            Colors.yellow.withOpacity(0.3),
-                          ],
-                        ),
+                        
                       ),
                     ),
                   ),
-                  const SizedBox(height: 15),
+                   SizedBox(height: 16.h),
                   const Text(
                     'Vikram Rajput',
                     style: TextStyle(

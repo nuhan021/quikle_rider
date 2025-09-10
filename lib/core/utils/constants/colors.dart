@@ -91,6 +91,7 @@ class AppColors {
 
   // Utility Colors
   static const Color success = Color(0xFF4CAF50);
+  static const Color greenbutton2 = Color(0xFF4CAF50);
   static const Color warning = Color(0xFFFFA726);
   static const Color error = Color(0xFFF44336);
   static const Color info = Color(0xFF29B6F6);
@@ -125,7 +126,8 @@ class AppColors {
   static const Color orrengebackground = Color(0xFFFEF6EE);
   static const Color greencontainer = Color(0xFFD3F8DF);
 
-
+static const Color gradientColor = Color(0xFFFFC200);
+static const Color beakYellow = Color(0xFFFFC200);
 
 //Rider Edit profile
  static const Color primary = Color(

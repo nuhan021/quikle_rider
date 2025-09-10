@@ -14,7 +14,7 @@ class RiderProfile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const CommonAppbar(title: "My Profile"),
+      appBar: const UnifiedProfileAppBar(title: "My Profile"),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

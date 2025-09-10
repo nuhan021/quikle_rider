@@ -1,7 +1,11 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
+import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/core/utils/constants/colors.dart';
 
 class AvailabilitySettingsPage extends StatefulWidget {
-  const AvailabilitySettingsPage({Key? key}) : super(key: key);
+  const AvailabilitySettingsPage({super.key});
 
   @override
   State<AvailabilitySettingsPage> createState() =>
@@ -17,22 +21,13 @@ class _AvailabilitySettingsPageState extends State<AvailabilitySettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text(
-          'Availability Settings',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
+      appBar: UnifiedProfileAppBar(
+        showActionButton: true,
+        title: "Availability Settings",
+      action: "Save",
+      onActionPressed: () {
+        
+      },),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Container(
@@ -75,14 +70,20 @@ class _AvailabilitySettingsPageState extends State<AvailabilitySettingsPage> {
                     ],
                   ),
                   Switch(
+                    trackOutlineColor: MaterialStateProperty.all(AppColors.primarygreen),
+                    focusColor: AppColors.primarygreen,
+                    hoverColor: AppColors.primarygreen,
+                    inactiveTrackColor: AppColors.primaryBackground,
+                    inactiveThumbColor: AppColors.primarygreen,
+                    activeThumbColor: AppColors.primaryBackground,
                     value: availableForDelivery,
                     onChanged: (value) {
                       setState(() {
                         availableForDelivery = value;
                       });
                     },
-                    activeColor: Colors.green,
-                    activeTrackColor: Colors.green.withOpacity(0.3),
+                    activeColor: AppColors.primaryBackground,
+                    activeTrackColor: AppColors.greenbutton,
                   ),
                 ],
               ),

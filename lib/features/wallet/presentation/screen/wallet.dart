@@ -1,6 +1,11 @@
+// ...existing code...
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';// Adjust the import path
+import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
+import 'package:quikle_rider/features/wallet/widgets/delevery_card.dart';
+import 'package:quikle_rider/features/wallet/widgets/start_tile.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -13,7 +18,37 @@ class _WalletScreenState extends State<WalletScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String selectedPeriod = 'All';
-  bool _isOnline = true; // State for toggle switch
+  bool _isOnline = true;
+
+  // changed: simple local model and sample data for past deliveries
+  final List<_DeliveryItem> _deliveries = [
+    _DeliveryItem(
+      id: '1023',
+      status: DeliveryStatus.delivered,
+      amount: '\$12.50',
+      customer: 'John Doe',
+      dateTime: 'Sep 8, 2025 10:15 AM',
+      distance: '2.1 miles',
+      rightSubline: '+\$1.50 tip',
+    ),
+    _DeliveryItem(
+      id: '1022',
+      status: DeliveryStatus.cancelled,
+      amount: '\$0.00',
+      customer: 'Jane Smith',
+      dateTime: 'Sep 7, 2025 4:20 PM',
+      distance: '—',
+      bottomNote: 'Customer cancelled',
+    ),
+    _DeliveryItem(
+      id: '1021',
+      status: DeliveryStatus.delivered,
+      amount: '\$8.20',
+      customer: 'Alice Johnson',
+      dateTime: 'Sep 6, 2025 1:05 PM',
+      distance: '1.3 miles',
+    ),
+  ];
 
   @override
   void initState() {
@@ -27,62 +62,69 @@ class _WalletScreenState extends State<WalletScreen>
     super.dispose();
   }
 
-  void _toggleOnlineStatus() {
-    setState(() {
-      _isOnline = !_isOnline;
-    });
-  }
+  void _toggleOnlineStatus() => setState(() => _isOnline = !_isOnline);
+
+  BoxDecoration get _cardBox => BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(12.r),
+    boxShadow: [
+      BoxShadow(
+        color: const Color(0x14000000),
+        blurRadius: 10,
+        offset: const Offset(0, 2),
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
-    // Initialize ScreenUtil if not already done in your app
     ScreenUtil.init(context, designSize: const Size(375, 812));
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF7F7F7),
       appBar: CustomTabBar(
         title: 'Wallet',
         isOnline: _isOnline,
         onToggle: _toggleOnlineStatus,
-        currentIndex: 3, // Assuming WalletScreen is the second tab
+        currentIndex: 3,
       ),
       body: Column(
         children: [
-          // Time Period Selector
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
+          // Segmented period selector
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             child: Container(
+              height: 36.h,
               decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(25.r),
+                color: const Color(0xFFF0F0F0),
+                borderRadius: BorderRadius.circular(22.r),
               ),
               child: Row(
                 children: ['All', 'Week', 'Month', 'Year'].map((period) {
-                  bool isSelected = selectedPeriod == period;
+                  final isSelected = selectedPeriod == period;
                   return Expanded(
                     child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectedPeriod = period;
-                        });
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 8.h),
+                      onTap: () => setState(() => selectedPeriod = period),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 160),
+                        alignment: Alignment.center,
+                        margin: EdgeInsets.all(4.r),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? Colors.yellow[600]
+                              ? const Color(0xFFFFD32A)
                               : Colors.transparent,
-                          borderRadius: BorderRadius.circular(20.r),
+                          borderRadius: BorderRadius.circular(18.r),
                         ),
                         child: Text(
                           period,
-                          textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.black54,
+                            fontSize: 13.sp,
                             fontWeight: isSelected
                                 ? FontWeight.w600
-                                : FontWeight.normal,
-                            fontSize: 14.sp,
+                                : FontWeight.w500,
+                            color: isSelected
+                                ? Colors.black
+                                : const Color(0x99000000),
                           ),
                         ),
                       ),
@@ -92,317 +134,178 @@ class _WalletScreenState extends State<WalletScreen>
               ),
             ),
           ),
-          SizedBox(height: 25.h),
 
-          // Current Balance Card
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 20.w),
-            padding: EdgeInsets.all(25.w),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  spreadRadius: 1,
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Text(
-                  'Current Balance',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  '\$459',
-                  style: TextStyle(
-                    fontSize: 36.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
-                SizedBox(height: 5.h),
-                Text(
-                  'Last updated: Today, 9:15 AM',
-                  style: TextStyle(fontSize: 12.sp, color: Colors.grey[500]),
-                ),
-                SizedBox(height: 20.h),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black87,
-                      padding: EdgeInsets.symmetric(vertical: 15.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
-                    ),
-                    child: Text(
-                      'Withdraw',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 25.h),
-
-          // Stats Row
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 20.w),
-            child: Row(
-              children: [
-                Expanded(child: _buildStatCard('Total Deliveries', '42')),
-                SizedBox(width: 15.w),
-                Expanded(child: _buildStatCard('Avg. Delivery Time', '18 min')),
-              ],
-            ),
-          ),
-          SizedBox(height: 15.h),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 20.w),
-            child: Row(
-              children: [
-                Expanded(child: _buildStatCard('Customer Rating', '4.8')),
-                SizedBox(width: 15.w),
-                Expanded(child: _buildStatCard('Completion Rate', '98%')),
-              ],
-            ),
-          ),
-          SizedBox(height: 25.h),
-
-          // Past Deliveries Section
+          // Scroll content
           Expanded(
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
+            child: ListView(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              children: [
+                // Current Balance Card
+                Container(
+                  padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
+                  decoration: _cardBox,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Current Balance',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: Colors.grey[600],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        '\$459',
+                        style: TextStyle(
+                          fontSize: 36.sp,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black,
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        'Last updated: Today, 9:15 AM',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+                      SizedBox(
+                        width: 124.w,
+                        height: 36.h,
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            elevation: 0,
+                            padding: EdgeInsets.zero,
+                          ),
+                          child: Text(
+                            'Withdraw',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 12.h),
+
+                // Stats grid (2 x 2)
+                Row(
+                  children: [
+                    Expanded(
+                      child: StatTile(
+                        title: 'Total Deliveries',
+                        value: '42',
+                        box: _cardBox,
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: StatTile(
+                        title: 'Avg. Delivery Time',
+                        value: '18 min',
+                        box: _cardBox,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 12.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: StatTile(
+                        title: 'Customer Rating',
+                        value: '4.8',
+                        box: _cardBox,
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: StatTile(
+                        title: 'Completion Rate',
+                        value: '98%',
+                        box: _cardBox,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16.h),
+
+                // Past Deliveries header
+                Padding(
+                  padding: EdgeInsets.only(left: 4.w, bottom: 8.h, top: 8.h),
+                  child: Text(
                     'Past Deliveries',
                     style: TextStyle(
-                      fontSize: 18.sp,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: Colors.black,
                     ),
                   ),
-                  SizedBox(height: 15.h),
-                  Expanded(
-                    child: ListView(
-                      children: [
-                        _buildDeliveryItem(
-                          '#5679',
-                          'Delivered',
-                          '\$12.50',
-                          'Aanya Desai',
-                          '20 Jul, 3:45 PM',
-                          '1.5 miles',
-                          '+\$3.00 tip',
-                          Colors.green,
-                        ),
-                        _buildDeliveryItem(
-                          '#5678',
-                          'Cancelled',
-                          '\$9.50',
-                          'Aanya Desai',
-                          '20 Jul, 3:45 PM',
-                          null,
-                          'Customer Cancelled',
-                          Colors.red,
-                        ),
-                        _buildDeliveryItem(
-                          '#5677',
-                          'Delivered',
-                          '\$10.50',
-                          'Aanya Desai',
-                          '20 Jul, 3:45 PM',
-                          '1.5 miles',
-                          '+\$2.00 tip',
-                          Colors.green,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+                ),
 
-  Widget _buildStatCard(String title, String value) {
-    return Container(
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+                ListView.builder(
+                  itemCount: _deliveries.length,
+                  shrinkWrap: true, // important for nested list
+                  physics:
+                      const NeverScrollableScrollPhysics(), // use parent ListView's scroll
+                  itemBuilder: (context, index) {
+                    final d = _deliveries[index];
+                    return DeliveryCard(
+                      box: _cardBox, // pass decoration via `box`
+                      orderId: d.id,
+                      status: d.status,
+                      amount: d.amount,
+                      customerName: d.customer,
+                      dateTime: d.dateTime,
+                      distance: d.distance,
+                      rightSubline: d.rightSubline,
+                      bottomNote: d.bottomNote,
+                    );
+                  },
+                ),
 
-  Widget _buildDeliveryItem(
-    String orderId,
-    String status,
-    String amount,
-    String customerName,
-    String datetime,
-    String? distance,
-    String subtitle,
-    Color statusColor,
-  ) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 15.h),
-      padding: EdgeInsets.all(15.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    'Order $orderId',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  SizedBox(width: 8.w),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8.w,
-                      vertical: 2.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: Text(
-                      status,
-                      style: TextStyle(
-                        fontSize: 10.sp,
-                        color: statusColor,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Text(
-                amount,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 10.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                customerName,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                subtitle,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  color: status == 'Delivered'
-                      ? Colors.green[600]
-                      : Colors.red[600],
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Delivered on $datetime',
-                style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
-              ),
-              GestureDetector(
-                onTap: () {},
-                child: Text(
-                  'View Details',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: Colors.blue[600],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          if (distance != null)
-            Padding(
-              padding: EdgeInsets.only(top: 5.h),
-              child: Row(
-                children: [
-                  Icon(Icons.location_on, size: 12.sp, color: Colors.grey[500]),
-                  SizedBox(width: 2.w),
-                  Text(
-                    distance,
-                    style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
-                  ),
-                ],
-              ),
+                SizedBox(height: 24.h),
+              ],
             ),
+          ),
         ],
       ),
     );
   }
+}
+
+// Simple local model for demo / sample data
+class _DeliveryItem {
+  final String id;
+  final DeliveryStatus status;
+  final String amount;
+  final String customer;
+  final String dateTime;
+  final String? distance;
+  final String? rightSubline;
+  final String? bottomNote;
+
+  const _DeliveryItem({
+    required this.id,
+    required this.status,
+    required this.amount,
+    required this.customer,
+    required this.dateTime,
+    this.distance,
+    this.rightSubline,
+    this.bottomNote,
+  });
 }

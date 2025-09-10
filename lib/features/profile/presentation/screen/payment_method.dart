@@ -1,7 +1,11 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 
 class PaymentMethodPage extends StatefulWidget {
-  const PaymentMethodPage({Key? key}) : super(key: key);
+  const PaymentMethodPage({super.key});
 
   @override
   State<PaymentMethodPage> createState() => _PaymentMethodPageState();
@@ -11,39 +15,39 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
   final List<PaymentMethod> paymentMethods = [
     PaymentMethod(
       name: 'Paytm',
-      icon: Icons.account_balance_wallet,
-      color: const Color(0xFF00BAF2),
+     imagepath: "assets/images/paytm.png",
+    
       isRemovable: true,
     ),
     PaymentMethod(
       name: 'Google Pay',
-      icon: Icons.g_translate,
-      color: const Color(0xFF4285F4),
+     imagepath: "assets/images/googlepay.png",
+    
       isRemovable: true,
     ),
     PaymentMethod(
       name: 'PhonePe',
-      icon: Icons.phone_android,
-      color: const Color(0xFF5F259F),
+     imagepath: "assets/images/phonme.png",
+  
       isRemovable: true,
     ),
     PaymentMethod(
       name: 'Cashfree',
-      icon: Icons.attach_money,
-      color: const Color(0xFF00D4AA),
+    imagepath: "assets/images/cashfire.png",
+
       isRemovable: true,
     ),
     PaymentMethod(
       name: 'Razorpay',
-      icon: Icons.payment,
-      color: const Color(0xFF528FF0),
+    imagepath: "assets/images/razorpay.png",
+
       isRemovable: true,
     ),
     PaymentMethod(
       name: 'Bank Transfer',
-      icon: Icons.account_balance,
-      color: Colors.grey[700]!,
-      isRemovable: false,
+      imagepath: "assets/images/bank.png",
+    
+      isRemovable: true,
     ),
   ];
 
@@ -51,35 +55,10 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'Payment Method',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      appBar: UnifiedProfileAppBar(title: "Payment Method"),
       body: Column(
         children: [
-          Container(
-            width: double.infinity,
-            height: 3,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.orange, Colors.yellow],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-            ),
-          ),
+          
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -93,7 +72,7 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
           Container(
             margin: const EdgeInsets.all(20),
             width: double.infinity,
-            height: 50,
+            
             child: ElevatedButton(
               onPressed: () {
                 _showAddPaymentMethodDialog();
@@ -108,7 +87,7 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.add, color: Colors.white, size: 20),
+                  Icon(Icons.add_box_outlined, color: Colors.white, size: 20),
                   SizedBox(width: 8),
                   Text(
                     'Add New Payment Method',
@@ -145,15 +124,10 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
       ),
       child: Row(
         children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: method.color,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(method.icon, color: Colors.white, size: 20),
-          ),
+          SizedBox(
+            width: 24.h,
+            height: 24.h,
+            child: Image(image: AssetImage(method.imagepath!))),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
@@ -166,17 +140,12 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
             ),
           ),
           if (method.isRemovable)
-            GestureDetector(
-              onTap: () => _showRemoveDialog(method),
-              child: Container(
-                width: 24,
-                height: 24,
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: const Icon(Icons.close, color: Colors.red, size: 16),
-              ),
+            IconButton(
+              icon: const Icon(Icons.close_outlined, color: Colors.red, size: 16),
+              onPressed: () => _showRemoveDialog(method),
+              color: Colors.red,
+              splashColor: Colors.red.withOpacity(0.1),
+              splashRadius: 16,
             ),
         ],
       ),
@@ -261,14 +230,14 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
 
 class PaymentMethod {
   final String name;
-  final IconData icon;
-  final Color color;
+  final String? imagepath;
+
   final bool isRemovable;
 
   PaymentMethod({
     required this.name,
-    required this.icon,
-    required this.color,
+    required this.imagepath,
+    
     required this.isRemovable,
   });
 }
