@@ -30,7 +30,7 @@ class BottomNavBar extends StatelessWidget {
           clipBehavior: Clip.none, // Allows the line to "peek" above
           children: [
             Container(
-              height: 117.h,
+              height: 120.h,
               decoration: BoxDecoration(
                 color: const Color(0xFF1A1A1A),
                 borderRadius: BorderRadius.only(

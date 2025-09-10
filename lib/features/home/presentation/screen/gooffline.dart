@@ -5,11 +5,14 @@ class GoOfflinePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The font family 'Obviously' needs to be added to your pubspec.yaml file
+    // and included in your project assets for this to work correctly.
     return Scaffold(
       backgroundColor: Colors.black.withOpacity(0.5),
       body: Center(
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 40),
+          width: 360,
+          height: 196,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -26,12 +29,13 @@ class GoOfflinePage extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 'Do You Want To Go Offline ?',
                 style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  fontFamily: 'Obviously',
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF333333),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -39,44 +43,48 @@ class GoOfflinePage extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton(
+                    child: OutlinedButton(
                       onPressed: () => _handleYesPressed(context),
-                      style: ElevatedButton.styleFrom(
+                      style: OutlinedButton.styleFrom(
                         backgroundColor: Colors.amber,
-                        foregroundColor: Colors.white,
+                        foregroundColor: const Color(0xFF333333),
                         padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: const BorderSide(color: Colors.black, width: 1.5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        elevation: 0,
                       ),
                       child: const Text(
                         'Yes',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontFamily: 'Obviously',
+                          fontSize: 20,
                           fontWeight: FontWeight.w500,
+                          color: Color(0xFF333333),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: ElevatedButton(
+                    child: OutlinedButton(
                       onPressed: () => _handleNoPressed(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey[300],
-                        foregroundColor: Colors.black87,
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.grey,
+                        foregroundColor: const Color(0xFF333333),
                         padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: const BorderSide(color: Colors.black, width: 1.5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        elevation: 0,
                       ),
                       child: const Text(
                         'No',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontFamily: 'Obviously',
+                          fontSize: 20,
                           fontWeight: FontWeight.w500,
+                          color: Color(0xFF333333),
                         ),
                       ),
                     ),
@@ -91,26 +99,26 @@ class GoOfflinePage extends StatelessWidget {
   }
 
   void _handleYesPressed(BuildContext context) {
-    // Handle going offline logic here
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('You are now offline and will not receive new orders.'),
+      SnackBar(
+        content: Text(
+          'You are now offline and will not receive new orders.',
+          style: const TextStyle(
+            fontFamily: 'Manrope',
+          ),
+        ),
         backgroundColor: Colors.orange,
-        duration: Duration(seconds: 2),
+        duration: const Duration(seconds: 2),
       ),
     );
-
-    // Return result or navigate
     Navigator.of(context).pop(true);
   }
 
   void _handleNoPressed(BuildContext context) {
-    // Handle cancel/no action
     Navigator.of(context).pop(false);
   }
 }
 
-// Helper method to show this dialog
 class GoOfflineDialog {
   static Future<bool?> show(BuildContext context) {
     return showDialog<bool?>(
@@ -122,4 +130,3 @@ class GoOfflineDialog {
     );
   }
 }
-
