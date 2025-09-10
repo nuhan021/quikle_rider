@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 class AskCancelPage extends StatelessWidget {
   const AskCancelPage({super.key});
@@ -6,7 +8,7 @@ class AskCancelPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.grey[100]?.withOpacity(0.5),
       body: Center(
         child: Container(
           width: 360,
@@ -71,7 +73,7 @@ class AskCancelPage extends StatelessWidget {
                       ),
                       child: TextButton(
                         onPressed: () {
-                          // Handle Yes action
+                          Get.back(result: true);
                         },
                         style: TextButton.styleFrom(
                           padding: EdgeInsets.zero,
@@ -104,7 +106,7 @@ class AskCancelPage extends StatelessWidget {
                       ),
                       child: TextButton(
                         onPressed: () {
-                          // Handle No action
+                          Get.back(result: false);
                         },
                         style: TextButton.styleFrom(
                           padding: EdgeInsets.zero,
