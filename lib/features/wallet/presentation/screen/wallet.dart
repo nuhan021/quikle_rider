@@ -78,7 +78,6 @@ class _WalletScreenState extends State<WalletScreen>
 
   @override
   Widget build(BuildContext context) {
-    ScreenUtil.init(context, designSize: const Size(375, 812));
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F7),
