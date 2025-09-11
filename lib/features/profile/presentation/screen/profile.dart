@@ -66,6 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Text(
                     'Vikram Rajput',
                     style: TextStyle(
+                      fontFamily: 'Obviously',
                       fontSize: 22.sp,
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
@@ -75,6 +76,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Text(
                     'vikramrajput@gmail.com',
                     style: TextStyle(
+                      fontFamily: 'Inter',
                       fontSize: 14.sp,
                       color: Colors.grey[600],
                     ),
@@ -189,6 +191,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Text(
                 title,
                 style: TextStyle(
+                  fontFamily: 'Inter',
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w500,
                   color: isSignOut ? Colors.red[600] : Colors.black87,

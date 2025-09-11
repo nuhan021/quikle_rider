@@ -197,6 +197,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           Text(
             label,
             style: const TextStyle(
+              fontFamily: 'Inter',
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: Colors.black,
