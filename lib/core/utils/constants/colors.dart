@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-
-
   // logo background color
   static const Color logoBg = Color(0xFF57C773);
   // Brand Colors
@@ -80,12 +78,6 @@ class AppColors {
   static const Color lightContainer = Color(
     0xFFF1F8E9,
   ); // Soft green for a subtle highlight
-
-
-
-
-
-
 
 
 
