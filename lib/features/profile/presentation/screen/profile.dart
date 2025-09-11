@@ -24,7 +24,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ScreenUtil.init(context, designSize: const Size(375, 812));
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),

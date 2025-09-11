@@ -16,7 +16,7 @@ class BottomNavbarController extends GetxController {
       fallbackIcon: Icons.home,
     ),
     NavItem(
-      icon: 'assets/icons/orders.png',
+      icon: 'assets/icons/ordericon.png',
       label: 'All Orders', 
       fallbackIcon: Icons.receipt_long,
     ),

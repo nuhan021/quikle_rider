@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -10,16 +12,15 @@ import 'package:quikle_rider/features/wallet/presentation/screen/wallet.dart';
 
 class BottomNavBar extends StatelessWidget {
   const BottomNavBar({super.key});
-
   @override
   Widget build(BuildContext context) {
     final BottomNavbarController controller = Get.put(BottomNavbarController());
     final List<Widget> screens = [
       const HomeScreen(),
       const AllOrders(),
-          const AllOrders(),
-           const AllOrders(),
-                const AllOrders(),
+      const MapScreen(),
+      const WalletScreen(),
+      const ProfileScreen(),
     ];
 
     return Scaffold(
@@ -28,7 +29,10 @@ class BottomNavBar extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNavigationBar(BuildContext context, BottomNavbarController controller) {
+  Widget _buildBottomNavigationBar(
+    BuildContext context,
+    BottomNavbarController controller,
+  ) {
     return Container(
       height: 130.h,
       decoration: BoxDecoration(
@@ -47,27 +51,21 @@ class BottomNavBar extends StatelessWidget {
       ),
       child: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: 16.w,
-            vertical: 8.h,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: List.generate(
-              controller.navItems.length,
-              (index) {
-                final item = controller.navItems[index];
-                return _buildNavItem(
-                  context,
-                  controller: controller,
-                  index: index,
-                  icon: item.icon,
-                  label: item.label,
-                  fallbackIcon: item.fallbackIcon,
-                  isProfile: item.isProfile,
-                );
-              },
-            ),
+            children: List.generate(controller.navItems.length, (index) {
+              final item = controller.navItems[index];
+              return _buildNavItem(
+                context,
+                controller: controller,
+                index: index,
+                icon: item.icon,
+                label: item.label,
+                fallbackIcon: item.fallbackIcon!,
+                isProfile: item.isProfile,
+              );
+            }),
           ),
         ),
       ),
@@ -145,7 +143,9 @@ class BottomNavBar extends StatelessWidget {
                   fontFamily: 'Inter',
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w400,
-                  color: isSelected ? const Color(0xFFFFB800) : Colors.grey[400],
+                  color: isSelected
+                      ? const Color(0xFFFFB800)
+                      : Colors.grey[400],
                 ),
               ),
               // Always render the indicator, but make it transparent if not selected

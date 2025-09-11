@@ -11,9 +11,6 @@ class MapScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize ScreenUtil if not already done in your app
-    ScreenUtil.init(context, designSize: const Size(375, 812));
-
     return ChangeNotifierProvider(
       create: (context) => MapController(),
       child: Consumer<MapController>(
@@ -44,17 +41,16 @@ class MapScreen extends StatelessWidget {
 
   Widget _buildMapArea() {
     return Expanded(
-      flex: 3,
-      child: Container(
+      child: SizedBox(
         width: double.infinity,
         child: Stack(
           children: [
             // Map background
             Container(
+              height: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.grey[100],
                 image: const DecorationImage(
-                  image: AssetImage('assets/images/mapdemo.png'),
+                  image: AssetImage('assets/images/map.png'),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -100,7 +96,6 @@ class MapScreen extends StatelessWidget {
 
   Widget _buildDeliveryInfo(BuildContext context, MapController controller) {
     final delivery = controller.currentDelivery!;
-
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
@@ -148,6 +143,7 @@ class MapScreen extends StatelessWidget {
           ),
         ),
         Container(
+  
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
           decoration: BoxDecoration(
             color: Colors.white10,
