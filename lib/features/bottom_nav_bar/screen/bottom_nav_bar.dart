@@ -62,7 +62,7 @@ class BottomNavBar extends StatelessWidget {
                 index: index,
                 icon: item.icon,
                 label: item.label,
-                fallbackIcon: item.fallbackIcon!,
+                fallbackIcon: item.fallbackIcon,
                 isProfile: item.isProfile,
               );
             }),
