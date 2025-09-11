@@ -4,6 +4,7 @@ class OrderCancelPage extends StatelessWidget {
   const OrderCancelPage({super.key});
 
   @override
+  // sooooo goood git
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
@@ -30,13 +31,12 @@ class OrderCancelPage extends StatelessWidget {
                 width: 80,
                 height: 80,
                 decoration: const BoxDecoration(
-                  color: Color(0xFFF44336),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.white,
-                  size: 40,
+                child: Image.asset(
+                  'assets/images/cancel.png',
+                  width: 40,
+                  height: 40,
                 ),
               ),
               const SizedBox(height: 32),
@@ -44,7 +44,7 @@ class OrderCancelPage extends StatelessWidget {
               const Text(
                 'Order Declined',
                 style: TextStyle(
-                  fontFamily: 'Obviously',
+                  fontFamily: 'Inter',
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,

@@ -49,7 +49,7 @@ class GoOfflinePage extends StatelessWidget {
                         backgroundColor: Colors.amber,
                         foregroundColor: const Color(0xFF333333),
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: const BorderSide(color: Colors.black, width: 1.5),
+                        side: BorderSide.none,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6),
                         ),
@@ -60,7 +60,7 @@ class GoOfflinePage extends StatelessWidget {
                           fontFamily: 'Obviously',
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF333333),
+                          color: Color.fromARGB(255, 255, 255, 255),
                         ),
                       ),
                     ),
@@ -70,8 +70,8 @@ class GoOfflinePage extends StatelessWidget {
                     child: OutlinedButton(
                       onPressed: () => _handleNoPressed(context),
                       style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.grey,
-                        foregroundColor: const Color(0xFF333333),
+                        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                        //foregroundColor: const Color(0xFF333333),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         side: const BorderSide(color: Colors.black, width: 1.5),
                         shape: RoundedRectangleBorder(

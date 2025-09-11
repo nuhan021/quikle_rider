@@ -1,6 +1,3 @@
-// ...existing code...
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
@@ -13,11 +10,10 @@ class DeliveryCard extends StatelessWidget {
   final String amount;
   final String customerName;
   final String dateTime;
-  final String? distance;       // e.g. "1.5 miles"
-  final String? rightSubline;   // e.g. "+$3.00 tip" or "Cancellation fee"
-  final String? bottomNote;     // e.g. "Customer cancelled"
+  final String? distance;     
+  final String? rightSubline;  
+  final String? bottomNote;     
   final VoidCallback? onViewDetails;
-  // changed: provide `box` parameter (matches usage) and keep `decoration` as deprecated alias
   final BoxDecoration? box;
   final BoxDecoration? decoration;
 
@@ -78,6 +74,7 @@ class DeliveryCard extends StatelessWidget {
                     Text(
                       'Order $orderId',
                       style: TextStyle(
+                        fontFamily: 'Obviously',
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: Colors.black,
@@ -150,9 +147,10 @@ class DeliveryCard extends StatelessWidget {
                 child: Text(
                   'View Details',
                   style: TextStyle(
+
                     fontSize: 12.sp,
-                    color: const Color(0xFF6F6F6F),
-                    fontWeight: FontWeight.w600,
+                    color: const Color.fromARGB(255, 0, 0, 0),
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ),

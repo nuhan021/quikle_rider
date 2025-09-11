@@ -78,7 +78,6 @@ class _WalletScreenState extends State<WalletScreen>
 
   @override
   Widget build(BuildContext context) {
-    ScreenUtil.init(context, designSize: const Size(375, 812));
 
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F7),
@@ -118,6 +117,7 @@ class _WalletScreenState extends State<WalletScreen>
                         child: Text(
                           period,
                           style: TextStyle(
+                            fontFamily: 'Manrope',
                             fontSize: 13.sp,
                             fontWeight: isSelected
                                 ? FontWeight.w600
@@ -150,6 +150,7 @@ class _WalletScreenState extends State<WalletScreen>
                       Text(
                         'Current Balance',
                         style: TextStyle(
+                          fontFamily: 'Inter',
                           fontSize: 13.sp,
                           color: Colors.grey[600],
                           fontWeight: FontWeight.w500,
@@ -159,6 +160,7 @@ class _WalletScreenState extends State<WalletScreen>
                       Text(
                         '\$459',
                         style: TextStyle(
+                          fontFamily: 'Inter',
                           fontSize: 36.sp,
                           fontWeight: FontWeight.w700,
                           color: Colors.black,
@@ -168,6 +170,7 @@ class _WalletScreenState extends State<WalletScreen>
                       Text(
                         'Last updated: Today, 9:15 AM',
                         style: TextStyle(
+                          fontFamily: 'Inter',
                           fontSize: 12.sp,
                           color: Colors.grey[500],
                         ),
@@ -189,6 +192,7 @@ class _WalletScreenState extends State<WalletScreen>
                           child: Text(
                             'Withdraw',
                             style: TextStyle(
+                              fontFamily: 'Manrope',
                               color: Colors.white,
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
@@ -249,6 +253,7 @@ class _WalletScreenState extends State<WalletScreen>
                   child: Text(
                     'Past Deliveries',
                     style: TextStyle(
+                      fontFamily: 'Obviously',
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: Colors.black,

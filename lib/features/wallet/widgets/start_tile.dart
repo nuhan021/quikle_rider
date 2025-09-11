@@ -24,6 +24,7 @@ class StatTile extends StatelessWidget {
           Text(
             title,
             style: TextStyle(
+              fontFamily: 'Inter',
               fontSize: 12.sp,
               color: Colors.grey[600],
               fontWeight: FontWeight.w500,
@@ -33,6 +34,7 @@ class StatTile extends StatelessWidget {
           Text(
             value,
             style: TextStyle(
+              fontFamily: 'Inter',
               fontSize: 22.sp,
               fontWeight: FontWeight.w700,
               color: Colors.black,
