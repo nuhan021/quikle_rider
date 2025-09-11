@@ -33,10 +33,10 @@ class OrderAcceptedPage extends StatelessWidget {
                   color: Color(0xFF4CAF50),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 40,
+                child: Image.asset(
+                  'assets/images/success.png',
+                  width: 40,
+                  height: 40,
                 ),
               ),
               const SizedBox(height: 32),
@@ -44,7 +44,7 @@ class OrderAcceptedPage extends StatelessWidget {
               const Text(
                 'Order Accepted',
                 style: TextStyle(
-                  fontFamily: 'Obviously',
+                  fontFamily: 'Inter',
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,
@@ -55,7 +55,7 @@ class OrderAcceptedPage extends StatelessWidget {
               const Text(
                 'Successfully',
                 style: TextStyle(
-                  fontFamily: 'Obviously',
+                  fontFamily: 'Inter',
                   fontSize: 22,
                   fontWeight: FontWeight.w400,
                   color: Colors.black54,
