@@ -24,7 +24,16 @@ class MyApp extends StatelessWidget {
           initialBinding: ControllerBinder(),
           themeMode: ThemeMode.system,
           theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
+          darkTheme: AppTheme.lightTheme,
+          builder: (context, widget) {
+            final mediaQueryData = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQueryData.copyWith(
+                textScaler: const TextScaler.linear(1.0),
+              ),
+              child: widget!,
+            );
+          },
         );
       },
     );
