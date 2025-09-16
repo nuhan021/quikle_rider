@@ -28,6 +28,33 @@ class OrderModel {
     required this.items,
   });
 
+  OrderModel copyWith({
+    String? id,
+    String? customerName,
+    String? restaurant,
+    String? address,
+    String? estimatedTime,
+    String? distance,
+    String? amount,
+    OrderStatus? status,
+    String? restaurantImage,
+    String? customerImage,
+    List<OrderItem>? items,
+  }) {
+    return OrderModel(
+      id: id ?? this.id,
+      customerName: customerName ?? this.customerName,
+      restaurant: restaurant ?? this.restaurant,
+      address: address ?? this.address,
+      estimatedTime: estimatedTime ?? this.estimatedTime,
+      distance: distance ?? this.distance,
+      amount: amount ?? this.amount,
+      status: status ?? this.status,
+      restaurantImage: restaurantImage ?? this.restaurantImage,
+      customerImage: customerImage ?? this.customerImage,
+      items: items ?? this.items,
+    );
+  }
   // Helper methods
   Color get statusColor {
     switch (status) {
@@ -96,8 +123,9 @@ class OrderModel {
   }
 
   String get pickupStatus {
-    return (status == OrderStatus.delivered || status == OrderStatus.readyForPickup) 
-        ? 'Completed' : 'Pending';
+    return (status == OrderStatus.inProgress || status == OrderStatus.delivered)
+        ? 'Completed'
+        : 'Pending';
   }
 }
 
@@ -109,3 +137,4 @@ class OrderItem {
 
   OrderItem({required this.name, required this.details});
 }
+

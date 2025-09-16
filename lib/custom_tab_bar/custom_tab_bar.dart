@@ -26,6 +26,7 @@ class CustomTabBar extends StatefulWidget implements PreferredSizeWidget {
   final bool isOnline;
   final VoidCallback onToggle;
   final int currentIndex;
+  final Widget? leading;
 
   const CustomTabBar({
     super.key,
@@ -33,6 +34,7 @@ class CustomTabBar extends StatefulWidget implements PreferredSizeWidget {
     required this.isOnline,
     required this.onToggle,
     required this.currentIndex,
+    this.leading,
   });
 
   @override
@@ -98,6 +100,7 @@ class _CustomTabBarState extends State<CustomTabBar>
         backgroundColor: Colors.white,
         elevation: 0,
         automaticallyImplyLeading: false,
+        leading: widget.leading,
         title: Row(
           children: [
             SizedBox(width: 8.w),

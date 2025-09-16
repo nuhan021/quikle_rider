@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
+import 'package:quikle_rider/features/home/presentation/screen/order_accepted.dart';
 
 class AskOrderPage extends StatelessWidget {
   const AskOrderPage({super.key});
@@ -29,7 +29,6 @@ class AskOrderPage extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Question Text
                 RichText(
                   textAlign: TextAlign.center,
                   text: const TextSpan(
@@ -59,11 +58,9 @@ class AskOrderPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 32),
-                // Buttons Row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // Yes Button
                     Container(
                       width: 80,
                       height: 40,
@@ -73,7 +70,7 @@ class AskOrderPage extends StatelessWidget {
                       ),
                       child: TextButton(
                         onPressed: () {
-                          Get.back(result: true);
+                          Get.to(() => const OrderAcceptedPage());
                         },
                         style: TextButton.styleFrom(
                           padding: EdgeInsets.zero,
@@ -92,7 +89,6 @@ class AskOrderPage extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // No Button
                     Container(
                       width: 80,
                       height: 40,

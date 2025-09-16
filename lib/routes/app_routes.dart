@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:quikle_rider/features/all_orders/presentation/screen/all_orders.dart';
 import 'package:quikle_rider/features/bottom_nav_bar/screen/bottom_nav_bar.dart';
 import 'package:quikle_rider/features/home/presentation/screen/homepage.dart';
+import 'package:quikle_rider/features/map/presentation/screen/parcel_done.dart';
 import '../features/splash_screen/presentation/screens/splash_screen.dart';
 import '../features/authentication/presentation/screens/login_screen.dart';
 import '../features/authentication/presentation/screens/login_otp.dart';
@@ -24,6 +25,7 @@ class AppRoute {
   static String mapScreen = "/mapScreen";
   static String walletScreen = "/walletScreen";
   static String profileScreen = "/profileScreen";
+  static String parcelDone = "/parcelDone";
 
   // Route getters
   static String getSplashScreen() => splashScreen;
@@ -37,6 +39,7 @@ class AppRoute {
   static String getMapScreen() => mapScreen;
   static String getWalletScreen() => walletScreen;
   static String getProfileScreen() => profileScreen;
+  static String getParcelDone() => parcelDone;
 
   // Routes list
   static List<GetPage> routes = [
@@ -51,5 +54,6 @@ class AppRoute {
     GetPage(name: mapScreen, page: () => const MapScreen()),
     GetPage(name: walletScreen, page: () => const WalletScreen()),
     GetPage(name: profileScreen, page: () => const ProfileScreen()),
+    GetPage(name: parcelDone, page: () => const ParcelDone()),
   ];
 }

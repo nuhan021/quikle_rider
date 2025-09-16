@@ -1,10 +1,8 @@
-// controllers/order_controller.dart
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/features/all_orders/models/oder_model.dart';
-
+import 'package:quikle_rider/features/map/presentation/screen/map.dart';
 
 class OrderController extends GetxController {
   final Rx<OrderModel> order = _getDummyOrder().obs;
@@ -19,7 +17,7 @@ class OrderController extends GetxController {
       estimatedTime: '25 min',
       distance: '1.5 miles',
       amount: '\$18.50',
-      status: OrderStatus.inProgress,
+      status: OrderStatus.readyForPickup, // Ensures "Pick Up" button shows initially
       restaurantImage: 'assets/images/foodimage.png',
       customerImage: 'assets/images/avatar.png',
       items: [
@@ -42,11 +40,21 @@ class OrderController extends GetxController {
     );
   }
 
+
+  void markAsPickedUp() {
+    this.order.value = this.order.value.copyWith(
+      status: OrderStatus.inProgress,
+    );
+    update();
+    _showSnackbar('Order ${order.value.id} marked as picked up');
+  }
+
   void navigateToDetails() {
-    if (order.value.isReadyForPickup) {
-      _showSnackbar('Picking up order ${order.value.id}');
-    } else {
-      _showSnackbar('Navigating to details for ${order.value.id}');
+    try {
+      Get.toNamed('/mapScreen'); // Use named route for robustness
+      _showSnackbar('Navigated to details for ${order.value.id}');
+    } catch (e) {
+      _showSnackbar('Error navigating to map: $e');
     }
   }
 
@@ -58,7 +66,12 @@ class OrderController extends GetxController {
     _showSnackbar('Opening chat with ${order.value.customerName}');
   }
 
-  Widget _buildActionDialog(String title, String content, {required VoidCallback onConfirm}) {
+
+  Widget _buildActionDialog(
+    String title,
+    String content, {
+    required VoidCallback onConfirm,
+  }) {
     return AlertDialog(
       title: Text(
         title,
@@ -98,7 +111,9 @@ class OrderController extends GetxController {
           onPressed: onConfirm,
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFFEF5350),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
           ),
           child: const Text(
             'Confirm',
@@ -136,3 +151,4 @@ class OrderController extends GetxController {
     );
   }
 }
+
