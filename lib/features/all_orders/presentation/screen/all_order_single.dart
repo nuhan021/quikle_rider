@@ -1,10 +1,8 @@
-// screens/all_orders_single.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_single.dart';
 import 'package:quikle_rider/features/all_orders/widgets/order_card.dart';
-
 
 class AllOrdersSingle extends StatelessWidget {
   const AllOrdersSingle({super.key});
@@ -22,10 +20,7 @@ class AllOrdersSingle extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Obx(() => OrderCard(
-                order: controller.order.value,
-                controller: controller,
-              )),
+              OrderCard(controller: controller),
               SizedBox(height: 80.h), // Bottom padding for nav bar
             ],
           ),

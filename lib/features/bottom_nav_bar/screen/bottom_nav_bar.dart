@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -12,9 +10,12 @@ import 'package:quikle_rider/features/wallet/presentation/screen/wallet.dart';
 
 class BottomNavBar extends StatelessWidget {
   const BottomNavBar({super.key});
+
   @override
   Widget build(BuildContext context) {
-    final BottomNavbarController controller = Get.put(BottomNavbarController());
+    // Use Get.find to reuse the existing BottomNavbarController instance
+    final BottomNavbarController controller =
+        Get.find<BottomNavbarController>();
     final List<Widget> screens = [
       const HomeScreen(),
       const AllOrders(),
@@ -23,9 +24,22 @@ class BottomNavBar extends StatelessWidget {
       const ProfileScreen(),
     ];
 
-    return Scaffold(
-      body: Obx(() => screens[controller.selectedIndex.value]),
-      bottomNavigationBar: _buildBottomNavigationBar(context, controller),
+    return PopScope(
+      canPop: false, // Prevent popping unless explicitly handled
+      onPopInvoked: (didPop) {
+        if (!didPop) {
+          // If on Home tab (index 0), allow app to exit; otherwise, switch to Home
+          if (controller.selectedIndex.value != 0) {
+            controller.changeIndex(0); // Switch to Home tab
+          } else {
+            Get.back(); // Allow app to exit
+          }
+        }
+      },
+      child: Scaffold(
+        body: Obx(() => screens[controller.selectedIndex.value]),
+        bottomNavigationBar: _buildBottomNavigationBar(context, controller),
+      ),
     );
   }
 
@@ -123,15 +137,13 @@ class BottomNavBar extends StatelessWidget {
                         color: isSelected
                             ? const Color(0xFFFFB800)
                             : Colors.grey[400],
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
-                            fallbackIcon,
-                            size: 24.sp,
-                            color: isSelected
-                                ? const Color(0xFFFFB800)
-                                : Colors.grey[400],
-                          );
-                        },
+                        errorBuilder: (context, error, stackTrace) => Icon(
+                          fallbackIcon,
+                          size: 24.sp,
+                          color: isSelected
+                              ? const Color(0xFFFFB800)
+                              : Colors.grey[400],
+                        ),
                       ),
               ),
               SizedBox(height: 4.h),
@@ -148,7 +160,6 @@ class BottomNavBar extends StatelessWidget {
                       : Colors.grey[400],
                 ),
               ),
-              // Always render the indicator, but make it transparent if not selected
               Container(
                 margin: EdgeInsets.only(top: 6.h),
                 width: 45.w,

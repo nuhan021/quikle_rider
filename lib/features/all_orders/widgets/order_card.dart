@@ -1,54 +1,57 @@
-// widgets/order_widgets.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart'; // Added for navigation
 import 'package:quikle_rider/features/all_orders/controllers/all_order_single.dart';
 import 'package:quikle_rider/features/all_orders/models/oder_model.dart';
 
 class OrderCard extends StatelessWidget {
-  final OrderModel order;
   final OrderController controller;
 
-  const OrderCard({
-    super.key,
-    required this.order,
-    required this.controller,
-  });
+  const OrderCard({super.key, required this.controller});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: ShapeDecoration(
-        color: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-        shadows: const [
-          BoxShadow(
-            color: Color(0x0A606060),
-            blurRadius: 8,
-            offset: Offset(0, 2),
+    return GetBuilder<OrderController>(
+      init: controller,
+      builder: (controller) {
+        final order = controller.order.value;
+        return Container(
+          padding: EdgeInsets.all(16.w),
+          decoration: ShapeDecoration(
+            color: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            shadows: const [
+              BoxShadow(
+                color: Color(0x0A606060),
+                blurRadius: 8,
+                offset: Offset(0, 2),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _OrderHeader(order: order),
-          SizedBox(height: 8.h),
-          _DeliveryProgress(order: order),
-          SizedBox(height: 24.h),
-          _PickupPoints(order: order),
-          SizedBox(height: 24.h),
-          _DeliveryInformation(order: order, controller: controller),
-          SizedBox(height: 24.h),
-          _DeliveryAddress(address: order.address),
-          SizedBox(height: 24.h),
-          _ItemsToDeliver(order: order),
-          if (!order.isCompleted) ...[
-            SizedBox(height: 12.h),
-            _ActionButtons(controller: controller, order: order),
-          ],
-        ],
-      ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _OrderHeader(order: order),
+              SizedBox(height: 8.h),
+              _DeliveryProgress(order: order),
+              SizedBox(height: 24.h),
+              _PickupPoints(order: order),
+              SizedBox(height: 24.h),
+              _DeliveryInformation(order: order, controller: controller),
+              SizedBox(height: 24.h),
+              _DeliveryAddress(address: order.address),
+              SizedBox(height: 24.h),
+              _ItemsToDeliver(order: order),
+              if (!order.isCompleted) ...[
+                SizedBox(height: 12.h),
+                _ActionButtons(controller: controller, order: order),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -77,7 +80,9 @@ class _OrderHeader extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
           decoration: ShapeDecoration(
             color: order.statusBgColor,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4.r),
+            ),
           ),
           child: Text(
             order.statusText,
@@ -116,12 +121,20 @@ class _DeliveryProgress extends StatelessWidget {
           ),
         ),
         SizedBox(height: 8.h),
-        Container(width: double.infinity, height: 1.h, color: const Color(0x3FB7B7B7)),
+        Container(
+          width: double.infinity,
+          height: 1.h,
+          color: const Color(0x3FB7B7B7),
+        ),
         SizedBox(height: 4.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _ProgressStep('Picked Up', true, order.status != OrderStatus.preparing),
+            _ProgressStep(
+              'Picked Up',
+              true,
+              order.status != OrderStatus.preparing,
+            ),
             _ProgressStep('In Progress', order.isInProgress, false),
             _ProgressStep('Delivered', order.isCompleted, false),
           ],
@@ -134,7 +147,9 @@ class _DeliveryProgress extends StatelessWidget {
               height: 6.h,
               decoration: ShapeDecoration(
                 color: const Color(0xFFF0F0F0),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
               ),
             ),
             Container(
@@ -142,7 +157,9 @@ class _DeliveryProgress extends StatelessWidget {
               height: 6.h,
               decoration: ShapeDecoration(
                 color: const Color(0xFFFFC200),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
               ),
             ),
           ],
@@ -173,7 +190,9 @@ class _ProgressStep extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14,
                 color: const Color(0xFF333333),
-                fontWeight: isCompleted || isActive ? FontWeight.w600 : FontWeight.w400,
+                fontWeight: isCompleted || isActive
+                    ? FontWeight.w600
+                    : FontWeight.w400,
                 fontFamily: 'Inter',
                 height: 1.50,
               ),
@@ -320,7 +339,11 @@ class _DeliveryInformation extends StatelessWidget {
           ),
         ),
         SizedBox(height: 8.h),
-        Container(width: double.infinity, height: 1.h, color: const Color(0x3FB7B7B7)),
+        Container(
+          width: double.infinity,
+          height: 1.h,
+          color: const Color(0x3FB7B7B7),
+        ),
         SizedBox(height: 12.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -339,7 +362,11 @@ class _DeliveryInformation extends StatelessWidget {
                       order.customerImage,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
-                        return const Icon(Icons.person, size: 20, color: Color(0xFF7C7C7C));
+                        return const Icon(
+                          Icons.person,
+                          size: 20,
+                          color: Color(0xFF7C7C7C),
+                        );
                       },
                     ),
                   ),
@@ -448,7 +475,11 @@ class _DeliveryAddress extends StatelessWidget {
         SizedBox(height: 8.h),
         Row(
           children: [
-            const Icon(Icons.location_on_outlined, size: 18, color: Color(0xFF333333)),
+            const Icon(
+              Icons.location_on_outlined,
+              size: 18,
+              color: Color(0xFF333333),
+            ),
             SizedBox(width: 2.w),
             Expanded(
               child: Text(
@@ -501,12 +532,18 @@ class _ItemsToDeliver extends StatelessWidget {
           ),
         ),
         SizedBox(height: 10.h),
-        Container(width: double.infinity, height: 1.h, color: const Color(0x3FB7B7B7)),
+        Container(
+          width: double.infinity,
+          height: 1.h,
+          color: const Color(0x3FB7B7B7),
+        ),
         SizedBox(height: 10.h),
-        ...order.items.map((item) => Padding(
-          padding: EdgeInsets.only(bottom: 10.h),
-          child: _FoodItem(item: item, imagePath: order.restaurantImage),
-        )),
+        ...order.items.map(
+          (item) => Padding(
+            padding: EdgeInsets.only(bottom: 10.h),
+            child: _FoodItem(item: item, imagePath: order.restaurantImage),
+          ),
+        ),
         SizedBox(height: 10.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -553,7 +590,9 @@ class _FoodItem extends StatelessWidget {
           height: 40.h,
           decoration: ShapeDecoration(
             color: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.r)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6.r),
+            ),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(6.r),
@@ -563,7 +602,11 @@ class _FoodItem extends StatelessWidget {
               errorBuilder: (context, error, stackTrace) {
                 return Container(
                   color: Colors.orange[100],
-                  child: const Icon(Icons.restaurant, size: 24, color: Colors.orange),
+                  child: const Icon(
+                    Icons.restaurant,
+                    size: 24,
+                    color: Colors.orange,
+                  ),
                 );
               },
             ),
@@ -617,15 +660,17 @@ class _ActionButtons extends StatelessWidget {
           child: OutlinedButton(
             onPressed: controller.cancelOrder,
             style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Color(0xFFEF5350)),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
+              side: const BorderSide(color: Color(0xFF333333)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4.r),
+              ),
               padding: EdgeInsets.symmetric(vertical: 10.h),
             ),
             child: const Text(
               'Cancel',
               style: TextStyle(
                 fontSize: 12,
-                color: Color(0xFFEF5350),
+                color: Color(0xFF333333),
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Manrope',
                 height: 1.50,
@@ -636,10 +681,17 @@ class _ActionButtons extends StatelessWidget {
         SizedBox(width: 10.w),
         Expanded(
           child: ElevatedButton(
-            onPressed: controller.navigateToDetails,
+            onPressed: () => order.isReadyForPickup
+                ? controller
+                      .markAsPickedUp() // Call new method for pickup
+                : controller
+                      .navigateToDetails(), // Navigate to MapScreen for View Details
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF333333),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
+              side: const BorderSide(color: Color(0xFF333333)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4.r),
+              ),
               padding: EdgeInsets.symmetric(vertical: 10.h),
               elevation: 0,
             ),
@@ -647,7 +699,7 @@ class _ActionButtons extends StatelessWidget {
               order.isReadyForPickup ? 'Pick Up' : 'View Details',
               style: const TextStyle(
                 fontSize: 12,
-                color: Color(0xFFFFC200),
+                color: Color(0xFFFFFFFF),
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Manrope',
                 height: 1.50,
