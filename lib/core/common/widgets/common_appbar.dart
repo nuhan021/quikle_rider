@@ -1,4 +1,4 @@
-// ...existing code...
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -18,7 +18,7 @@ class UnifiedProfileAppBar extends StatelessWidget implements PreferredSizeWidge
     this.action,
     this.onActionPressed,
     this.showActionButton = false,
-    this.height = 72.0, // design height in logical pixels; will be adapted with ScreenUtil
+    this.height = 72.0, 
   });
 
   @override
@@ -90,4 +90,3 @@ class UnifiedProfileAppBar extends StatelessWidget implements PreferredSizeWidge
     );
   }
 }
-// ...existing code...

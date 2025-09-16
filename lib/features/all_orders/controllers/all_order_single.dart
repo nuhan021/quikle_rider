@@ -40,6 +40,7 @@ class OrderController extends GetxController {
     );
   }
 
+
   void markAsPickedUp() {
     this.order.value = this.order.value.copyWith(
       status: OrderStatus.inProgress,
@@ -64,6 +65,7 @@ class OrderController extends GetxController {
   void sendMessage() {
     _showSnackbar('Opening chat with ${order.value.customerName}');
   }
+
 
   Widget _buildActionDialog(
     String title,
@@ -149,3 +151,4 @@ class OrderController extends GetxController {
     );
   }
 }
+

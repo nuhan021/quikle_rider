@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -10,7 +12,6 @@ import 'package:quikle_rider/features/wallet/presentation/screen/wallet.dart';
 
 class BottomNavBar extends StatelessWidget {
   const BottomNavBar({super.key});
-
   @override
   Widget build(BuildContext context) {
     // Use Get.find to reuse the existing BottomNavbarController instance
@@ -23,7 +24,6 @@ class BottomNavBar extends StatelessWidget {
       const WalletScreen(),
       const ProfileScreen(),
     ];
-
     return PopScope(
       canPop: false, // Prevent popping unless explicitly handled
       onPopInvoked: (didPop) {

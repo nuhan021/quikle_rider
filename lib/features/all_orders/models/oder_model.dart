@@ -55,7 +55,6 @@ class OrderModel {
       items: items ?? this.items,
     );
   }
-
   // Helper methods
   Color get statusColor {
     switch (status) {
@@ -138,3 +137,4 @@ class OrderItem {
 
   OrderItem({required this.name, required this.details});
 }
+

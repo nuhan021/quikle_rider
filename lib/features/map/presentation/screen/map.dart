@@ -154,6 +154,7 @@ class MapScreen extends StatelessWidget {
           ),
         ),
         Container(
+  
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
           decoration: BoxDecoration(
             color: Colors.white10,

@@ -70,7 +70,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // Logo
-                        Container(
+                          Container(
                             width: 64.w,
                             height: 64.h,
                             child: Image.asset(
@@ -109,16 +109,12 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             ),
                           ),
 
-                         SizedBox(height: 60.h),
+                          SizedBox(height: 60.h),
 
-                         Container(
-                            width: 60.w,
-                            height: 60.h,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 3,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                const Color(0xFFFFB800),
-                              ),
+                          CircularProgressIndicator(
+                            strokeWidth: 3,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              const Color(0xFFFFB800),
                             ),
                           ),
                         ],

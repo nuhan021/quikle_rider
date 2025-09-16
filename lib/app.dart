@@ -19,12 +19,21 @@ class MyApp extends StatelessWidget {
       builder: (_, child) {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
-          initialRoute: AppRoute.getBottomNavBar(), // Changed to splash screen
+          initialRoute: AppRoute.getSplashScreen(), // Changed to splash screen
           getPages: AppRoute.routes,
           initialBinding: ControllerBinder(),
           themeMode: ThemeMode.system,
           theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
+          darkTheme: AppTheme.lightTheme,
+          builder: (context, widget) {
+            final mediaQueryData = MediaQuery.of(context);
+            return MediaQuery(
+              data: mediaQueryData.copyWith(
+                textScaler: const TextScaler.linear(1.0),
+              ),
+              child: widget!,
+            );
+          },
         );
       },
     );
