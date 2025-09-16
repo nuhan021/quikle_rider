@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart'; // Added for GetX navigation
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
 import 'package:quikle_rider/features/map/presentation/controller/map_controller.dart';
@@ -364,7 +364,17 @@ class MapScreen extends StatelessWidget {
         Expanded(
           child: ElevatedButton(
             onPressed: () {
-              Get.toNamed('/parcelDone'); // Use GetX navigation
+              try {
+                Get.toNamed('/parcelDone'); // Navigate to ParcelDone
+              } catch (e) {
+                Get.snackbar(
+                  'Error',
+                  'Failed to navigate to ParcelDone: $e',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black87,
