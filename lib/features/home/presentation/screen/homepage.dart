@@ -2,64 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
-import 'package:quikle_rider/features/home/presentation/screen/goonline.dart';
-import 'package:quikle_rider/features/home/presentation/screen/gooffline.dart';
-import 'package:quikle_rider/features/home/presentation/screen/ask_order.dart';
-import 'package:quikle_rider/features/home/presentation/screen/ask_cancel.dart';
-import 'package:quikle_rider/features/home/presentation/screen/order_accepted.dart';
-import 'package:quikle_rider/features/home/presentation/screen/order_cancel.dart';
+import 'package:quikle_rider/features/home/controller/home_controller.dart';
+import 'package:quikle_rider/features/home/model/home_model.dart';
 
-class HomeScreen extends StatefulWidget {
+
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  bool isOnline = false;
-
-  void _onToggleSwitch() async {
-    if (!isOnline) {
-      // Show go online dialog
-      final result = await Get.to(
-        () => const GoOnlinePage(),
-        opaque: false,
-        fullscreenDialog: true,
-        transition: Transition.fade,
-      );
-      if (result == true) {
-        setState(() {
-          isOnline = true;
-        });
-      }
-    } else {
-      // Show go offline dialog
-      final result = await Get.to(
-        () => const GoOfflinePage(),
-        opaque: false,
-        fullscreenDialog: true,
-        transition: Transition.fade,
-      );
-      if (result == true) {
-        setState(() {
-          isOnline = false;
-        });
-      }
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: CustomTabBar(
-        currentIndex: 0,
-        title: 'Home',
-        isOnline: isOnline,
-        onToggle: _onToggleSwitch,
-      ),
-      body: isOnline ? _buildOnlineView() : _buildOfflineView(),
+    return GetBuilder<HomeController>(
+      init: HomeController(),
+      builder: (controller) {
+        return Obx(() {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            appBar: CustomTabBar(
+              currentIndex: 0,
+              title: 'Home',
+              isOnline: controller.isOnline,
+              onToggle: controller.onToggleSwitch,
+            ),
+            body: controller.isOnline
+                ? _buildOnlineView(controller)
+                : _buildOfflineView(),
+          );
+        });
+      },
     );
   }
 
@@ -83,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildOnlineView() {
+  Widget _buildOnlineView(HomeController controller) {
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -95,11 +64,19 @@ class _HomeScreenState extends State<HomeScreen> {
             // Stats Row
             Row(
               children: [
-                _buildStatCard('Today', '5', 'Deliveries'),
+                _buildStatCard(
+                  'Today',
+                  controller.stats.todayDeliveries,
+                  'Deliveries',
+                ),
                 SizedBox(width: 12.w),
-                _buildStatCard('This Week', '32', 'Deliveries'),
+                _buildStatCard(
+                  'This Week',
+                  controller.stats.weekDeliveries,
+                  'Deliveries',
+                ),
                 SizedBox(width: 12.w),
-                _buildStatCard('Rating', '4.8', 'Out of 5'),
+                _buildStatCard('Rating', controller.stats.rating, 'Out of 5'),
               ],
             ),
 
@@ -119,29 +96,14 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: 16.h),
 
             // Assignment Cards
-            _buildAssignmentCard(
-              orderId: '#5678',
-              customerName: 'Aanya Desai',
-              arrivalTime: 'Arrives by 4:00 PM',
-              address: '456 Oak Ave, Downtown',
-              distance: '2.1 mile',
-              total: '\$24.00',
-              isUrgent: true,
-              isCombined: true,
-            ),
-
-            SizedBox(height: 16.h),
-
-            _buildAssignmentCard(
-              orderId: '#5679',
-              customerName: 'Aanya Desai',
-              arrivalTime: 'Arrives by 4:00 PM',
-              address: '456 Oak Ave, Downtown',
-              distance: '2.1 mile',
-              total: '\$24.00',
-              isUrgent: false,
-              isCombined: false,
-            ),
+            ...controller.assignments
+                .map(
+                  (assignment) => Padding(
+                    padding: EdgeInsets.only(bottom: 16.h),
+                    child: _buildAssignmentCard(assignment, controller),
+                  ),
+                )
+                .toList(),
 
             SizedBox(height: 80.h), // Bottom padding for nav bar
           ],
@@ -198,16 +160,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildAssignmentCard({
-    required String orderId,
-    required String customerName,
-    required String arrivalTime,
-    required String address,
-    required String distance,
-    required String total,
-    required bool isUrgent,
-    required bool isCombined,
-  }) {
+  Widget _buildAssignmentCard(
+    AssignmentModel assignment,
+    HomeController controller,
+  ) {
     return Container(
       width: 350.w,
       padding: EdgeInsets.all(16.w),
@@ -230,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Order $orderId',
+                'Order ${assignment.orderId}',
                 style: TextStyle(
                   fontFamily: 'Obviously',
                   fontSize: 16.sp,
@@ -240,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               Row(
                 children: [
-                  if (isUrgent)
+                  if (assignment.isUrgent)
                     Container(
                       padding: EdgeInsets.symmetric(
                         horizontal: 12.w,
@@ -271,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderRadius: BorderRadius.circular(4.r),
                     ),
                     child: Text(
-                      isCombined ? 'Combined' : 'Single',
+                      assignment.isCombined ? 'Combined' : 'Single',
                       style: TextStyle(
                         fontFamily: 'Inter',
                         fontSize: 12.sp,
@@ -289,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Customer Info
           Text(
-            customerName,
+            assignment.customerName,
             style: TextStyle(
               fontFamily: 'Inter',
               fontSize: 16.sp,
@@ -306,7 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Icon(Icons.access_time, size: 18.sp, color: Colors.black),
               SizedBox(width: 6.w),
               Text(
-                arrivalTime,
+                assignment.arrivalTime,
                 style: TextStyle(
                   fontFamily: 'Inter',
                   fontSize: 14.sp,
@@ -332,7 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(width: 6.w),
                   Text(
-                    address,
+                    assignment.address,
                     style: TextStyle(
                       fontFamily: 'Inter',
                       fontSize: 14.sp,
@@ -343,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               Text(
-                distance,
+                assignment.distance,
                 style: TextStyle(
                   fontFamily: 'Manrope', // Manrope font requested
                   fontSize: 14.sp,
@@ -374,7 +330,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               Text(
-                total,
+                assignment.total,
                 style: TextStyle(
                   fontFamily: 'Obviously',
                   fontSize: 16.sp,
@@ -394,24 +350,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: SizedBox(
                   height: 40.h,
                   child: OutlinedButton(
-                    onPressed: () async {
-                      // Navigate to AskCancelPage
-                      final result = await Get.to(
-                        () => const AskCancelPage(),
-                        opaque: false,
-                        fullscreenDialog: true,
-                        transition: Transition.fade,
-                      );
-                      if (result == true) {
-                        // Navigate to OrderCancelPage
-                        await Get.to(
-                          () => const OrderCancelPage(),
-                          opaque: false,
-                          fullscreenDialog: true,
-                          transition: Transition.fade,
-                        );
-                      }
-                    },
+                    onPressed: () => controller.onRejectOrder(assignment),
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(
                         color: const Color(0xFFE03E1A),
@@ -439,24 +378,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: SizedBox(
                   height: 40.h,
                   child: ElevatedButton(
-                    onPressed: () async {
-                      // Navigate to AskOrderPage
-                      final result = await Get.to(
-                        () => const AskOrderPage(),
-                        opaque: false,
-                        fullscreenDialog: true,
-                        transition: Transition.fade,
-                      );
-                      if (result == true) {
-                        // Navigate to OrderAcceptedPage
-                        await Get.to(
-                          () => const OrderAcceptedPage(),
-                          opaque: false,
-                          fullscreenDialog: true,
-                          transition: Transition.fade,
-                        );
-                      }
-                    },
+                    onPressed: () => controller.onAcceptOrder(assignment),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
                       shape: RoundedRectangleBorder(
