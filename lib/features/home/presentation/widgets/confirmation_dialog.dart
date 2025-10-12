@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+<<<<<<< HEAD:lib/features/home/presentation/widgets/confirmation_dialog.dart
+=======
+import 'package:quikle_rider/features/home/presentation/screen/order_accepted.dart';
+>>>>>>> origin/main:lib/features/home/presentation/screen/ask_order.dart
 
 class ConfirmationDialog extends StatelessWidget {
   final String actionText;
@@ -35,7 +39,6 @@ class ConfirmationDialog extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Question Text
                 RichText(
                   textAlign: TextAlign.center,
                   text: TextSpan(
@@ -65,11 +68,9 @@ class ConfirmationDialog extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 32),
-                // Buttons Row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // Yes Button
                     Container(
                       width: 80,
                       height: 40,
@@ -79,7 +80,7 @@ class ConfirmationDialog extends StatelessWidget {
                       ),
                       child: TextButton(
                         onPressed: () {
-                          Get.back(result: true);
+                          Get.to(() => const OrderAcceptedPage());
                         },
                         style: TextButton.styleFrom(
                           padding: EdgeInsets.zero,
@@ -98,7 +99,6 @@ class ConfirmationDialog extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // No Button
                     Container(
                       width: 80,
                       height: 40,

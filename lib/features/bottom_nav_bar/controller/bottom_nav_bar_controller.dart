@@ -5,31 +5,45 @@ class BottomNavbarController extends GetxController {
   final RxInt selectedIndex = 0.obs;
 
   void changeIndex(int index) {
-    selectedIndex.value = index;
+    // Ensure the index is within valid bounds (0 for Home, 1 for All Orders, 2 for Map, 3 for Wallet, 4 for Aanya)
+    if (index >= 0 && index < navItems.length) {
+      selectedIndex.value = index;
+      print(
+        'BottomNavbarController: Changed index to $index (${navItems[index].label})',
+      );
+    } else {
+      print(
+        'BottomNavbarController: Invalid index: $index. Must be between 0 and ${navItems.length - 1}',
+      );
+    }
   }
 
-  // Navigation items configuration
   List<NavItem> get navItems => [
+    // Index 0: Home
     NavItem(
       icon: 'assets/icons/home.png',
       label: 'Home',
       fallbackIcon: Icons.home,
     ),
+    // Index 1: All Orders
     NavItem(
       icon: 'assets/icons/ordericon.png',
-      label: 'All Orders', 
+      label: 'All Orders',
       fallbackIcon: Icons.receipt_long,
     ),
+    // Index 2: Map
     NavItem(
       icon: 'assets/icons/map.png',
       label: 'Map',
       fallbackIcon: Icons.map,
     ),
+    // Index 3: Wallet
     NavItem(
       icon: 'assets/icons/wallet.png',
       label: 'Wallet',
       fallbackIcon: Icons.wallet,
     ),
+    // Index 4: Aanya (Profile)
     NavItem(
       icon: 'assets/icons/profile.png',
       label: 'Aanya',

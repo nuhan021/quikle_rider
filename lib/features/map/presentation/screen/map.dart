@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
 import 'package:quikle_rider/features/map/presentation/controller/map_controller.dart';
@@ -15,24 +16,34 @@ class MapScreen extends StatelessWidget {
       create: (context) => MapController(),
       child: Consumer<MapController>(
         builder: (context, controller, child) {
-          return Scaffold(
-            backgroundColor: Colors.white,
-            appBar: CustomTabBar(
-              title: 'Map',
-              isOnline: controller.isOnline,
-              onToggle: controller.toggleOnlineStatus,
-              currentIndex: 2,
+          return WillPopScope(
+            onWillPop: () async {
+              Get.back(); // Handle device back button
+              return false; // Prevent default pop
+            },
+            child: Scaffold(
+              backgroundColor: Colors.white,
+              appBar: CustomTabBar(
+                title: 'Map',
+                isOnline: controller.isOnline,
+                onToggle: controller.toggleOnlineStatus,
+                currentIndex: 2,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.black87),
+                  onPressed: () => Get.back(), // UI back button
+                ),
+              ),
+              body: controller.currentDelivery == null
+                  ? const Center(child: CircularProgressIndicator())
+                  : Column(
+                      children: [
+                        // Map Area
+                        _buildMapArea(),
+                        // Delivery Information
+                        _buildDeliveryInfo(context, controller),
+                      ],
+                    ),
             ),
-            body: controller.currentDelivery == null
-                ? const Center(child: CircularProgressIndicator())
-                : Column(
-                    children: [
-                      // Map Area
-                      _buildMapArea(),
-                      // Delivery Information
-                      _buildDeliveryInfo(context, controller),
-                    ],
-                  ),
           );
         },
       ),
@@ -354,10 +365,17 @@ class MapScreen extends StatelessWidget {
         Expanded(
           child: ElevatedButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ParcelDone()),
-              );
+              try {
+                Get.toNamed('/parcelDone'); // Navigate to ParcelDone
+              } catch (e) {
+                Get.snackbar(
+                  'Error',
+                  'Failed to navigate to ParcelDone: $e',
+                  snackPosition: SnackPosition.BOTTOM,
+                  backgroundColor: Colors.red,
+                  colorText: Colors.white,
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black87,

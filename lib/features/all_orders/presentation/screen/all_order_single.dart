@@ -22,10 +22,7 @@ class AllOrdersSingle extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Obx(() => OrderCard(
-                order: controller.order.value,
-                controller: controller,
-              )),
+              OrderCard(controller: controller),
               SizedBox(height: 80.h), // Bottom padding for nav bar
             ],
           ),
@@ -34,3 +31,4 @@ class AllOrdersSingle extends StatelessWidget {
     );
   }
 }
+
