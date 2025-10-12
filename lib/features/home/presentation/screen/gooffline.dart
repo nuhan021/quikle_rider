@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 
 class GoOfflinePage extends StatelessWidget {
@@ -5,8 +7,7 @@ class GoOfflinePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The font family 'Obviously' needs to be added to your pubspec.yaml file
-    // and included in your project assets for this to work correctly.
+  
     return Scaffold(
       backgroundColor: Colors.black.withOpacity(0.5),
       body: Center(

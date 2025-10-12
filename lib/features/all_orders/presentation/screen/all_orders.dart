@@ -13,7 +13,8 @@ class AllOrders extends StatefulWidget {
   State<AllOrders> createState() => _AllOrdersState();
 }
 
-class _AllOrdersState extends State<AllOrders> with SingleTickerProviderStateMixin {
+class _AllOrdersState extends State<AllOrders>
+    with SingleTickerProviderStateMixin {
   final AllOrdersController controller = Get.put(AllOrdersController());
 
   @override
@@ -29,79 +30,61 @@ class _AllOrdersState extends State<AllOrders> with SingleTickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() => Scaffold(
-          backgroundColor: Colors.white,
-          appBar: CustomTabBar(
-            currentIndex: 1,
-            title: 'Orders',
-            isOnline: controller.isOnline.value,
-            onToggle: controller.toggleOnline,
-          ),
-          body: Padding(
-            padding: EdgeInsets.only(top: 16.h, left: 16.w, right: 16.w),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () => controller.changeTab(0),
-                      child: Container(
-                        width: 170.w,
-                        height: 36.h,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: controller.selectedIndex.value == 0 ? Colors.black : Colors.white,
-                          border: Border.all(color: Colors.black, width: 1.w),
-                          borderRadius: BorderRadius.circular(6.r),
-                        ),
-                        child: Text(
-                          'Combined',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
-                            color: controller.selectedIndex.value == 0 ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    GestureDetector(
-                      onTap: () => controller.changeTab(1),
-                      child: Container(
-                        width: 170.w,
-                        height: 36.h,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: controller.selectedIndex.value == 1 ? Colors.black : Colors.white,
-                          border: Border.all(color: Colors.black, width: 1.w),
-                          borderRadius: BorderRadius.circular(6.r),
-                        ),
-                        child: Text(
-                          'Single',
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w600,
-                            color: controller.selectedIndex.value == 1 ? Colors.white : Colors.black,
-                          ),
-                        ),
-                      ),
-                    ),
+    return Obx(
+      () => Scaffold(
+        backgroundColor: Colors.white,
+        appBar: CustomTabBar(
+          currentIndex: 1,
+          title: 'Orders',
+          isOnline: controller.isOnline.value,
+          onToggle: controller.toggleOnline,
+        ),
+        body: Padding(
+          padding: EdgeInsets.only(top: 16.h, left: 16.w, right: 16.w),
+          child: Column(
+            children: [
+              Container(
+                height: 36.h,
+
+                child: TabBar(
+                  dividerColor: Colors.transparent,
+
+                  indicatorSize: TabBarIndicatorSize.tab,
+                  controller: controller.tabController,
+                  indicator: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6.r),
+                    color: Colors.black,
+                  ),
+                  labelColor: Colors.white,
+                  unselectedLabelColor: Colors.black,
+                  labelStyle: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  unselectedLabelStyle: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  tabs: const [
+                    Tab(text: 'Combined'),
+                    Tab(text: 'Single'),
                   ],
                 ),
-                SizedBox(height: 16.h),
-                Expanded(
-                  child: TabBarView(
-                    controller: controller.tabController,
-                    children: const [AllOrdersCombined(), AllOrdersSingle()],
-                  ),
+              ),
+              SizedBox(height: 16.h),
+              Expanded(
+                child: TabBarView(
+                  controller: controller.tabController,
+                  children: const [AllOrdersCombined(), AllOrdersSingle()],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 
   @override

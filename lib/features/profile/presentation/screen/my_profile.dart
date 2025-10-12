@@ -12,7 +12,7 @@ class MyProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: UnifiedProfileAppBar(title: "My Profile"),
+      appBar: UnifiedProfileAppBar(title: "My Profile",),
       body: SingleChildScrollView(
         child: Column(
           children: [

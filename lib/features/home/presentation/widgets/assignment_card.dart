@@ -1,0 +1,273 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+class AssignmentCard extends StatelessWidget {
+  final String orderId;
+  final String customerName;
+  final String arrivalTime;
+  final String address;
+  final String distance;
+  final String total;
+  final bool isUrgent;
+  final bool isCombined;
+  final VoidCallback onAccept;
+  final VoidCallback onReject;
+
+  const AssignmentCard({
+    super.key,
+    required this.orderId,
+    required this.customerName,
+    required this.arrivalTime,
+    required this.address,
+    required this.distance,
+    required this.total,
+    required this.isUrgent,
+    required this.isCombined,
+    required this.onAccept,
+    required this.onReject,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 350.w,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0x0A606060),
+            blurRadius: 8.r,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Order $orderId',
+                style: TextStyle(
+                  fontFamily: 'Obviously',
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF484848),
+                ),
+              ),
+              Row(
+                children: [
+                  if (isUrgent)
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 12.w,
+                        vertical: 4.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0x26FF0000),
+                        borderRadius: BorderRadius.circular(4.r),
+                      ),
+                      child: Text(
+                        'Urgent',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 12.sp,
+                          color: const Color(0xFFFF0000),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  SizedBox(width: 8.w),
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 4.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0F0F0),
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                    child: Text(
+                      isCombined ? 'Combined' : 'Single',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 12.sp,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          SizedBox(height: 8.h),
+
+          // Customer Info
+          Text(
+            customerName,
+            style: TextStyle(
+              fontFamily: 'Inter',
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+            ),
+          ),
+
+          SizedBox(height: 12.h),
+
+          // Arrival Time
+          Row(
+            children: [
+              Icon(Icons.access_time, size: 18.sp, color: Colors.black),
+              SizedBox(width: 6.w),
+              Text(
+                arrivalTime,
+                style: TextStyle(
+                  fontFamily: 'Inter',
+                  fontSize: 14.sp,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 12.h),
+
+          // Address and Distance
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.location_on_outlined,
+                    size: 18.sp,
+                    color: Colors.black,
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    address,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 14.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                distance,
+                style: TextStyle(
+                  fontFamily: 'Manrope', // Manrope font requested
+                  fontSize: 14.sp,
+                  color: const Color(0xFF484848),
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 16.h),
+
+          Divider(color: const Color(0x3FB7B7B7), thickness: 1.h),
+
+          SizedBox(height: 16.h),
+
+          // Total
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total:',
+                style: TextStyle(
+                  fontFamily: 'Obviously',
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF333333),
+                ),
+              ),
+              Text(
+                total,
+                style: TextStyle(
+                  fontFamily: 'Obviously',
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w900,
+                  color: const Color(0xFF333333),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 16.h),
+
+          // Action Buttons
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 40.h,
+                  child: OutlinedButton(
+                    onPressed: onReject,
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(
+                        color: const Color(0xFFE03E1A),
+                        width: 1.w,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                    ),
+                    child: Text(
+                      'Reject',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 14.sp,
+                        color: const Color(0xFFFF0000),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: SizedBox(
+                  height: 40.h,
+                  child: ElevatedButton(
+                    onPressed: onAccept,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'Accept',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 14.sp,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
