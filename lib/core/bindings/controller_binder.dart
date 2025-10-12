@@ -10,11 +10,11 @@ class ControllerBinder extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<SplashController>(() => SplashController(), fenix: true);
-<<<<<<< HEAD
+
     Get.lazyPut<HomepageController>(() => HomepageController(), fenix: true);
     Get.lazyPut<WalletController>(() => WalletController(), fenix: true);
-=======
+
     Get.put<BottomNavbarController>(BottomNavbarController());
->>>>>>> origin/main
+
   }
 }

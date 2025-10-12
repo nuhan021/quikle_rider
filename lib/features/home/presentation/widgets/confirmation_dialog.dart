@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-<<<<<<< HEAD:lib/features/home/presentation/widgets/confirmation_dialog.dart
-=======
+
 import 'package:quikle_rider/features/home/presentation/screen/order_accepted.dart';
->>>>>>> origin/main:lib/features/home/presentation/screen/ask_order.dart
 
 class ConfirmationDialog extends StatelessWidget {
   final String actionText;
