@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import 'package:quikle_rider/features/home/presentation/screen/order_accepted.dart';
 
-class AskOrderPage extends StatelessWidget {
-  const AskOrderPage({super.key});
+class ConfirmationDialog extends StatelessWidget {
+  final String actionText;
+  final Color actionColor;
+
+  const ConfirmationDialog({
+    super.key,
+    required this.actionText,
+    required this.actionColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,26 +39,26 @@ class AskOrderPage extends StatelessWidget {
               children: [
                 RichText(
                   textAlign: TextAlign.center,
-                  text: const TextSpan(
-                    style: TextStyle(
+                  text: TextSpan(
+                    style: const TextStyle(
                       fontFamily: 'Obviously',
                       fontSize: 22,
                       color: Colors.black87,
                       height: 1.2,
                     ),
                     children: [
-                      TextSpan(
+                      const TextSpan(
                         text: 'Do You Want To ',
                         style: TextStyle(fontWeight: FontWeight.w400),
                       ),
                       TextSpan(
-                        text: 'Accept',
+                        text: actionText,
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF4CAF50),
+                          color: actionColor,
                         ),
                       ),
-                      TextSpan(
+                      const TextSpan(
                         text: '\nThe Order ?',
                         style: TextStyle(fontWeight: FontWeight.w400),
                       ),

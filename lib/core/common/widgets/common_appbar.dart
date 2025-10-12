@@ -1,11 +1,12 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
 
-class UnifiedProfileAppBar extends StatelessWidget implements PreferredSizeWidget {
+//common appbar
+class UnifiedProfileAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
   final String title;
   final String? action;
   final VoidCallback? onActionPressed;
@@ -18,7 +19,7 @@ class UnifiedProfileAppBar extends StatelessWidget implements PreferredSizeWidge
     this.action,
     this.onActionPressed,
     this.showActionButton = false,
-    this.height = 72.0, 
+    this.height = 72.0,
   });
 
   @override
@@ -76,13 +77,13 @@ class UnifiedProfileAppBar extends StatelessWidget implements PreferredSizeWidge
 
             // Action button
             if (showActionButton && action != null)
-              IconButton(
-                icon: Image.asset(
+              InkWell(
+                child: Image.asset(
                   'assets/images/notification.png',
-                  width: 24.w,
-                  height: 24.h,
+                  width: 40.w,
+                  height: 40.h,
                 ),
-                onPressed: onActionPressed,
+                onTap: onActionPressed,
               ),
           ],
         ),
