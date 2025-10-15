@@ -5,7 +5,9 @@ import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/features/wallet/controllers/wallet_controller.dart';
 import 'package:quikle_rider/features/wallet/widgets/balance_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/delevery_card.dart';
+import 'package:quikle_rider/features/wallet/widgets/rating_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/start_tile.dart';
+import 'package:quikle_rider/features/wallet/widgets/tier_card.dart';
 
 class WalletScreen extends GetView<WalletController> {
   const WalletScreen({super.key});
@@ -82,7 +84,7 @@ class WalletScreen extends GetView<WalletController> {
                     BalanceCard(
                       balance: controller.currentBalance.value,
                       lastUpdated: controller.avgDeliveryTime.value,
-                      onWithdraw: () async{},
+                      onWithdraw: () async {},
                     ),
                     SizedBox(height: 12.h),
 
@@ -107,6 +109,7 @@ class WalletScreen extends GetView<WalletController> {
                       ],
                     ),
                     SizedBox(height: 12.h),
+
                     Row(
                       children: [
                         Expanded(
@@ -127,6 +130,44 @@ class WalletScreen extends GetView<WalletController> {
                       ],
                     ),
                     SizedBox(height: 16.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: StatTile(
+                            title: 'Acceptance Rate %',
+                            value: controller.totalDeliveries.value,
+                            box: cardBox,
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: StatTile(
+                            title: 'On-Time Delivery %',
+                            value: controller.avgDeliveryTime.value,
+                            box: cardBox,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'Customer Ratings',
+                      style: TextStyle(
+                        fontFamily: 'Obviously',
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                    ),
+                    // Custom Rating Icons Card
+                    RatingCard(
+                      rating: 4.5,
+                      totalRatings: '5.2K Ratings',
+                      reviewCount: 18,
+                    ),
+                    // Bronze Tier
+                    //current Tier Card
+                    TierCard(tier: 'Silver'),
 
                     // Past Deliveries header
                     Padding(
