@@ -33,10 +33,6 @@ class WalletScreen extends GetView<WalletController> {
 
         body: Column(
           children: [
-
-
-
-
             // Segmented period selector
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -84,7 +80,6 @@ class WalletScreen extends GetView<WalletController> {
                 () => ListView(
                   padding: EdgeInsets.symmetric(horizontal: 16.w),
                   children: [
-                
                     // Current Balance Card
                     BalanceCard(
                       balance: controller.currentBalance.value,
@@ -171,9 +166,8 @@ class WalletScreen extends GetView<WalletController> {
                       reviewCount: 18,
                     ),
                     // Bronze Tier
-                        //current Tier Card
-                  TierCard(tier: 'Silver'),
-            
+                    //current Tier Card
+                    TierCard(tier: 'Silver'),
 
                     // Past Deliveries header
                     Padding(

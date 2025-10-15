@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:quikle_rider/features/home/models/home_dashboard_models.dart';
 import 'package:quikle_rider/features/home/presentation/screen/goonline.dart';
 import 'package:quikle_rider/features/home/presentation/screen/gooffline.dart';
+import 'package:quikle_rider/features/home/presentation/widgets/alert_dialog.dart';
+import 'package:quikle_rider/features/home/presentation/widgets/incoming_assignment_dialog.dart';
 
 class HomepageController extends GetxController {
   var isOnline = false.obs;
@@ -10,6 +14,11 @@ class HomepageController extends GetxController {
   final stats = <HomeStat>[].obs;
   final assignments = <Assignment>[].obs;
   final _pendingActions = <String>{}.obs;
+  final popupAssignment = Rxn<Assignment>();
+
+  Timer? _incomingAssignmentTimer;
+  Timer? _dialogAutoCloseTimer;
+  int _assignmentSequence = 6000;
 
   void onToggleSwitch() async {
     if (!isOnline.value) {
@@ -21,6 +30,7 @@ class HomepageController extends GetxController {
       );
       if (result == true) {
         isOnline.value = true;
+        _scheduleIncomingAssignment();
       }
     } else {
       final result = await Get.to(
@@ -31,6 +41,7 @@ class HomepageController extends GetxController {
       );
       if (result == true) {
         isOnline.value = false;
+        _cancelIncomingAssignment();
       }
     }
   }
@@ -84,11 +95,44 @@ class HomepageController extends GetxController {
           customerName: 'Aanya Desai',
           expectedArrival: DateTime.now().add(const Duration(hours: 1)),
           address: '456 Oak Ave, Downtown',
-          distanceInMiles: 2.1,
-          totalAmount: 24.00,
-          currency: '',
+          distanceInKm: 3.0,
+          totalAmount: 35,
+          basePay: 25,
+          distancePay: 10,
+          orderType: 'Food',
+          currency: '₹',
           isUrgent: true,
           isCombined: true,
+        ),
+        Assignment(
+          id: '#5677',
+          customerName: 'Rahul Verma',
+          expectedArrival: DateTime.now().add(const Duration(hours: 3)),
+          address: '89 Lake View Road, Uptown',
+          distanceInKm: 2.5,
+          totalAmount: 28,
+          basePay: 18,
+          distancePay: 10,
+          orderType: 'Pharmacy',
+          currency: '₹',
+          isUrgent: false,
+          isCombined: false,
+          status: AssignmentStatus.accepted,
+        ),
+        Assignment(
+          id: '#5676',
+          customerName: 'Neha Kapoor',
+          expectedArrival: DateTime.now().add(const Duration(hours: 5)),
+          address: '12 Garden Blvd, Midtown',
+          distanceInKm: 5.4,
+          totalAmount: 48,
+          basePay: 30,
+          distancePay: 18,
+          orderType: 'Grocery',
+          currency: '₹',
+          isUrgent: false,
+          isCombined: true,
+          status: AssignmentStatus.rejected,
         ),
       ],
     );
@@ -98,23 +142,31 @@ class HomepageController extends GetxController {
       _pendingActions.contains(assignmentId);
 
   Future<bool> acceptAssignment(Assignment assignment) async {
-    return _performAssignmentAction(
+    final result = await _performAssignmentAction(
       assignmentId: assignment.id,
       action: () async {
         await Future.delayed(const Duration(milliseconds: 350));
         return true;
       },
     );
+    if (result) {
+      _setAssignmentStatus(assignment, AssignmentStatus.accepted);
+    }
+    return result;
   }
 
   Future<bool> rejectAssignment(Assignment assignment) async {
-    return _performAssignmentAction(
+    final result = await _performAssignmentAction(
       assignmentId: assignment.id,
       action: () async {
         await Future.delayed(const Duration(milliseconds: 350));
         return true;
       },
     );
+    if (result) {
+      _setAssignmentStatus(assignment, AssignmentStatus.rejected);
+    }
+    return result;
   }
 
   Future<bool> _performAssignmentAction({
@@ -129,5 +181,140 @@ class HomepageController extends GetxController {
     } finally {
       _pendingActions.remove(assignmentId);
     }
+  }
+
+  void _scheduleIncomingAssignment() {
+    _incomingAssignmentTimer?.cancel();
+    _incomingAssignmentTimer = Timer(
+      const Duration(seconds: 20),
+      _presentIncomingAssignment,
+    );
+  }
+
+  void _cancelIncomingAssignment() {
+    _incomingAssignmentTimer?.cancel();
+    _incomingAssignmentTimer = null;
+    _dialogAutoCloseTimer?.cancel();
+    _dialogAutoCloseTimer = null;
+    popupAssignment.value = null;
+    if (Get.isDialogOpen ?? false) {
+      Get.back();
+    }
+  }
+
+  Assignment _createIncomingAssignment() {
+    _assignmentSequence += 1;
+    final now = DateTime.now();
+    final arrival = now.add(const Duration(minutes: 30));
+
+    return Assignment(
+      id: '#$_assignmentSequence',
+      customerName: 'Priya Sharma',
+      expectedArrival: arrival,
+      address: '221B Baker St, Park Town',
+      distanceInKm: 4.2,
+      totalAmount: 42,
+      currency: '₹',
+      basePay: 28,
+      distancePay: 14,
+      orderType: 'Grocery',
+      isUrgent: true,
+      isCombined: false,
+    );
+  }
+
+  Future<void> _presentIncomingAssignment() async {
+    final assignment = _createIncomingAssignment();
+    popupAssignment.value = assignment;
+
+    _dialogAutoCloseTimer?.cancel();
+    _dialogAutoCloseTimer = Timer(const Duration(seconds: 10), () {
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+    });
+
+    final status = await Get.dialog<AssignmentStatus>(
+      IncomingAssignmentDialog(
+        assignment: assignment,
+        onAccept: () => Get.back(result: AssignmentStatus.accepted),
+        onReject: () => Get.back(result: AssignmentStatus.rejected),
+      ),
+      barrierDismissible: false,
+    );
+
+    _dialogAutoCloseTimer?.cancel();
+    _dialogAutoCloseTimer = null;
+    popupAssignment.value = null;
+
+    await _handleIncomingAssignmentResult(assignment, status);
+
+    if (isOnline.value) {
+      _scheduleIncomingAssignment();
+    }
+  }
+
+  void _setAssignmentStatus(Assignment assignment, AssignmentStatus status) {
+    final updated = assignment.copyWith(status: status);
+    final idx = assignments.indexWhere((item) => item.id == assignment.id);
+    if (idx == -1) {
+      assignments.insert(0, updated);
+    } else {
+      assignments[idx] = updated;
+    }
+  }
+
+  Future<void> _handleIncomingAssignmentResult(
+    Assignment assignment,
+    AssignmentStatus? status,
+  ) async {
+    switch (status) {
+      case AssignmentStatus.accepted:
+        final success = await acceptAssignment(assignment);
+        if (success) {
+          // Show dialog
+          Get.dialog(
+            OrderStatusDialog(
+              imageUrl: "assets/images/success.png",
+              text: "Order Accepted",
+            ),
+            barrierDismissible: false,
+          );
+
+          // Auto close after 1s
+          Future.delayed(const Duration(seconds: 1), () {
+            if (Get.isDialogOpen ?? false) Get.back();
+          });
+        }
+        break;
+
+      case AssignmentStatus.rejected:
+        final success = await rejectAssignment(assignment);
+        if (success) {
+          Get.dialog(
+            OrderStatusDialog(
+              imageUrl: "assets/images/cancel.png",
+              text: "Order Rejected",
+            ),
+            barrierDismissible: false,
+          );
+
+          Future.delayed(const Duration(seconds: 1), () {
+            if (Get.isDialogOpen ?? false) Get.back();
+          });
+        }
+        break;
+
+      case AssignmentStatus.pending:
+      case null:
+        _setAssignmentStatus(assignment, AssignmentStatus.pending);
+        break;
+    }
+  }
+
+  @override
+  void onClose() {
+    _cancelIncomingAssignment();
+    super.onClose();
   }
 }

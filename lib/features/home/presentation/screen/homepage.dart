@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
 import 'package:quikle_rider/features/home/controllers/homepage_controller.dart';
+import 'package:quikle_rider/features/home/models/home_dashboard_models.dart';
 import 'package:quikle_rider/features/home/presentation/widgets/alert_dialog.dart';
 import 'package:quikle_rider/features/home/presentation/widgets/assignment_card.dart';
 import 'package:quikle_rider/features/home/presentation/widgets/stat_card.dart';
@@ -165,6 +166,8 @@ class HomeScreen extends GetView<HomepageController> {
               else
                 Column(
                   children: assignments.map((assignment) {
+                    final isPending =
+                        assignment.status == AssignmentStatus.pending;
                     return Padding(
                       padding: EdgeInsets.only(bottom: 16.h),
                       child: AssignmentCard(
@@ -174,48 +177,78 @@ class HomeScreen extends GetView<HomepageController> {
                         address: assignment.address,
                         distance: assignment.formattedDistance,
                         total: assignment.formattedTotal,
+                        breakdown: assignment.formattedBreakdown,
                         isUrgent: assignment.isUrgent,
                         isCombined: assignment.isCombined,
-                        onAccept: () async {
-                          final pending = controller
-                              .isAssignmentActionPending(assignment.id);
-                          if (pending) return;
-                          final success =
-                              await controller.acceptAssignment(assignment);
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return OrderStatusDialog(
-                                imageUrl: success
-                                    ? "assets/images/success.png"
-                                    : "assets/images/cancel.png",
-                                text: success
-                                    ? "Order Accepted"
-                                    : "Order failed to accept",
-                              );
-                            },
-                          );
-                        },
-                        onReject: () async {
-                          final pending = controller
-                              .isAssignmentActionPending(assignment.id);
-                          if (pending) return;
-                          final success =
-                              await controller.rejectAssignment(assignment);
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return OrderStatusDialog(
-                                imageUrl: success
-                                    ? "assets/images/cancel.png"
-                                    : "assets/images/success.png",
-                                text: success
-                                    ? "Order Rejected"
-                                    : "Order failed to reject",
-                              );
-                            },
-                          );
-                        },
+                        status: assignment.status,
+                        showActions: isPending,
+                        onAccept: isPending
+                            ? () async {
+                                final pending = controller
+                                    .isAssignmentActionPending(assignment.id);
+                                if (pending) return;
+
+                                final success = await controller
+                                    .acceptAssignment(assignment);
+
+                                // Show status dialog
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) {
+                                    return OrderStatusDialog(
+                                      imageUrl: success
+                                          ? "assets/images/success.png"
+                                          : "assets/images/cancel.png",
+                                      text: success
+                                          ? "Order Accepted"
+                                          : "Order failed to accept",
+                                    );
+                                  },
+                                );
+
+                                // Auto close after 1 second
+                                Future.delayed(const Duration(seconds: 1), () {
+                                  if (Navigator.of(context).canPop()) {
+                                    Navigator.of(context).pop();
+                                  }
+                                });
+                              }
+                            : null,
+
+                        onReject: isPending
+                            ? () async {
+                                final pending = controller
+                                    .isAssignmentActionPending(assignment.id);
+                                if (pending) return;
+
+                                final success = await controller
+                                    .rejectAssignment(assignment);
+
+                                // Show status dialog
+                                showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (context) {
+                                    return OrderStatusDialog(
+                                      imageUrl: success
+                                          ? "assets/images/cancel.png"
+                                          : "assets/images/success.png",
+                                      text: success
+                                          ? "Order Rejected"
+                                          : "Order failed to reject",
+                                    );
+                                  },
+                                );
+
+                                // Auto close after 1 second
+                                Future.delayed(const Duration(seconds: 1), () {
+                                  if (Navigator.of(context).canPop()) {
+                                    Navigator.of(context).pop();
+                                  }
+                                });
+                              }
+                            : null,
                       ),
                     );
                   }).toList(),

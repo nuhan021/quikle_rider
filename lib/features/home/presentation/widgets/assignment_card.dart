@@ -1,5 +1,9 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quikle_rider/core/utils/constants/colors.dart';
+import 'package:quikle_rider/features/home/models/home_dashboard_models.dart';
 
 class AssignmentCard extends StatelessWidget {
   final String orderId;
@@ -8,10 +12,13 @@ class AssignmentCard extends StatelessWidget {
   final String address;
   final String distance;
   final String total;
+  final String? breakdown;
   final bool isUrgent;
   final bool isCombined;
-  final VoidCallback onAccept;
-  final VoidCallback onReject;
+  final AssignmentStatus? status;
+  final bool showActions;
+  final VoidCallback? onAccept;
+  final VoidCallback? onReject;
 
   const AssignmentCard({
     super.key,
@@ -21,19 +28,41 @@ class AssignmentCard extends StatelessWidget {
     required this.address,
     required this.distance,
     required this.total,
+    this.breakdown,
     required this.isUrgent,
     required this.isCombined,
-    required this.onAccept,
-    required this.onReject,
+    this.status,
+    this.showActions = true,
+    this.onAccept,
+    this.onReject,
   });
 
   @override
   Widget build(BuildContext context) {
+    final AssignmentStatus? currentStatus = status;
+    final bool isPending =
+        currentStatus == null || currentStatus == AssignmentStatus.pending;
+
+    Color? statusColor;
+    if (currentStatus != null) {
+      switch (currentStatus) {
+        case AssignmentStatus.pending:
+          statusColor = const Color(0xFF6B7280);
+          break;
+        case AssignmentStatus.accepted:
+          statusColor = const Color(0xFF1DAA6F);
+          break;
+        case AssignmentStatus.rejected:
+          statusColor = const Color(0xFFE03E1A);
+          break;
+      }
+    }
+
     return Container(
-      width: 350.w,
+      // width: 350.w,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.background,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
@@ -51,7 +80,7 @@ class AssignmentCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Order $orderId',
+                'Order$orderId',
                 style: TextStyle(
                   fontFamily: 'Obviously',
                   fontSize: 16.sp,
@@ -59,50 +88,67 @@ class AssignmentCard extends StatelessWidget {
                   color: const Color(0xFF484848),
                 ),
               ),
-              Row(
-                children: [
-                  if (isUrgent)
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 12.w,
-                        vertical: 4.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0x26FF0000),
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                      child: Text(
-                        'Urgent',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 12.sp,
-                          color: const Color(0xFFFF0000),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  SizedBox(width: 8.w),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 4.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF0F0F0),
-                      borderRadius: BorderRadius.circular(4.r),
-                    ),
-                    child: Text(
-                      isCombined ? 'Combined' : 'Single',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 12.sp,
-                        color: Colors.black,
-                        fontWeight: FontWeight.w500,
-                      ),
+
+              if (isUrgent)
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 4.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0x26FF0000),
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                  child: Text(
+                    'Urgent',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 12.sp,
+                      color: const Color(0xFFFF0000),
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                ],
+                ),
+
+              Container(
+                padding: EdgeInsets.symmetric( vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0F0F0),
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                child: Text(
+                  isCombined ? 'Combined' : 'Single',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 12.sp,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
+              if (currentStatus != null) ...[
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 4.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color:
+                        statusColor?.withOpacity(0.12) ??
+                        const Color(0x11000000),
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                  child: Text(
+                    currentStatus.label,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 12.sp,
+                      color: statusColor ?? const Color(0xFF6B7280),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
 
@@ -181,91 +227,90 @@ class AssignmentCard extends StatelessWidget {
 
           SizedBox(height: 16.h),
 
-          // Total
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Total:',
-                style: TextStyle(
-                  fontFamily: 'Obviously',
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF333333),
-                ),
-              ),
-              Text(
-                total,
-                style: TextStyle(
-                  fontFamily: 'Obviously',
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w900,
-                  color: const Color(0xFF333333),
-                ),
-              ),
-            ],
+          // Payout summary
+          Text(
+            'Order Payout: $total',
+            style: TextStyle(
+              fontFamily: 'Obviously',
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w900,
+              color: const Color(0xFF333333),
+            ),
           ),
+          if (breakdown != null) ...[
+            SizedBox(height: 6.h),
+            Text(
+              breakdown!,
+              style: TextStyle(
+                fontFamily: 'Inter',
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF6B7280),
+              ),
+            ),
+          ],
 
           SizedBox(height: 16.h),
 
           // Action Buttons
-          Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 40.h,
-                  child: OutlinedButton(
-                    onPressed: onReject,
-                    style: OutlinedButton.styleFrom(
-                      side: BorderSide(
-                        color: const Color(0xFFE03E1A),
-                        width: 1.w,
+          if (showActions && isPending)
+            Row(
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    height: 40.h,
+                    child: OutlinedButton(
+                      onPressed: onReject,
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: const Color(0xFFE03E1A),
+                          width: 1.w,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6.r),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 24.w),
-                    ),
-                    child: Text(
-                      'Reject',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 14.sp,
-                        color: const Color(0xFFFF0000),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: SizedBox(
-                  height: 40.h,
-                  child: ElevatedButton(
-                    onPressed: onAccept,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6.r),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 24.w),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'Accept',
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 14.sp,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
+                      child: Text(
+                        'Reject',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14.sp,
+                          color: const Color(0xFFFF0000),
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: SizedBox(
+                    height: 40.h,
+                    child: ElevatedButton(
+                      onPressed: onAccept,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6.r),
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Accept',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14.sp,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );
