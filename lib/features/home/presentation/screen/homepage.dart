@@ -49,80 +49,182 @@ class HomeScreen extends GetView<HomepageController> {
   }
 
   Widget _buildOnlineView(BuildContext context) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 16.h),
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
 
-            // Stats Row
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      if (controller.errorMessage.value != null) {
+        return Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.w),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                StatCard(title: 'Today', value: '5', subtitle: 'Deliveries'),
-                StatCard(
-                  title: 'This Week',
-                  value: '32',
-                  subtitle: 'Deliveries',
+                Text(
+                  controller.errorMessage.value!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: 'Obviously',
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[700],
+                  ),
                 ),
-                StatCard(title: 'Rating', value: '4.8', subtitle: 'Out of 5'),
+                SizedBox(height: 12.h),
+                SizedBox(
+                  height: 40.h,
+                  child: ElevatedButton(
+                    onPressed: controller.fetchDashboardData,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                    ),
+                    child: const Text('Retry'),
+                  ),
+                ),
               ],
             ),
+          ),
+        );
+      }
 
-            SizedBox(height: 24.h),
+      final stats = controller.stats;
+      final assignments = controller.assignments;
 
-            // Upcoming Assignments
-            Text(
-              'Upcoming Assignments',
-              style: TextStyle(
-                fontFamily: 'Obviously',
-                fontSize: 18,
-                fontWeight: FontWeight.w900,
-                color: Colors.black,
+      return SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 16.h),
+              if (stats.isEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 24.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: Colors.grey[200]!),
+                  ),
+                  child: Text(
+                    'No stats available.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 14.sp,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                )
+              else
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: stats.take(3).map((stat) {
+                    return StatCard(
+                      title: stat.title,
+                      value: stat.displayValue,
+                      subtitle: stat.subtitle,
+                    );
+                  }).toList(),
+                ),
+              SizedBox(height: 24.h),
+              Text(
+                'Upcoming Assignments',
+                style: TextStyle(
+                  fontFamily: 'Obviously',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.black,
+                ),
               ),
-            ),
-
-            SizedBox(height: 16.h),
-
-            // Assignment Cards
-            AssignmentCard(
-              orderId: '#5678',
-              customerName: 'Aanya Desai',
-              arrivalTime: 'Arrives by 4:00 PM',
-              address: '456 Oak Ave, Downtown',
-              distance: '2.1 mile',
-              total: '24.00',
-              isUrgent: true,
-              isCombined: true,
-              onAccept: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return OrderStatusDialog(
-                      imageUrl: "assets/images/success.png",
-                      text: "Order Accepted",
+              SizedBox(height: 16.h),
+              if (assignments.isEmpty)
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.symmetric(vertical: 32.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: Colors.grey[200]!),
+                  ),
+                  child: Text(
+                    'No upcoming assignments right now.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 14.sp,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                )
+              else
+                Column(
+                  children: assignments.map((assignment) {
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 16.h),
+                      child: AssignmentCard(
+                        orderId: assignment.id,
+                        customerName: assignment.customerName,
+                        arrivalTime: assignment.formattedArrival,
+                        address: assignment.address,
+                        distance: assignment.formattedDistance,
+                        total: assignment.formattedTotal,
+                        isUrgent: assignment.isUrgent,
+                        isCombined: assignment.isCombined,
+                        onAccept: () async {
+                          final pending = controller
+                              .isAssignmentActionPending(assignment.id);
+                          if (pending) return;
+                          final success =
+                              await controller.acceptAssignment(assignment);
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return OrderStatusDialog(
+                                imageUrl: success
+                                    ? "assets/images/success.png"
+                                    : "assets/images/cancel.png",
+                                text: success
+                                    ? "Order Accepted"
+                                    : "Order failed to accept",
+                              );
+                            },
+                          );
+                        },
+                        onReject: () async {
+                          final pending = controller
+                              .isAssignmentActionPending(assignment.id);
+                          if (pending) return;
+                          final success =
+                              await controller.rejectAssignment(assignment);
+                          showDialog(
+                            context: context,
+                            builder: (context) {
+                              return OrderStatusDialog(
+                                imageUrl: success
+                                    ? "assets/images/cancel.png"
+                                    : "assets/images/success.png",
+                                text: success
+                                    ? "Order Rejected"
+                                    : "Order failed to reject",
+                              );
+                            },
+                          );
+                        },
+                      ),
                     );
-                  },
-                );
-              },
-
-              onReject: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return OrderStatusDialog(
-                      imageUrl: "assets/images/cancel.png",
-                      text: "Order Rejected",
-                    );
-                  },
-                );
-              },
-            ),
-          ],
+                  }).toList(),
+                ),
+              SizedBox(height: 24.h),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }

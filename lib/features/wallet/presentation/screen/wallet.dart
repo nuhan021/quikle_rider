@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
-import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
 import 'package:quikle_rider/features/wallet/controllers/wallet_controller.dart';
+import 'package:quikle_rider/features/wallet/widgets/balance_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/delevery_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/start_tile.dart';
 
@@ -26,9 +26,9 @@ class WalletScreen extends GetView<WalletController> {
 
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.white ,
-        appBar: UnifiedProfileAppBar(title: "Wallet",),
-      
+        backgroundColor: Colors.white,
+        appBar: UnifiedProfileAppBar(title: "Wallet"),
+
         body: Column(
           children: [
             // Segmented period selector
@@ -42,8 +42,8 @@ class WalletScreen extends GetView<WalletController> {
                 ),
                 child: TabBar(
                   dividerColor: Colors.transparent,
-                 
-                  indicatorSize: TabBarIndicatorSize.tab  ,
+
+                  indicatorSize: TabBarIndicatorSize.tab,
                   controller: controller.tabController,
                   indicator: BoxDecoration(
                     color: const Color(0xFFFFD32A),
@@ -71,7 +71,7 @@ class WalletScreen extends GetView<WalletController> {
                 ),
               ),
             ),
-      
+
             // Scroll content
             Expanded(
               child: Obx(
@@ -79,70 +79,13 @@ class WalletScreen extends GetView<WalletController> {
                   padding: EdgeInsets.symmetric(horizontal: 16.w),
                   children: [
                     // Current Balance Card
-                    Container(
-                      padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
-                      decoration: cardBox,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Current Balance',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 13.sp,
-                              color: Colors.grey[600],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          SizedBox(height: 8.h),
-                          Text(
-                            controller.currentBalance.value,
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 36.sp,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.black,
-                            ),
-                          ),
-                          SizedBox(height: 4.h),
-                          Text(
-                            'Last updated: Today, 9:15 AM',
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 12.sp,
-                              color: Colors.grey[500],
-                            ),
-                          ),
-                          SizedBox(height: 12.h),
-                          SizedBox(
-                            width: 124.w,
-                            height: 36.h,
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8.r),
-                                ),
-                                elevation: 0,
-                                padding: EdgeInsets.zero,
-                              ),
-                              child: Text(
-                                'Withdraw',
-                                style: TextStyle(
-                                  fontFamily: 'Manrope',
-                                  color: Colors.white,
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    BalanceCard(
+                      balance: controller.currentBalance.value,
+                      lastUpdated: controller.avgDeliveryTime.value,
+                      onWithdraw: () async{},
                     ),
                     SizedBox(height: 12.h),
-      
+
                     // Stats grid (2 x 2)
                     Row(
                       children: [
@@ -184,10 +127,14 @@ class WalletScreen extends GetView<WalletController> {
                       ],
                     ),
                     SizedBox(height: 16.h),
-      
+
                     // Past Deliveries header
                     Padding(
-                      padding: EdgeInsets.only(left: 4.w, bottom: 8.h, top: 8.h),
+                      padding: EdgeInsets.only(
+                        left: 4.w,
+                        bottom: 8.h,
+                        top: 8.h,
+                      ),
                       child: Text(
                         'Past Deliveries',
                         style: TextStyle(
@@ -198,7 +145,7 @@ class WalletScreen extends GetView<WalletController> {
                         ),
                       ),
                     ),
-      
+
                     ListView.builder(
                       itemCount: controller.deliveries.length,
                       shrinkWrap: true, // important for nested list
@@ -219,7 +166,7 @@ class WalletScreen extends GetView<WalletController> {
                         );
                       },
                     ),
-      
+
                     SizedBox(height: 24.h),
                   ],
                 ),
