@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/help_support.dart';
@@ -11,6 +12,7 @@ import 'package:quikle_rider/features/profile/presentation/screen/vehicle_inform
 import 'package:quikle_rider/features/profile/presentation/screen/delivery_zone.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/availability_settings.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/notification_settings.dart';
+import 'package:quikle_rider/features/wallet/widgets/tier_badge.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -20,65 +22,62 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: UnifiedProfileAppBar(
         showActionButton: true,
         title: "Profile",
-      action: "Notification",
-      onActionPressed: () {
-        
-      },),
+        action: "Notification",
+        onActionPressed: () {},
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20.w),
         child: Column(
           children: [
-            // Profile Header
+            /// Profile Header
             Container(
               width: double.infinity,
-              padding: EdgeInsets.all(25.w),
+              padding: const EdgeInsets.symmetric(vertical: 20),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(15.r),
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    spreadRadius: 0,
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
+                    color: Colors.black.withValues(alpha: .05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
               child: Column(
                 children: [
-                  CircleAvatar(
-                    radius: 50.r,
-                    backgroundImage: const AssetImage('assets/images/loginriderimage.png'),
-                    backgroundColor: Colors.grey[300],
+                  Padding(
+                    padding: const EdgeInsets.only(right: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [TierBadge(tier: "Silver")],
+                    ),
                   ),
-                  SizedBox(height: 15.h),
+                  CircleAvatar(
+                    radius: 45,
+                    backgroundImage: AssetImage("assets/images/avatar.png"),
+                  ),
+
+                  SizedBox(height: 12),
                   Text(
-                    'Vikram Rajput',
-                    style: TextStyle(
-                      fontFamily: 'Obviously',
-                      fontSize: 22.sp,
+                    "Vikram Rajput",
+                    style: getTextStyle2(
+                      fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
                     ),
                   ),
-                  SizedBox(height: 5.h),
+                  SizedBox(height: 4),
                   Text(
-                    'vikramrajput@gmail.com',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 14.sp,
-                      color: Colors.grey[600],
-                    ),
+                    "vikramrajput@gmail.com",
+                    style: getTextStyle2(fontSize: 14, color: Colors.black54),
                   ),
                 ],
               ),
@@ -105,41 +104,71 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   _buildMenuItem(
                     imagepath: "assets/icons/profileicon.png",
                     title: 'My Profile',
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const MyProfilePage())),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MyProfilePage(),
+                      ),
+                    ),
                   ),
                   _buildDivider(),
                   _buildMenuItem(
-              imagepath: "assets/icons/vehicle.png",
+                    imagepath: "assets/icons/vehicle.png",
                     title: 'Vehicle Information',
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const VehicleInformationPage())),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const VehicleInformationPage(),
+                      ),
+                    ),
                   ),
                   _buildDivider(),
                   _buildMenuItem(
-                 imagepath: "assets/icons/location.png",
+                    imagepath: "assets/icons/location.png",
                     title: 'Delivery Zone',
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const DeliveryZonePage())),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DeliveryZonePage(),
+                      ),
+                    ),
                   ),
                   _buildDivider(),
                   _buildMenuItem(
                     imagepath: "assets/icons/payment.png",
                     title: 'Payment Method',
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const PaymentMethodPage())),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const PaymentMethodPage(),
+                      ),
+                    ),
                   ),
                   _buildDivider(),
                   _buildMenuItem(
-                imagepath: "assets/icons/avaiability.png",
+                    imagepath: "assets/icons/avaiability.png",
                     title: 'Availability Settings',
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AvailabilitySettingsPage())),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AvailabilitySettingsPage(),
+                      ),
+                    ),
                   ),
                   _buildDivider(),
                   _buildMenuItem(
-                imagepath: "assets/icons/notification.png",
+                    imagepath: "assets/icons/notification.png",
                     title: 'Notification Settings',
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const NotificationSettingsPage())),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const NotificationSettingsPage(),
+                      ),
+                    ),
                   ),
                   _buildDivider(),
                   _buildMenuItem(
-                 imagepath: "assets/icons/language.png",
+                    imagepath: "assets/icons/language.png",
                     title: 'Language Settings',
                     onTap: () {
                       _showLanguageDialog(context);
@@ -147,13 +176,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   _buildDivider(),
                   _buildMenuItem(
-                 imagepath: "assets/icons/help.png",
+                    imagepath: "assets/icons/help.png",
                     title: 'Help & Support',
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HelpSupportPage())),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HelpSupportPage(),
+                      ),
+                    ),
                   ),
                   _buildDivider(),
                   _buildMenuItem(
-            imagepath: "assets/icons/signout.png",
+                    imagepath: "assets/icons/signout.png",
                     title: 'Sign out',
                     onTap: () => _showSignOutDialog(context),
                     isSignOut: true,
@@ -218,94 +252,103 @@ class _ProfileScreenState extends State<ProfileScreen> {
       endIndent: 20.w,
     );
   }
-  void _showLanguageDialog(BuildContext context) {
-  final List<String> languages = ["English", "Spanish", "French", "German"];
-  String selectedLang = languages.first;
 
-  showDialog(
-    context: context,
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          return Dialog(
-            backgroundColor: AppColors.background,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Language Settings",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    "Choose Language",
-                    style: TextStyle(fontSize: 14),
-                  ),
-                  const SizedBox(height: 8),
-                  DropdownButtonFormField<String>(
-                    value: selectedLang,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(6),
+  void _showLanguageDialog(BuildContext context) {
+    final List<String> languages = ["English", "Spanish", "French", "German"];
+    String selectedLang = languages.first;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Dialog(
+              backgroundColor: AppColors.background,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Language Settings",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                     ),
-                    items: languages
-                        .map((lang) => DropdownMenuItem(
-                              value: lang,
-                              child: Text(lang),
-                            ))
-                        .toList(),
-                    onChanged: (value) {
-                      setState(() => selectedLang = value!);
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Choose Language",
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<String>(
+                      value: selectedLang,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(6),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                        ),
                       ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text("Language set to $selectedLang")),
-                        );
+                      items: languages
+                          .map(
+                            (lang) => DropdownMenuItem(
+                              value: lang,
+                              child: Text(lang),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        setState(() => selectedLang = value!);
                       },
-                      child: const Text("Save Language"),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("Language set to $selectedLang"),
+                            ),
+                          );
+                        },
+                        child: const Text("Save Language"),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      );
-    },
-  );
-}
+            );
+          },
+        );
+      },
+    );
+  }
 
   void _showSignOutDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.r)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.r),
+          ),
           title: Text(
             'Sign Out',
             style: TextStyle(
@@ -337,7 +380,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red[600],
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
                 padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
               ),
               child: Text(

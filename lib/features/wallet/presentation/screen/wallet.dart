@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/features/wallet/controllers/wallet_controller.dart';
 import 'package:quikle_rider/features/wallet/widgets/balance_card.dart';
+import 'package:quikle_rider/features/wallet/widgets/bonus_tracking.dart';
+import 'package:quikle_rider/features/wallet/widgets/dashboard_breakdown_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/delevery_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/rating_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/start_tile.dart';
@@ -87,6 +89,10 @@ class WalletScreen extends GetView<WalletController> {
                       onWithdraw: () async {},
                     ),
                     SizedBox(height: 12.h),
+                    const WalletDashboardCard(),
+                    SizedBox(height: 12.h),
+                    BonusTracking(),
+                    SizedBox(height: 12.h),
 
                     // Stats grid (2 x 2)
                     Row(
@@ -109,7 +115,26 @@ class WalletScreen extends GetView<WalletController> {
                       ],
                     ),
                     SizedBox(height: 12.h),
-
+                    Row(
+                      children: [
+                        Expanded(
+                          child: StatTile(
+                            title: 'Orders Accepted',
+                            value: controller.totalDeliveries.value,
+                            box: cardBox,
+                          ),
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: StatTile(
+                            title: 'Orders Rejected',
+                            value: controller.totalDeliveries.value,
+                            box: cardBox,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 12.h),
                     Row(
                       children: [
                         Expanded(
@@ -150,6 +175,14 @@ class WalletScreen extends GetView<WalletController> {
                       ],
                     ),
                     SizedBox(height: 16.h),
+                    Expanded(
+                      child: StatTile(
+                        title: 'Total Orders',
+                        value: controller.totalDeliveries.value,
+                        box: cardBox,
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
                     Text(
                       'Customer Ratings',
                       style: TextStyle(
@@ -167,8 +200,7 @@ class WalletScreen extends GetView<WalletController> {
                     ),
                     // Bronze Tier
                     //current Tier Card
-                    TierCard(tier: 'Silver'),
-
+                    TierCard(benefits: '₹16,000-18,500/month'),
                     // Past Deliveries header
                     Padding(
                       padding: EdgeInsets.only(
