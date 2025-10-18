@@ -56,7 +56,7 @@ class WalletController extends GetxController with GetSingleTickerProviderStateM
   // Stats data
   var currentBalance = '\$459'.obs;
   var totalDeliveries = '42'.obs;
-  var avgDeliveryTime = '18 min'.obs;
+  var avgDeliveryTime = '18'.obs;
   var customerRating = '4.8'.obs;
   var completionRate = '98%'.obs;
 
@@ -76,7 +76,7 @@ class WalletController extends GetxController with GetSingleTickerProviderStateM
       case 0: // All
         currentBalance.value = '\$459';
         totalDeliveries.value = '42';
-        avgDeliveryTime.value = '18 min';
+        avgDeliveryTime.value = '18';
         customerRating.value = '4.8';
         completionRate.value = '98%';
         deliveries.value = _allDeliveries;
@@ -84,7 +84,7 @@ class WalletController extends GetxController with GetSingleTickerProviderStateM
       case 1: // Week
         currentBalance.value = '\$120';
         totalDeliveries.value = '10';
-        avgDeliveryTime.value = '15 min';
+        avgDeliveryTime.value = '15';
         customerRating.value = '4.9';
         completionRate.value = '100%';
         deliveries.value = _weekDeliveries;
@@ -92,7 +92,7 @@ class WalletController extends GetxController with GetSingleTickerProviderStateM
       case 2: // Month
         currentBalance.value = '\$350';
         totalDeliveries.value = '30';
-        avgDeliveryTime.value = '17 min';
+        avgDeliveryTime.value = '17';
         customerRating.value = '4.8';
         completionRate.value = '99%';
         deliveries.value = _monthDeliveries;
@@ -100,7 +100,7 @@ class WalletController extends GetxController with GetSingleTickerProviderStateM
       case 3: // Year
         currentBalance.value = '\$2500';
         totalDeliveries.value = '200';
-        avgDeliveryTime.value = '20 min';
+        avgDeliveryTime.value = '20';
         customerRating.value = '4.7';
         completionRate.value = '97%';
         deliveries.value = _yearDeliveries;

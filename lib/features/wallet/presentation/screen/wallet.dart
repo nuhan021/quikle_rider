@@ -160,7 +160,7 @@ class WalletScreen extends GetView<WalletController> {
                         Expanded(
                           child: StatTile(
                             title: 'Acceptance Rate %',
-                            value: controller.totalDeliveries.value,
+                            value: "${controller.totalDeliveries.value}%",
                             box: cardBox,
                           ),
                         ),
@@ -168,7 +168,7 @@ class WalletScreen extends GetView<WalletController> {
                         Expanded(
                           child: StatTile(
                             title: 'On-Time Delivery %',
-                            value: controller.avgDeliveryTime.value,
+                            value: "${controller.avgDeliveryTime.value}%",
                             box: cardBox,
                           ),
                         ),
