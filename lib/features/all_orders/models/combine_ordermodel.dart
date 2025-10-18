@@ -9,6 +9,12 @@ class CombinedOrderModel {
   final List<Restaurant> restaurants;
   final int completedSteps;
   final int totalSteps;
+  final double totalPayout;
+  final double distanceInKm;
+  final double distancePay;
+  final double combinedOrderBonus;
+  final List<PickupPayout> pickupPayouts;
+  final String currency;
 
   CombinedOrderModel({
     required this.customerName,
@@ -18,6 +24,12 @@ class CombinedOrderModel {
     required this.restaurants,
     required this.completedSteps,
     required this.totalSteps,
+    required this.totalPayout,
+    required this.distanceInKm,
+    required this.distancePay,
+    required this.combinedOrderBonus,
+    required this.pickupPayouts,
+    this.currency = '₹',
   });
 
   String get progressText => '$completedSteps of $totalSteps steps';
@@ -26,6 +38,17 @@ class CombinedOrderModel {
   bool get isPickedUp => completedSteps >= 1;
   bool get isInProgress => completedSteps >= 2;
   bool get isDelivered => completedSteps >= 3;
+
+  String formatAmount(double amount) {
+    return amount % 1 == 0
+        ? amount.toStringAsFixed(0)
+        : amount.toStringAsFixed(2);
+  }
+
+  String get formattedTotalPayout => formatAmount(totalPayout);
+  String get formattedDistance => distanceInKm % 1 == 0
+      ? distanceInKm.toStringAsFixed(0)
+      : distanceInKm.toStringAsFixed(1);
 }
 
 class PickupPoint {
@@ -86,4 +109,20 @@ class MenuItem {
     required this.details,
     required this.imagePath,
   });
+}
+
+class PickupPayout {
+  final String pickupName;
+  final double baseAmount;
+
+  PickupPayout({
+    required this.pickupName,
+    required this.baseAmount,
+  });
+
+  String formatAmount() {
+    return baseAmount % 1 == 0
+        ? baseAmount.toStringAsFixed(0)
+        : baseAmount.toStringAsFixed(2);
+  }
 }
