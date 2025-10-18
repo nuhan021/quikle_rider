@@ -50,93 +50,135 @@ class DeliveryCard extends StatelessWidget {
           boxShadow: const [
             BoxShadow(
               color: Color(0x14000000),
-              blurRadius: 10,
-              offset: Offset(0, 2),
+              blurRadius: 8,
+              offset: Offset(0, 4),
             ),
           ],
-          border: Border.all(color: const Color(0xFFEDEDED)),
         );
+
+    final bool isDelivered = status == DeliveryStatus.delivered;
+    final Color badgeColor = isDelivered
+        ? AppColors.greenbutton.withValues(alpha: 0.15)
+        : AppColors.error.withValues(alpha: 0.2);
+    final Color badgeTextColor = isDelivered ? AppColors.greenbutton : AppColors.error;
+
+    final Color statusNoteColor = isDelivered ? AppColors.greenbutton : AppColors.error;
+    final String statusContextText = bottomNote ??
+        (isDelivered ? 'Completed successfully' : 'Customer cancelled');
 
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
-      padding: EdgeInsets.all(12.w),
+      padding: EdgeInsets.all(16.w),
+      clipBehavior: Clip.antiAlias,
       decoration: effectiveBox,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Top row
+          // Header section: Order info + amount
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Left: order id + badge
-              Expanded(
-                child: Row(
-                  children: [
-                    Text(
-                      'Order $orderId',
-                      style: getTextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-                      decoration: BoxDecoration(
-                        color: _statusColor.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: Text(
-                        _statusText,
-                        style: getTextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: _statusColor,
-                          lineHeight: 1.2,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Right: amount + tip/fee
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              Row(
                 children: [
                   Text(
-                    amount,
-                    style: headingStyle3(color: Colors.black),
+                    'Order #$orderId',
+                    style: getTextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF333333),
+                    ),
                   ),
-                  if (rightSubline != null) ...[
-                    SizedBox(height: 2.h),
-                    Text(
-                      rightSubline!,
+                  SizedBox(width: 10.w),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                    decoration: BoxDecoration(
+                      color: badgeColor,
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                    child: Text(
+                      _statusText,
                       style: getTextStyle(
                         fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: status == DeliveryStatus.delivered
-                            ? AppColors.beakYellow
-                            : Colors.black54,
-                       
+                        fontWeight: FontWeight.w500,
+                        color: badgeTextColor,
                       ),
                     ),
-                  ],
+                  ),
                 ],
+              ),
+              Text(
+                amount,
+                style: headingStyle2(color: const Color(0xFF333333)),
               ),
             ],
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 12.h),
 
-          // Customer + View details
+          // Customer name + right subline
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 customerName,
                 style: getTextStyle(
-                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                   color: Colors.black,
+                ),
+              ),
+              if (rightSubline != null)
+                Text(
+                  rightSubline!,
+                  style: getTextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF919191),
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(height: 6.h),
+
+          // Delivered time
+          Text(
+            '${isDelivered ? "Delivered" : "Cancelled"} on $dateTime',
+            style: getTextStyle(
+              fontSize: 14,
+              color: const Color(0xFF7C7C7C),
+            ),
+          ),
+          if (distance != null) ...[
+            SizedBox(height: 8.h),
+            Row(
+              children: [
+                Image.asset(
+                  'assets/icons/location.png',
+                  width: 12.sp,
+                  height: 12.sp,
+                ),
+                SizedBox(width: 6.w),
+                Text(
+                  distance!,
+                  style: getTextStyle(
+                    fontSize: 14,
+                    color: const Color(0xFF7C7C7C),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          SizedBox(height: 16.h),
+
+          // Status note + action
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                statusContextText,
+                style: getTextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: statusNoteColor,
                 ),
               ),
               GestureDetector(
@@ -145,55 +187,13 @@ class DeliveryCard extends StatelessWidget {
                   'View Details',
                   style: getTextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF000000),
-                   
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF333333),
                   ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 6.h),
-
-          // Delivered on...
-          Text(
-            '${status == DeliveryStatus.delivered ? "Delivered" : "Cancelled"} on $dateTime',
-            style: getTextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-             
-            ),
-          ),
-
-          // distance + bottom note
-          if (distance != null || bottomNote != null) SizedBox(height: 6.h),
-          if (distance != null)
-            Row(
-              children: [
-                Image.asset('assets/icons/location.png', width: 10.sp, height: 10.sp, ),
-                SizedBox(width: 6.w),
-                Text(
-                  distance!,
-                  style: getTextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                   
-                  ),
-                ),
-              ],
-            ),
-          if (bottomNote != null) ...[
-            SizedBox(height: 6.h),
-            Text(
-              bottomNote!,
-              style: getTextStyle(
-                fontSize: 14,
-                color: const Color(0xFFE74C3C),
-                fontWeight: FontWeight.w600,
-               
-              ),
-            ),
-          ],
         ],
       ),
     );
