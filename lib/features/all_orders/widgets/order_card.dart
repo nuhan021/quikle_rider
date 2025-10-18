@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart'; // Added for navigation
+import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_single.dart';
 import 'package:quikle_rider/features/all_orders/models/oder_model.dart';
 
@@ -68,13 +69,7 @@ class _OrderHeader extends StatelessWidget {
       children: [
         Text(
           'Order ${order.id}',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-            color: Color.fromARGB(255, 0, 0, 0),
-            fontFamily: 'Obviously',
-            height: 1.40,
-          ),
+          style: headingStyle2(color: const Color(0xFF000000)),
         ),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
@@ -86,12 +81,10 @@ class _OrderHeader extends StatelessWidget {
           ),
           child: Text(
             order.statusText,
-            style: TextStyle(
+            style: getTextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
               color: order.statusColor,
-              fontFamily: 'Manrope',
-              height: 1.50,
             ),
           ),
         ),
@@ -110,15 +103,9 @@ class _DeliveryProgress extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Delivery Progress',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-            color: Color.fromARGB(255, 0, 0, 0),
-            fontFamily: 'Obviously',
-            height: 1.40,
-          ),
+          style: headingStyle2(color: const Color(0xFF000000)),
         ),
         SizedBox(height: 8.h),
         Container(
@@ -187,14 +174,11 @@ class _ProgressStep extends StatelessWidget {
             Text(
               label,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: getTextStyle(
                 fontSize: 14,
                 color: const Color(0xFF333333),
-                fontWeight: isCompleted || isActive
-                    ? FontWeight.w600
-                    : FontWeight.w400,
-                fontFamily: 'Inter',
-                height: 1.50,
+                fontWeight:
+                    isCompleted || isActive ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
           ],
@@ -214,15 +198,9 @@ class _PickupPoints extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Pickup Points',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-            color: Color.fromARGB(255, 0, 0, 0),
-            fontFamily: 'Obviously',
-            height: 1.40,
-          ),
+          style: headingStyle2(color: const Color(0xFF000000)),
         ),
         SizedBox(height: 12.h),
         Container(
@@ -255,32 +233,25 @@ class _PickupPoints extends StatelessWidget {
                       children: [
                         Text(
                           order.restaurant,
-                          style: const TextStyle(
+                          style: getTextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                             color: Colors.black,
-                            fontFamily: 'Inter',
-                            height: 1.50,
                           ),
                         ),
                         Text(
                           order.address,
-                          style: const TextStyle(
+                          style: getTextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF484848),
-                            fontFamily: 'Inter',
-                            height: 1.20,
+                            color: const Color(0xFF484848),
                           ),
                         ),
                         Text(
                           order.pickupStatusText,
-                          style: const TextStyle(
+                          style: getTextStyle(
                             fontSize: 12,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xFF9B9B9B),
-                            fontFamily: 'Inter',
-                            height: 1.30,
+                            color: const Color(0xFF9B9B9B),
                           ),
                         ),
                       ],
@@ -298,14 +269,12 @@ class _PickupPoints extends StatelessWidget {
                 ),
                 child: Text(
                   order.pickupStatus,
-                  style: TextStyle(
+                  style: getTextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: order.pickupStatus == 'Completed'
                         ? const Color(0xFF4CAF50)
                         : const Color(0xFFFF6F00),
-                    fontFamily: 'Manrope',
-                    height: 1.50,
                   ),
                 ),
               ),
@@ -328,15 +297,9 @@ class _DeliveryInformation extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Delivery Information',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-            color: Color.fromARGB(255, 0, 0, 0),
-            fontFamily: 'Obviously',
-            height: 1.40,
-          ),
+          style: headingStyle2(color: const Color(0xFF000000)),
         ),
         SizedBox(height: 8.h),
         Container(
@@ -379,22 +342,17 @@ class _DeliveryInformation extends StatelessWidget {
                     children: [
                       Text(
                         order.customerName,
-                        style: const TextStyle(
+                        style: getTextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF333333),
-                          fontFamily: 'Inter',
-                          height: 1.20,
+                          color: const Color(0xFF333333),
                         ),
                       ),
                       Text(
                         order.address,
-                        style: const TextStyle(
+                        style: getTextStyle(
                           fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFF7C7C7C),
-                          fontFamily: 'Inter',
-                          height: 1.50,
+                          color: const Color(0xFF7C7C7C),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -462,15 +420,9 @@ class _DeliveryAddress extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Delivery Address',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-            color: Color.fromARGB(255, 0, 0, 0),
-            fontFamily: 'Obviously',
-            height: 1.40,
-          ),
+          style: headingStyle2(color: const Color(0xFF000000)),
         ),
         SizedBox(height: 8.h),
         Row(
@@ -484,12 +436,9 @@ class _DeliveryAddress extends StatelessWidget {
             Expanded(
               child: Text(
                 address,
-                style: const TextStyle(
+                style: getTextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: Color(0xFF333333),
-                  fontFamily: 'Manrope',
-                  height: 1.50,
+                  color: const Color(0xFF333333),
                 ),
               ),
             ),
@@ -510,25 +459,17 @@ class _ItemsToDeliver extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Items to Deliver',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-            color: Color.fromARGB(255, 0, 0, 0),
-            fontFamily: 'Obviously',
-            height: 1.40,
-          ),
+          style: headingStyle2(color: const Color(0xFF000000)),
         ),
         SizedBox(height: 10.h),
         Text(
           order.restaurant,
-          style: const TextStyle(
+          style: getTextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF333333),
-            fontFamily: 'Inter',
-            height: 1.20,
+            color: const Color(0xFF333333),
           ),
         ),
         SizedBox(height: 10.h),
@@ -548,24 +489,19 @@ class _ItemsToDeliver extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Order Total:',
-              style: TextStyle(
+              style: getTextStyle(
                 fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF7C7C7C),
-                fontFamily: 'Inter',
-                height: 1.50,
+                color: const Color(0xFF7C7C7C),
               ),
             ),
             Text(
               order.amount,
-              style: const TextStyle(
+              style: getTextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF333333),
-                fontFamily: 'Inter',
-                height: 1.20,
+                color: const Color(0xFF333333),
               ),
             ),
           ],
@@ -620,22 +556,17 @@ class _FoodItem extends StatelessWidget {
             children: [
               Text(
                 item.name,
-                style: const TextStyle(
+                style: getTextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: Colors.black,
-                  fontFamily: 'Inter',
-                  height: 1.20,
                 ),
               ),
               Text(
                 item.details,
-                style: const TextStyle(
+                style: getTextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                  color: Color(0xFF7C7C7C),
-                  fontFamily: 'Inter',
-                  height: 1.30,
+                  color: const Color(0xFF7C7C7C),
                 ),
               ),
             ],
@@ -666,14 +597,11 @@ class _ActionButtons extends StatelessWidget {
               ),
               padding: EdgeInsets.symmetric(vertical: 10.h),
             ),
-            child: const Text(
+            child: Text(
               'Cancel',
-              style: TextStyle(
-                fontSize: 12,
-                color: Color(0xFF333333),
+              style: buttonTextStyle(
+                color: const Color(0xFF333333),
                 fontWeight: FontWeight.w600,
-                fontFamily: 'Manrope',
-                height: 1.50,
               ),
             ),
           ),
@@ -697,12 +625,9 @@ class _ActionButtons extends StatelessWidget {
             ),
             child: Text(
               order.isReadyForPickup ? 'Pick Up' : 'View Details',
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFFFFFFFF),
+              style: buttonTextStyle(
+                color: const Color(0xFFFFFFFF),
                 fontWeight: FontWeight.w600,
-                fontFamily: 'Manrope',
-                height: 1.50,
               ),
             ),
           ),
@@ -711,4 +636,3 @@ class _ActionButtons extends StatelessWidget {
     );
   }
 }
-

@@ -83,9 +83,11 @@ class LoginOtp extends GetView<AuthController> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: List.generate(6, (index) {
                     return SizedBox(
-                      width: 45.w,
-                      height: 56.h,
+                      // height: 52.h,
+                      width: 48.w,
+                      // height: 56.h,
                       child: TextFormField(
+                        
                         controller: controller.otpControllers[index],
                         focusNode: controller.otpFocusNodes[index],
                         textAlign: TextAlign.center,

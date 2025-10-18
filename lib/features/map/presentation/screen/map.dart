@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
 import 'package:quikle_rider/features/map/presentation/controller/map_controller.dart';
 import 'package:quikle_rider/features/map/presentation/model/delivery_model.dart';
@@ -147,11 +148,7 @@ class MapScreen extends StatelessWidget {
       children: [
         Text(
           'Delivery Address',
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
+          style: headingStyle2(color: Colors.black87),
         ),
         Container(
   
@@ -162,11 +159,10 @@ class MapScreen extends StatelessWidget {
           ),
           child: Text(
             delivery.estimatedTime,
-            style: TextStyle(
-              fontSize: 14.sp,
+            style: getTextStyle(
+              fontSize: 14,
               fontWeight: FontWeight.w500,
               color: Colors.black,
-              fontFamily: 'Obviously',
             ),
           ),
         ),
@@ -189,15 +185,18 @@ class MapScreen extends StatelessWidget {
             children: [
               Text(
                 delivery.customerName,
-                style: TextStyle(
-                  fontSize: 16.sp,
+                style: getTextStyle(
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: Colors.black87,
                 ),
               ),
               Text(
                 delivery.customerAddress,
-                style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
+                style: getTextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
               ),
             ],
           ),
@@ -249,7 +248,10 @@ class MapScreen extends StatelessWidget {
         Expanded(
           child: Text(
             delivery.deliveryAddress,
-            style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
+            style: getTextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
           ),
         ),
       ],
@@ -262,18 +264,13 @@ class MapScreen extends StatelessWidget {
       children: [
         Text(
           'Items to Deliver',
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w700,
-            color: Colors.black87,
-            fontFamily: 'Obviously',
-          ),
+          style: headingStyle2(color: Colors.black87),
         ),
         SizedBox(height: 10.h),
         Text(
           delivery.restaurantName,
-          style: TextStyle(
-            fontSize: 14.sp,
+          style: getTextStyle(
+            fontSize: 14,
             fontWeight: FontWeight.w700,
             color: Colors.grey[700],
           ),
@@ -318,15 +315,18 @@ class MapScreen extends StatelessWidget {
               children: [
                 Text(
                   '${item.name} X ${item.quantity}',
-                  style: TextStyle(
-                    fontSize: 14.sp,
+                  style: getTextStyle(
+                    fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: Colors.black87,
                   ),
                 ),
                 Text(
                   item.description,
-                  style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
+                  style: getTextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
                 ),
               ],
             ),
@@ -350,7 +350,10 @@ class MapScreen extends StatelessWidget {
             ),
             label: Text(
               'Call Customer',
-              style: TextStyle(color: Colors.black87, fontSize: 14.sp),
+              style: buttonTextStyle(
+                color: Colors.black87,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             style: OutlinedButton.styleFrom(
               padding: EdgeInsets.symmetric(vertical: 12.h),
@@ -389,10 +392,9 @@ class MapScreen extends StatelessWidget {
             ),
             child: Text(
               'Mark as Delivered',
-              style: TextStyle(
+              style: buttonTextStyle(
                 color: Colors.white,
-                fontWeight: FontWeight.w500,
-                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),

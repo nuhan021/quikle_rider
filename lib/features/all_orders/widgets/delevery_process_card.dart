@@ -1,9 +1,9 @@
 // widgets/combined_order_widgets.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_combioned_controller.dart';
 import 'package:quikle_rider/features/all_orders/models/combine_ordermodel.dart';
-
 
 class DeliveryProgressCard extends StatelessWidget {
   final CombinedOrderModel order;
@@ -16,7 +16,9 @@ class DeliveryProgressCard extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: ShapeDecoration(
         color: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.r),
+        ),
         shadows: const [
           BoxShadow(
             color: Color(0x0A606060),
@@ -49,25 +51,13 @@ class _ProgressHeader extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
+        Text(
           'Delivery Progress',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-            color: Color.fromARGB(255, 0, 0, 0),
-            fontFamily: 'Obviously',
-            height: 1.40,
-          ),
+          style: headingStyle2(color: const Color(0xFF000000)),
         ),
         Text(
           progressText,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w400,
-            color: Color(0xFF919191),
-            fontFamily: 'Inter',
-            height: 1.50,
-          ),
+          style: bodyTextStyle(color: const Color(0xFF919191)),
         ),
       ],
     );
@@ -83,7 +73,11 @@ class _ProgressSteps extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Container(width: double.infinity, height: 1.h, color: const Color(0x3FB7B7B7)),
+        Container(
+          width: double.infinity,
+          height: 1.h,
+          color: const Color(0x3FB7B7B7),
+        ),
         SizedBox(height: 4.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -101,7 +95,9 @@ class _ProgressSteps extends StatelessWidget {
               height: 6.h,
               decoration: ShapeDecoration(
                 color: const Color(0xFFF0F0F0),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
               ),
             ),
             Container(
@@ -109,7 +105,9 @@ class _ProgressSteps extends StatelessWidget {
               height: 6.h,
               decoration: ShapeDecoration(
                 color: const Color(0xFFFFC200),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
               ),
             ),
           ],
@@ -137,12 +135,12 @@ class _ProgressStep extends StatelessWidget {
             Text(
               label,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: getTextStyle(
                 fontSize: 14,
                 color: const Color(0xFF333333),
-                fontWeight: isCompleted || isActive ? FontWeight.w600 : FontWeight.w400,
-                fontFamily: 'Inter',
-                height: 1.50,
+                fontWeight: isCompleted || isActive
+                    ? FontWeight.w600
+                    : FontWeight.w400,
               ),
             ),
           ],
@@ -162,15 +160,9 @@ class _PickupPointsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Pickup Points',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-            color: Color.fromARGB(255, 0, 0, 0),
-            fontFamily: 'Obviously',
-            height: 1.40,
-          ),
+          style: headingStyle2(color: const Color(0xFF000000)),
         ),
         SizedBox(height: 12.h),
         ...pickupPoints.asMap().entries.map((entry) {
@@ -231,32 +223,27 @@ class _PickupPointItem extends StatelessWidget {
                   children: [
                     Text(
                       pickupPoint.name,
-                      style: const TextStyle(
+                      style: getTextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Colors.black,
-                        fontFamily: 'Inter',
-                        height: 1.50,
                       ),
                     ),
                     Text(
                       pickupPoint.address,
-                      style: const TextStyle(
+                      style: getTextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF484848),
-                        fontFamily: 'Inter',
-                        height: 1.20,
+                        color: const Color(0xFF484848),
+                        lineHeight: 1.3,
                       ),
                     ),
                     Text(
                       pickupPoint.statusText,
-                      style: const TextStyle(
+                      style: getTextStyle(
                         fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF9B9B9B),
-                        fontFamily: 'Inter',
-                        height: 1.30,
+                        color: const Color(0xFF9B9B9B),
+                        lineHeight: 1.3,
                       ),
                     ),
                   ],
@@ -272,12 +259,10 @@ class _PickupPointItem extends StatelessWidget {
             ),
             child: Text(
               pickupPoint.statusString,
-              style: TextStyle(
+              style: getTextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: pickupPoint.statusTextColor,
-                fontFamily: 'Manrope',
-                height: 1.50,
               ),
             ),
           ),
@@ -303,7 +288,9 @@ class DeliveryInfoCard extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: ShapeDecoration(
         color: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.r),
+        ),
         shadows: const [
           BoxShadow(
             color: Color(0x0A606060),
@@ -339,18 +326,16 @@ class _DeliveryInfoSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Delivery Information',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-            color: Color.fromARGB(255, 0, 0, 0),
-            fontFamily: 'Obviously',
-            height: 1.40,
-          ),
+          style: headingStyle2(color: const Color(0xFF000000)),
         ),
         SizedBox(height: 8.h),
-        Container(width: double.infinity, height: 1.h, color: const Color(0x3FB7B7B7)),
+        Container(
+          width: double.infinity,
+          height: 1.h,
+          color: const Color(0x3FB7B7B7),
+        ),
         SizedBox(height: 12.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -369,7 +354,11 @@ class _DeliveryInfoSection extends StatelessWidget {
                       order.customerImage,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
-                        return const Icon(Icons.person, size: 20, color: Color(0xFF7C7C7C));
+                        return const Icon(
+                          Icons.person,
+                          size: 20,
+                          color: Color(0xFF7C7C7C),
+                        );
                       },
                     ),
                   ),
@@ -382,22 +371,18 @@ class _DeliveryInfoSection extends StatelessWidget {
                     children: [
                       Text(
                         order.customerName,
-                        style: const TextStyle(
+                        style: getTextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF333333),
-                          fontFamily: 'Inter',
-                          height: 1.20,
+                          color: const Color(0xFF333333),
+                          lineHeight: 1.3,
                         ),
                       ),
-                      const Text(
+                      Text(
                         '123 Main St, Bangkok',
-                        style: TextStyle(
+                        style: getTextStyle(
                           fontSize: 14,
-                          fontWeight: FontWeight.w400,
-                          color: Color(0xFF7C7C7C),
-                          fontFamily: 'Inter',
-                          height: 1.50,
+                          color: const Color(0xFF7C7C7C),
                         ),
                       ),
                     ],
@@ -437,15 +422,9 @@ class _OrderPayoutSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Order Payout Breakdown',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-            color: Color.fromARGB(255, 0, 0, 0),
-            fontFamily: 'Obviously',
-            height: 1.40,
-          ),
+          style: headingStyle2(color: const Color(0xFF000000)),
         ),
         SizedBox(height: 12.h),
         Container(
@@ -468,7 +447,9 @@ class _OrderPayoutSection extends StatelessWidget {
                 final index = entry.key + 1;
                 final pickup = entry.value;
                 return Padding(
-                  padding: EdgeInsets.only(bottom: index == order.pickupPayouts.length ? 0 : 8.h),
+                  padding: EdgeInsets.only(
+                    bottom: index == order.pickupPayouts.length ? 0 : 8.h,
+                  ),
                   child: _PayoutRow(
                     label: 'Pickup $index: ${pickup.pickupName}',
                     value: 'Base: $currency${pickup.formatAmount()}',
@@ -483,7 +464,8 @@ class _OrderPayoutSection extends StatelessWidget {
               SizedBox(height: 8.h),
               _PayoutRow(
                 label: 'Combined Order Bonus',
-                value: '$currency${order.formatAmount(order.combinedOrderBonus)}',
+                value:
+                    '$currency${order.formatAmount(order.combinedOrderBonus)}',
               ),
             ],
           ),
@@ -497,10 +479,7 @@ class _PayoutRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _PayoutRow({
-    required this.label,
-    required this.value,
-  });
+  const _PayoutRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -511,24 +490,22 @@ class _PayoutRow extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(
+            style: getTextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF333333),
-              fontFamily: 'Inter',
-              height: 1.40,
+              color: const Color(0xFF333333),
+              lineHeight: 1.4,
             ),
           ),
         ),
         SizedBox(width: 12.w),
         Text(
           value,
-          style: const TextStyle(
+          style: getTextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF484848),
-            fontFamily: 'Inter',
-            height: 1.40,
+            color: const Color(0xFF484848),
+            lineHeight: 1.4,
           ),
         ),
       ],
@@ -574,30 +551,25 @@ class _DeliveryAddressSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Delivery Address',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-            color: Color.fromARGB(255, 0, 0, 0),
-            fontFamily: 'Obviously',
-            height: 1.40,
-          ),
+          style: headingStyle2(color: const Color(0xFF000000)),
         ),
         SizedBox(height: 8.h),
         Row(
           children: [
-            const Icon(Icons.location_on_outlined, size: 18, color: Color(0xFF333333)),
+            const Icon(
+              Icons.location_on_outlined,
+              size: 18,
+              color: Color(0xFF333333),
+            ),
             SizedBox(width: 2.w),
             Expanded(
               child: Text(
                 address,
-                style: const TextStyle(
+                style: getTextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  color: Color(0xFF333333),
-                  fontFamily: 'Manrope',
-                  height: 1.50,
+                  color: const Color(0xFF333333),
                 ),
               ),
             ),
@@ -618,18 +590,14 @@ class _ItemsToDeliverSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Items to Deliver',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
-            color: Color.fromARGB(255, 0, 0, 0),
-            fontFamily: 'Obviously',
-            height: 1.40,
-          ),
+          style: headingStyle2(color: const Color(0xFF000000)),
         ),
         SizedBox(height: 10.h),
-        ...restaurants.map((restaurant) => _RestaurantSection(restaurant: restaurant)),
+        ...restaurants.map(
+          (restaurant) => _RestaurantSection(restaurant: restaurant),
+        ),
       ],
     );
   }
@@ -647,21 +615,26 @@ class _RestaurantSection extends StatelessWidget {
       children: [
         Text(
           restaurant.name,
-          style: const TextStyle(
+          style: getTextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF333333),
-            fontFamily: 'Inter',
-            height: 1.20,
+            color: const Color(0xFF333333),
+            lineHeight: 1.3,
           ),
         ),
         SizedBox(height: 10.h),
-        Container(width: double.infinity, height: 1.h, color: const Color(0x3FB7B7B7)),
+        Container(
+          width: double.infinity,
+          height: 1.h,
+          color: const Color(0x3FB7B7B7),
+        ),
         SizedBox(height: 10.h),
-        ...restaurant.items.map((item) => Padding(
-          padding: EdgeInsets.only(bottom: 10.h),
-          child: _MenuItemWidget(item: item),
-        )),
+        ...restaurant.items.map(
+          (item) => Padding(
+            padding: EdgeInsets.only(bottom: 10.h),
+            child: _MenuItemWidget(item: item),
+          ),
+        ),
       ],
     );
   }
@@ -681,7 +654,9 @@ class _MenuItemWidget extends StatelessWidget {
           height: 40.h,
           decoration: ShapeDecoration(
             color: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6.r)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6.r),
+            ),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(6.r),
@@ -691,7 +666,11 @@ class _MenuItemWidget extends StatelessWidget {
               errorBuilder: (context, error, stackTrace) {
                 return Container(
                   color: Colors.orange[100],
-                  child: const Icon(Icons.restaurant, size: 24, color: Colors.orange),
+                  child: const Icon(
+                    Icons.restaurant,
+                    size: 24,
+                    color: Colors.orange,
+                  ),
                 );
               },
             ),
@@ -705,22 +684,19 @@ class _MenuItemWidget extends StatelessWidget {
             children: [
               Text(
                 item.name,
-                style: const TextStyle(
+                style: getTextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: Colors.black,
-                  fontFamily: 'Inter',
-                  height: 1.20,
+                  lineHeight: 1.3,
                 ),
               ),
               Text(
                 item.details,
-                style: const TextStyle(
+                style: getTextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                  color: Color(0xFF7C7C7C),
-                  fontFamily: 'Inter',
-                  height: 1.30,
+                  color: const Color(0xFF7C7C7C),
+                  lineHeight: 1.3,
                 ),
               ),
             ],

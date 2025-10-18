@@ -16,21 +16,17 @@ class AllOrdersCombined extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SingleChildScrollView(
-        child: Container(
-          width: 360.w,
-          padding: EdgeInsets.all(16.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Obx(() => DeliveryProgressCard(order: controller.order.value)),
-              SizedBox(height: 24.h),
-              Obx(() => DeliveryInfoCard(
-                order: controller.order.value,
-                controller: controller,
-              )),
-              SizedBox(height: 80.h), // Bottom padding for nav bar
-            ],
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Obx(() => DeliveryProgressCard(order: controller.order.value)),
+            SizedBox(height: 24.h),
+            Obx(() => DeliveryInfoCard(
+              order: controller.order.value,
+              controller: controller,
+            )),
+            SizedBox(height: 80.h), // Bottom padding for nav bar
+          ],
         ),
       ),
     );

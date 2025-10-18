@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
 
 enum DeliveryStatus { delivered, cancelled }
@@ -73,9 +74,8 @@ class DeliveryCard extends StatelessWidget {
                   children: [
                     Text(
                       'Order $orderId',
-                      style: TextStyle(
-                        fontFamily: 'Obviously',
-                        fontSize: 14.sp,
+                      style: getTextStyle(
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Colors.black,
                       ),
@@ -84,15 +84,16 @@ class DeliveryCard extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                       decoration: BoxDecoration(
-                        color: _statusColor.withOpacity(0.12),
+                        color: _statusColor.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       child: Text(
                         _statusText,
-                        style: TextStyle(
-                          fontSize: 10.sp,
+                        style: getTextStyle(
+                          fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: _statusColor,
+                          lineHeight: 1.2,
                         ),
                       ),
                     ),
@@ -105,22 +106,19 @@ class DeliveryCard extends StatelessWidget {
                 children: [
                   Text(
                     amount,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
+                    style: headingStyle3(color: Colors.black),
                   ),
                   if (rightSubline != null) ...[
                     SizedBox(height: 2.h),
                     Text(
                       rightSubline!,
-                      style: TextStyle(
-                        fontSize: 12.sp,
+                      style: getTextStyle(
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                         color: status == DeliveryStatus.delivered
                             ? AppColors.beakYellow
                             : Colors.black54,
+                       
                       ),
                     ),
                   ],
@@ -136,8 +134,7 @@ class DeliveryCard extends StatelessWidget {
             children: [
               Text(
                 customerName,
-                style: TextStyle(
-                  fontSize: 14.sp,
+                style: getTextStyle(
                   fontWeight: FontWeight.w600,
                   color: Colors.black,
                 ),
@@ -146,11 +143,11 @@ class DeliveryCard extends StatelessWidget {
                 onTap: onViewDetails,
                 child: Text(
                   'View Details',
-                  style: TextStyle(
-
-                    fontSize: 12.sp,
-                    color: const Color.fromARGB(255, 0, 0, 0),
+                  style: getTextStyle(
+                    fontSize: 14,
                     fontWeight: FontWeight.w700,
+                    color: const Color(0xFF000000),
+                   
                   ),
                 ),
               ),
@@ -161,7 +158,11 @@ class DeliveryCard extends StatelessWidget {
           // Delivered on...
           Text(
             '${status == DeliveryStatus.delivered ? "Delivered" : "Cancelled"} on $dateTime',
-            style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
+            style: getTextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+             
+            ),
           ),
 
           // distance + bottom note
@@ -173,7 +174,11 @@ class DeliveryCard extends StatelessWidget {
                 SizedBox(width: 6.w),
                 Text(
                   distance!,
-                  style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
+                  style: getTextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                   
+                  ),
                 ),
               ],
             ),
@@ -181,10 +186,11 @@ class DeliveryCard extends StatelessWidget {
             SizedBox(height: 6.h),
             Text(
               bottomNote!,
-              style: TextStyle(
-                fontSize: 12.sp,
+              style: getTextStyle(
+                fontSize: 14,
                 color: const Color(0xFFE74C3C),
                 fontWeight: FontWeight.w600,
+               
               ),
             ),
           ],

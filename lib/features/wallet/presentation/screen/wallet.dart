@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/features/wallet/controllers/wallet_controller.dart';
 import 'package:quikle_rider/features/wallet/widgets/balance_card.dart';
@@ -57,14 +58,12 @@ class WalletScreen extends GetView<WalletController> {
                   indicatorPadding: EdgeInsets.all(4.r),
                   labelColor: Colors.black,
                   unselectedLabelColor: const Color(0x99000000),
-                  labelStyle: TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 13.sp,
+                  labelStyle: getTextStyle(
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
-                  unselectedLabelStyle: TextStyle(
-                    fontFamily: 'Manrope',
-                    fontSize: 13.sp,
+                  unselectedLabelStyle: getTextStyle(
+                    fontSize: 14,
                     fontWeight: FontWeight.w500,
                   ),
                   tabs: const [
@@ -197,12 +196,7 @@ class WalletScreen extends GetView<WalletController> {
                     SizedBox(height: 16.h),
                     Text(
                       'Customer Ratings',
-                      style: TextStyle(
-                        fontFamily: 'Obviously',
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
+                      style: headingStyle2(color: Colors.black),
                     ),
                     // Custom Rating Icons Card
                     RatingCard(
@@ -222,12 +216,7 @@ class WalletScreen extends GetView<WalletController> {
                       ),
                       child: Text(
                         'Past Deliveries',
-                        style: TextStyle(
-                          fontFamily: 'Obviously',
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        ),
+                        style: headingStyle2(color: Colors.black),
                       ),
                     ),
 

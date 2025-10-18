@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_single.dart';
 import 'package:quikle_rider/features/all_orders/widgets/order_card.dart';
 
-
 class AllOrdersSingle extends StatelessWidget {
   const AllOrdersSingle({super.key});
 
@@ -18,7 +17,7 @@ class AllOrdersSingle extends StatelessWidget {
       body: SingleChildScrollView(
         child: Container(
           width: 360.w,
-          padding: EdgeInsets.all(16.w),
+
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -31,4 +30,3 @@ class AllOrdersSingle extends StatelessWidget {
     );
   }
 }
-
