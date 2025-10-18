@@ -12,6 +12,7 @@ import 'package:quikle_rider/features/profile/presentation/screen/vehicle_inform
 import 'package:quikle_rider/features/profile/presentation/screen/delivery_zone.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/availability_settings.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/notification_settings.dart';
+import 'package:quikle_rider/features/profile/widgets/profile_completion_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/tier_badge.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -81,6 +82,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ],
               ),
+            ),
+            SizedBox(height: 16.h),
+            const ProfileCompletionCard(
+              completionPercent: 85,
+              missingItems: [
+                'Vehicle Insurance certificate',
+                'Emergency contact',
+              ],
+              motivationMessage: 'Complete 100% to unlock Gold tier',
+              onCompleteNow: null,
             ),
             SizedBox(height: 30.h),
 

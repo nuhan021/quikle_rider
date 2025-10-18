@@ -7,6 +7,7 @@ import 'package:quikle_rider/features/wallet/widgets/balance_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/bonus_tracking.dart';
 import 'package:quikle_rider/features/wallet/widgets/dashboard_breakdown_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/delevery_card.dart';
+import 'package:quikle_rider/features/wallet/widgets/monthly_earnings_forecast_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/rating_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/start_tile.dart';
 import 'package:quikle_rider/features/wallet/widgets/tier_card.dart';
@@ -82,6 +83,17 @@ class WalletScreen extends GetView<WalletController> {
                 () => ListView(
                   padding: EdgeInsets.symmetric(horizontal: 16.w),
                   children: [
+                    const MonthlyEarningsForecastCard(
+                      title: 'Monthly Earnings Forecast',
+                      projectedAmount: 'On track for: ₹24,000',
+                      basisNote: '(Based on current pace)',
+                      goals: [
+                        'Complete 5 more deliveries this week',
+                        'Maintain 4.5+ rating',
+                      ],
+                      onViewDetails: null,
+                    ),
+                    SizedBox(height: 12.h),
                     // Current Balance Card
                     BalanceCard(
                       balance: controller.currentBalance.value,

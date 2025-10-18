@@ -317,6 +317,8 @@ class DeliveryInfoCard extends StatelessWidget {
         children: [
           _DeliveryInfoSection(order: order, controller: controller),
           SizedBox(height: 24.h),
+          _OrderPayoutSection(order: order),
+          SizedBox(height: 24.h),
           _DeliveryAddressSection(address: order.deliveryAddress),
           SizedBox(height: 24.h),
           _ItemsToDeliverSection(restaurants: order.restaurants),
@@ -417,6 +419,117 @@ class _DeliveryInfoSection extends StatelessWidget {
               ],
             ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+class _OrderPayoutSection extends StatelessWidget {
+  final CombinedOrderModel order;
+
+  const _OrderPayoutSection({required this.order});
+
+  @override
+  Widget build(BuildContext context) {
+    final String currency = order.currency;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Order Payout Breakdown',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w900,
+            color: Color.fromARGB(255, 0, 0, 0),
+            fontFamily: 'Obviously',
+            height: 1.40,
+          ),
+        ),
+        SizedBox(height: 12.h),
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(12.w),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8F8F8),
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: const Color(0x3FB7B7B7)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _PayoutRow(
+                label: 'Total Order Payout',
+                value: '$currency${order.formattedTotalPayout}',
+              ),
+              SizedBox(height: 8.h),
+              ...order.pickupPayouts.asMap().entries.map((entry) {
+                final index = entry.key + 1;
+                final pickup = entry.value;
+                return Padding(
+                  padding: EdgeInsets.only(bottom: index == order.pickupPayouts.length ? 0 : 8.h),
+                  child: _PayoutRow(
+                    label: 'Pickup $index: ${pickup.pickupName}',
+                    value: 'Base: $currency${pickup.formatAmount()}',
+                  ),
+                );
+              }),
+              if (order.pickupPayouts.isNotEmpty) SizedBox(height: 8.h),
+              _PayoutRow(
+                label: 'Distance (${order.formattedDistance}km)',
+                value: '$currency${order.formatAmount(order.distancePay)}',
+              ),
+              SizedBox(height: 8.h),
+              _PayoutRow(
+                label: 'Combined Order Bonus',
+                value: '$currency${order.formatAmount(order.combinedOrderBonus)}',
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PayoutRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _PayoutRow({
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF333333),
+              fontFamily: 'Inter',
+              height: 1.40,
+            ),
+          ),
+        ),
+        SizedBox(width: 12.w),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF484848),
+            fontFamily: 'Inter',
+            height: 1.40,
+          ),
         ),
       ],
     );

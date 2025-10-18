@@ -15,6 +15,10 @@ class CombinedOrderController extends GetxController {
       deliveryAddress: '789 River Rd, Apartment 3B, Riverside Mohakhali',
       completedSteps: 2,
       totalSteps: 3,
+      totalPayout: 70,
+      distanceInKm: 4,
+      distancePay: 14,
+      combinedOrderBonus: 0,
       pickupPoints: [
         PickupPoint(
           name: 'Thai Spice Restaurant',
@@ -59,6 +63,16 @@ class CombinedOrderController extends GetxController {
               imagePath: 'assets/images/foodimage03.png',
             ),
           ],
+        ),
+      ],
+      pickupPayouts: [
+        PickupPayout(
+          pickupName: 'Thai Spice Restaurant',
+          baseAmount: 28,
+        ),
+        PickupPayout(
+          pickupName: 'Sushi Express',
+          baseAmount: 28,
         ),
       ],
     );
