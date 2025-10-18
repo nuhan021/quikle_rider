@@ -84,6 +84,7 @@ class Assignment {
   final bool isUrgent;
   final bool isCombined;
   final AssignmentStatus status;
+  final String ?tierLabel;
 
   const Assignment({
     required this.id,
@@ -99,13 +100,14 @@ class Assignment {
     this.isUrgent = false,
     this.isCombined = false,
     this.status = AssignmentStatus.pending,
+    this.tierLabel = 'Tier Rate',
   });
 
   String get formattedArrival =>
       'Arrives by ${DateFormat.jm().format(expectedArrival)}';
 
   String get formattedDistance =>
-      '${distanceInKm.toStringAsFixed(1)} km';
+      '${_formatDistance(distanceInKm)} km';
 
   String get formattedTotal {
     final amount = totalAmount % 1 == 0
@@ -118,13 +120,19 @@ class Assignment {
   String get formattedPayoutLabel => 'Order Payout: ${formattedTotal}';
 
   String get formattedBreakdown {
-    final base = basePay % 1 == 0
-        ? basePay.toStringAsFixed(0)
-        : basePay.toStringAsFixed(2);
-    final distanceAmount = distancePay % 1 == 0
-        ? distancePay.toStringAsFixed(0)
-        : distancePay.toStringAsFixed(2);
-    return 'Base: $currency$base | Distance (${distanceInKm.toStringAsFixed(0)}km): $currency$distanceAmount | Type: $orderType';
+    final base = _formatCurrency(basePay);
+    final distanceAmount = _formatCurrency(distancePay);
+    final distanceLabel = _formatDistance(distanceInKm);
+    final ratePerKm = distanceInKm == 0
+        ? null
+        : distancePay / distanceInKm;
+    final rateLabel =
+        ratePerKm == null ? '' : ' (at $currency${_formatRatePerKm(ratePerKm)}/km)';
+    return [
+      '$tierLabel: $currency$base',
+      'Distance (${distanceLabel}km): $currency$distanceAmount$rateLabel',
+      'Type: $orderType',
+    ].join('\n');
   }
 
   Assignment copyWith({
@@ -141,6 +149,7 @@ class Assignment {
     bool? isUrgent,
     bool? isCombined,
     AssignmentStatus? status,
+    String? tierLabel,
   }) {
     return Assignment(
       id: id ?? this.id,
@@ -156,6 +165,7 @@ class Assignment {
       isUrgent: isUrgent ?? this.isUrgent,
       isCombined: isCombined ?? this.isCombined,
       status: status ?? this.status,
+      tierLabel: tierLabel ?? this.tierLabel,
     );
   }
 
@@ -177,6 +187,7 @@ class Assignment {
         (value) => value.name == (json['status'] as String? ?? 'pending'),
         orElse: () => AssignmentStatus.pending,
       ),
+      tierLabel: json['tier_label'] as String? ?? 'Tier Rate',
     );
   }
 
@@ -195,7 +206,26 @@ class Assignment {
       'is_urgent': isUrgent,
       'is_combined': isCombined,
       'status': status.name,
+      'tier_label': tierLabel,
     };
+  }
+
+  static String _formatDistance(double value) {
+    return value % 1 == 0
+        ? value.toStringAsFixed(0)
+        : value.toStringAsFixed(1);
+  }
+
+  static String _formatCurrency(double value) {
+    return value % 1 == 0
+        ? value.toStringAsFixed(0)
+        : value.toStringAsFixed(2);
+  }
+
+  static String _formatRatePerKm(double value) {
+    if (value % 1 == 0) return value.toStringAsFixed(0);
+    if ((value * 10) % 1 == 0) return value.toStringAsFixed(1);
+    return value.toStringAsFixed(2);
   }
 }
 

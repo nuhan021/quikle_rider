@@ -95,14 +95,15 @@ class HomepageController extends GetxController {
           customerName: 'Aanya Desai',
           expectedArrival: DateTime.now().add(const Duration(hours: 1)),
           address: '456 Oak Ave, Downtown',
-          distanceInKm: 3.0,
-          totalAmount: 35,
-          basePay: 25,
-          distancePay: 10,
-          orderType: 'Food',
+          distanceInKm: 4.0,
+          totalAmount: 34,
+          basePay: 20,
+          distancePay: 14,
+          orderType: 'Grocery',
           currency: '₹',
           isUrgent: true,
           isCombined: true,
+          tierLabel: 'Bronze Tier Rate',
         ),
         Assignment(
           id: '#5677',
@@ -186,7 +187,7 @@ class HomepageController extends GetxController {
   void _scheduleIncomingAssignment() {
     _incomingAssignmentTimer?.cancel();
     _incomingAssignmentTimer = Timer(
-      const Duration(seconds: 20),
+      const Duration(seconds: 200000),
       _presentIncomingAssignment,
     );
   }

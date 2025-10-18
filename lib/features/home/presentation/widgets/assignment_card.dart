@@ -42,6 +42,8 @@ class AssignmentCard extends StatelessWidget {
     final AssignmentStatus? currentStatus = status;
     final bool isPending =
         currentStatus == null || currentStatus == AssignmentStatus.pending;
+    final List<String> breakdownLines =
+        breakdown == null ? const [] : breakdown!.split('\n');
 
     Color? statusColor;
     if (currentStatus != null) {
@@ -111,7 +113,7 @@ class AssignmentCard extends StatelessWidget {
                 ),
 
               Container(
-                padding: EdgeInsets.symmetric( vertical: 4.h),
+                padding: EdgeInsets.symmetric(vertical: 4.h),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF0F0F0),
                   borderRadius: BorderRadius.circular(4.r),
@@ -239,15 +241,26 @@ class AssignmentCard extends StatelessWidget {
           ),
           if (breakdown != null) ...[
             SizedBox(height: 6.h),
-            Text(
-              breakdown!,
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF6B7280),
-              ),
-            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (int index = 0; index < breakdownLines.length; index++)
+                  Padding(
+                    padding: EdgeInsets.only(
+                      bottom: index == breakdownLines.length - 1 ? 0 : 4.h,
+                    ),
+                    child: Text(
+                      breakdownLines[index],
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF6B7280),
+                      ),
+                    ),
+                  ),
+              ],
+            )
           ],
 
           SizedBox(height: 16.h),
