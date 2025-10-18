@@ -23,7 +23,7 @@ class AppColors {
   );
 
 
-
+ static const Color eggshellWhite = Color(0xFFF8F8F8);
  
   static const Color secondarygrey= Color(
     0xFFCFCFCF,

@@ -3,24 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/utils/constants/enums.dart';
-import '../../../../routes/app_routes.dart';
+import 'package:quikle_rider/features/authentication/controllers/auth_controller.dart';
 
-class CreateAccount extends StatefulWidget {
+class CreateAccount extends GetView<AuthController> {
   const CreateAccount({super.key});
-
-  @override
-  State<CreateAccount> createState() => _CreateAccountState();
-}
-
-class _CreateAccountState extends State<CreateAccount> {
-  final TextEditingController fullNameController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController drivingLicenseController =
-      TextEditingController();
-  final TextEditingController vehicleLicenseController =
-      TextEditingController();
-
-  final _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -39,31 +25,23 @@ class _CreateAccountState extends State<CreateAccount> {
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 24.w),
             child: Form(
-              key: _formKey,
+              key: controller.formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: 20.h),
-
-                  // Logo and Title
                   Center(
                     child: Column(
                       children: [
-                        Container(
+                        SizedBox(
                           width: 64.w,
                           height: 64.h,
                           child: Image.asset(
-                            // Changed from Icon to Image.asset
-                            'assets/images/welcomeimage.png',
+                            'assets/images/logo.png',
                             fit: BoxFit.contain,
-                            width: 32
-                                .sp, // Using sp for consistency with original Icon size
-                            height: 32.sp,
                           ),
                         ),
-
                         SizedBox(height: 16.h),
-
                         RichText(
                           text: TextSpan(
                             children: [
@@ -88,9 +66,7 @@ class _CreateAccountState extends State<CreateAccount> {
                             ],
                           ),
                         ),
-
                         SizedBox(height: 8.h),
-
                         Text(
                           "The premier platform for riders",
                           style: getTextStyle(
@@ -103,14 +79,11 @@ class _CreateAccountState extends State<CreateAccount> {
                       ],
                     ),
                   ),
-
                   SizedBox(height: 40.h),
-
-                  // Full Name Field
                   _buildLabel("Full Name"),
                   SizedBox(height: 8.h),
                   _buildTextField(
-                    controller: fullNameController,
+                    controller: controller.fullNameController,
                     hintText: "S. M. Mahedi Hasan",
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -119,14 +92,11 @@ class _CreateAccountState extends State<CreateAccount> {
                       return null;
                     },
                   ),
-
                   SizedBox(height: 20.h),
-
-                  // Phone Number Field
                   _buildLabel("Phone Number"),
                   SizedBox(height: 8.h),
                   _buildTextField(
-                    controller: phoneController,
+                    controller: controller.accountPhoneController,
                     hintText: "(+880) 123-4567",
                     keyboardType: TextInputType.phone,
                     validator: (value) {
@@ -136,14 +106,11 @@ class _CreateAccountState extends State<CreateAccount> {
                       return null;
                     },
                   ),
-
                   SizedBox(height: 20.h),
-
-                  // Driving License Field
                   _buildLabel("Driving License Number"),
                   SizedBox(height: 8.h),
                   _buildTextField(
-                    controller: drivingLicenseController,
+                    controller: controller.drivingLicenseController,
                     hintText: "Driving License Number",
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -152,14 +119,11 @@ class _CreateAccountState extends State<CreateAccount> {
                       return null;
                     },
                   ),
-
                   SizedBox(height: 20.h),
-
-                  // Vehicle License Field
                   _buildLabel("Vehicle License Number"),
                   SizedBox(height: 8.h),
                   _buildTextField(
-                    controller: vehicleLicenseController,
+                    controller: controller.vehicleLicenseController,
                     hintText: "Vehicle License Number",
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -168,16 +132,14 @@ class _CreateAccountState extends State<CreateAccount> {
                       return null;
                     },
                   ),
-
                   SizedBox(height: 30.h),
-
-                  // Create Account Button
                   SizedBox(
                     width: double.infinity,
-                    height: 48.h,
+
                     child: ElevatedButton(
-                      onPressed: _createAccount,
+                      onPressed: () => controller.createAccount(context),
                       style: ElevatedButton.styleFrom(
+                        side: BorderSide.none,
                         backgroundColor: Colors.black,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.r),
@@ -195,10 +157,7 @@ class _CreateAccountState extends State<CreateAccount> {
                       ),
                     ),
                   ),
-
                   SizedBox(height: 20.h),
-
-                  // Terms and Privacy Policy
                   Center(
                     child: RichText(
                       textAlign: TextAlign.center,
@@ -220,7 +179,7 @@ class _CreateAccountState extends State<CreateAccount> {
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: Colors.black,
-                            ).copyWith(decoration: TextDecoration.underline),
+                            ),
                           ),
                           TextSpan(
                             text: " and ",
@@ -238,13 +197,12 @@ class _CreateAccountState extends State<CreateAccount> {
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
                               color: Colors.black,
-                            ).copyWith(decoration: TextDecoration.underline),
+                            ),
                           ),
                         ],
                       ),
                     ),
                   ),
-
                   SizedBox(height: 30.h),
                 ],
               ),
@@ -311,61 +269,5 @@ class _CreateAccountState extends State<CreateAccount> {
         ),
       ),
     );
-  }
-
-  void _createAccount() {
-    if (_formKey.currentState!.validate()) {
-      // Show loading
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFFB800)),
-          ),
-        ),
-      );
-
-      // Simulate account creation delay
-      Future.delayed(const Duration(seconds: 2), () {
-        Get.back(); // Close loading dialog
-
-        // Show success message
-        Get.snackbar(
-          "Account Created",
-          "Your account has been created successfully!",
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: const Color(0xFFFFB800),
-          titleText: const Text(
-            "Account Created",
-            style: TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          messageText: const Text(
-            "Your account has been created successfully!",
-            style: TextStyle(
-              fontSize: 16.0,
-              color: Colors.black,
-            ),
-          ),
-          duration: const Duration(seconds: 3),
-        );
-
-        // Navigate to Welcome Screen
-        Get.offNamed(AppRoute.getWelcomeScreen());
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    fullNameController.dispose();
-    phoneController.dispose();
-    drivingLicenseController.dispose();
-    vehicleLicenseController.dispose();
-    super.dispose();
   }
 }
