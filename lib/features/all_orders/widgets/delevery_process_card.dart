@@ -12,6 +12,13 @@ class DeliveryProgressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final totalSteps = 3;
+    final completedSteps = [
+      order.isPickedUp,
+      order.isInProgress,
+      order.isDelivered,
+    ].where((step) => step).length;
+
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: ShapeDecoration(
@@ -30,9 +37,16 @@ class DeliveryProgressCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _ProgressHeader(progressText: order.progressText),
-          SizedBox(height: 8.h),
-          _ProgressSteps(order: order),
+          _ProgressHeader(
+            completedSteps: completedSteps,
+            totalSteps: totalSteps,
+          ),
+          SizedBox(height: 12.h),
+          _ProgressSteps(
+            order: order,
+            completedSteps: completedSteps,
+            totalSteps: totalSteps,
+          ),
           SizedBox(height: 24.h),
           _PickupPointsSection(pickupPoints: order.pickupPoints),
         ],
@@ -42,9 +56,13 @@ class DeliveryProgressCard extends StatelessWidget {
 }
 
 class _ProgressHeader extends StatelessWidget {
-  final String progressText;
+  final int completedSteps;
+  final int totalSteps;
 
-  const _ProgressHeader({required this.progressText});
+  const _ProgressHeader({
+    required this.completedSteps,
+    required this.totalSteps,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -56,8 +74,11 @@ class _ProgressHeader extends StatelessWidget {
           style: headingStyle2(color: const Color(0xFF000000)),
         ),
         Text(
-          progressText,
-          style: bodyTextStyle(color: const Color(0xFF919191)),
+          '$completedSteps of $totalSteps steps',
+          style: getTextStyle(
+            fontSize: 16,
+            color: const Color(0xFF919191),
+          ),
         ),
       ],
     );
@@ -66,86 +87,88 @@ class _ProgressHeader extends StatelessWidget {
 
 class _ProgressSteps extends StatelessWidget {
   final CombinedOrderModel order;
+  final int completedSteps;
+  final int totalSteps;
 
-  const _ProgressSteps({required this.order});
+  const _ProgressSteps({
+    required this.order,
+    required this.completedSteps,
+    required this.totalSteps,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final steps = [
+      ('Picked Up', order.isPickedUp),
+      ('In Progress', order.isInProgress),
+      ('Delivered', order.isDelivered),
+    ];
+
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           width: double.infinity,
           height: 1.h,
           color: const Color(0x3FB7B7B7),
         ),
-        SizedBox(height: 4.h),
+        SizedBox(height: 12.h),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _ProgressStep('Picked Up', order.isPickedUp, true),
-            _ProgressStep('In Progress', order.isInProgress, false),
-            _ProgressStep('Delivered', order.isDelivered, false),
-          ],
+          children: List.generate(steps.length, (index) {
+            final label = steps[index].$1;
+            final isActive = index < completedSteps;
+
+            final textAlign = index == 0
+                ? TextAlign.left
+                : index == steps.length - 1
+                    ? TextAlign.right
+                    : TextAlign.center;
+
+            return Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: index == 1 ? 12.w : 0),
+                child: Text(
+                  label,
+                  textAlign: textAlign,
+                  style: getTextStyle(
+                    fontSize: 14,
+                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                    color: const Color(0xFF333333),
+                  ),
+                ),
+              ),
+            );
+          }),
         ),
-        SizedBox(height: 4.h),
-        Stack(
-          children: [
-            Container(
-              width: 328.w,
+        SizedBox(height: 8.h),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final double segmentWidth = constraints.maxWidth / totalSteps;
+            final double filledWidth =
+                (completedSteps.clamp(0, totalSteps)) * segmentWidth;
+
+            return Container(
+              width: double.infinity,
               height: 6.h,
-              decoration: ShapeDecoration(
+              decoration: BoxDecoration(
                 color: const Color(0xFFF0F0F0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4.r),
+                borderRadius: BorderRadius.circular(4.r),
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  width: filledWidth,
+                  height: 6.h,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFC200),
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
                 ),
               ),
-            ),
-            Container(
-              width: order.progressWidth.w,
-              height: 6.h,
-              decoration: ShapeDecoration(
-                color: const Color(0xFFFFC200),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(4.r),
-                ),
-              ),
-            ),
-          ],
+            );
+          },
         ),
       ],
-    );
-  }
-}
-
-class _ProgressStep extends StatelessWidget {
-  final String label;
-  final bool isCompleted;
-  final bool isActive;
-
-  const _ProgressStep(this.label, this.isCompleted, this.isActive);
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 4.h),
-        child: Column(
-          children: [
-            SizedBox(height: 1.h),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: getTextStyle(
-                fontSize: 14,
-                color: const Color(0xFF333333),
-                fontWeight: isCompleted || isActive
-                    ? FontWeight.w600
-                    : FontWeight.w400,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -165,20 +188,25 @@ class _PickupPointsSection extends StatelessWidget {
           style: headingStyle2(color: const Color(0xFF000000)),
         ),
         SizedBox(height: 12.h),
+        Container(
+          width: double.infinity,
+          height: 1.h,
+          color: const Color(0x3FB7B7B7),
+        ),
+        SizedBox(height: 16.h),
         ...pickupPoints.asMap().entries.map((entry) {
-          final index = entry.key;
-          final point = entry.value;
+          final isLast = entry.key == pickupPoints.length - 1;
           return Column(
             children: [
-              _PickupPointItem(pickupPoint: point),
-              if (index < pickupPoints.length - 1) ...[
-                SizedBox(height: 12.h),
+              _PickupPointItem(pickupPoint: entry.value),
+              if (!isLast) ...[
+                SizedBox(height: 16.h),
                 Container(
                   width: double.infinity,
                   height: 1.h,
                   color: const Color(0x3FB7B7B7),
                 ),
-                SizedBox(height: 12.h),
+                SizedBox(height: 16.h),
               ],
             ],
           );
@@ -195,79 +223,86 @@ class _PickupPointItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: const Color(0x3FB7B7B7)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 8.w,
-                height: 8.h,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 6.0),
+              child: Container(
+                width: 20.w,
+                height: 20.h,
                 decoration: BoxDecoration(
+              
+            
                   shape: BoxShape.circle,
-                  color: pickupPoint.dotColor,
+                ),
+                child: Center(
+                  child: Icon(
+                    pickupPoint.status == PickupStatus.completed
+                        ? Icons.check_circle
+                        : Icons.more_horiz,
+                    color: pickupPoint.dotColor,
+                    size: 20.w,
+                  ),
                 ),
               ),
-              SizedBox(width: 8.w),
-              SizedBox(
-                width: 168.w,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      pickupPoint.name,
-                      style: getTextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black,
-                      ),
-                    ),
-                    Text(
-                      pickupPoint.address,
-                      style: getTextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF484848),
-                        lineHeight: 1.3,
-                      ),
-                    ),
-                    Text(
-                      pickupPoint.statusText,
-                      style: getTextStyle(
-                        fontSize: 12,
-                        color: const Color(0xFF9B9B9B),
-                        lineHeight: 1.3,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
-            decoration: BoxDecoration(
-              color: pickupPoint.statusBgColor,
-              borderRadius: BorderRadius.circular(4.r),
             ),
-            child: Text(
-              pickupPoint.statusString,
-              style: getTextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: pickupPoint.statusTextColor,
+            SizedBox(width: 12.w),
+            SizedBox(
+              width: 180.w,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    pickupPoint.name,
+                    style: getTextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    pickupPoint.address,
+                    style: getTextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xFF484848),
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    pickupPoint.statusText,
+                    style: getTextStyle(
+                      fontSize: 12,
+                      color: const Color(0xFF9B9B9B),
+                    ),
+                  ),
+                ],
               ),
             ),
+          ],
+        ),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+          decoration: BoxDecoration(
+            color: pickupPoint.statusBgColor,
+            borderRadius: BorderRadius.circular(4.r),
           ),
-        ],
-      ),
+          child: Text(
+            pickupPoint.statusString,
+            style: getTextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: pickupPoint.statusTextColor,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
