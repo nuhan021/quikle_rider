@@ -3,37 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/utils/constants/enums.dart';
-import 'login_otp.dart';
+import 'package:quikle_rider/features/authentication/controllers/auth_controller.dart';
 import 'package:quikle_rider/features/authentication/presentation/screens/create_account.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends GetView<AuthController> {
   const LoginScreen({super.key});
-
-  @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController phoneController = TextEditingController();
-  final FocusNode _phoneFocusNode = FocusNode();
-  bool _isFocused = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _phoneFocusNode.addListener(() {
-      setState(() {
-        _isFocused = _phoneFocusNode.hasFocus;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    phoneController.dispose();
-    _phoneFocusNode.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,8 +20,6 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               children: [
                 SizedBox(height: 60.h),
-
-                // Title Section
                 Column(
                   children: [
                     RichText(
@@ -86,20 +58,13 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
-
-                SizedBox(height: 0.h),
-
-                // Rider Image
                 Image.asset(
                   'assets/images/loginriderimage.png',
                   fit: BoxFit.contain,
                   width: double.infinity,
                   height: 300.h,
                 ),
-
                 SizedBox(height: 40.h),
-
-                // Form Section
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -112,69 +77,62 @@ class _LoginScreenState extends State<LoginScreen> {
                         color: Colors.black,
                       ),
                     ),
-
                     SizedBox(height: 12.h),
+                    Obx(
+                      () => SizedBox(
+                        height: 52.h,
+                        child: TextFormField(
+                          controller: controller.phoneController,
+                          focusNode: controller.phoneFocusNode,
+                          keyboardType: TextInputType.number,
+                          
 
-                    SizedBox(
-                      height: 52.h,
-                      child: TextFormField(
-                        controller: phoneController,
-                        focusNode: _phoneFocusNode,
-                        keyboardType: TextInputType.phone,
-                        style: getTextStyle(font: CustomFonts.inter),
-                        decoration: InputDecoration(
-                          hintText: "Enter Your Phone Number",
-                          hintStyle: getTextStyle(
-                            font: CustomFonts.inter,
-                            fontSize: 16,
-                            color: Colors.grey[500],
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                            borderSide: BorderSide(
-                              color: _isFocused
-                                  ? Colors.black
-                                  : const Color(0xFF7C7C7C),
-                              width: 1.0,
+                          style: getTextStyle(font: CustomFonts.inter),
+                          decoration: InputDecoration(
+                            hintText: "Enter Your Phone Number",
+                            hintStyle: getTextStyle(
+                              font: CustomFonts.inter,
+                              fontSize: 16,
+                              color: Colors.grey[500],
                             ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                            borderSide: const BorderSide(
-                              color: Color(0xFF7C7C7C),
-                              width: 1.0,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: BorderSide(
+                                color: controller.isPhoneFocused.value
+                                    ? Colors.black
+                                    : const Color(0xFF7C7C7C),
+                                width: 1.0,
+                              ),
                             ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                            borderSide: const BorderSide(
-                              color: Colors.black,
-                              width: 1.0,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: const BorderSide(
+                                color: const Color(0xFF7C7C7C),
+                                width: 1.0,
+                              ),
                             ),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 16.w,
-                            vertical: 16.h,
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                              borderSide: const BorderSide(
+                                color: Colors.black,
+                                width: 1.0,
+                              ),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16.w,
+                              vertical: 16.h,
+                            ),
                           ),
                         ),
                       ),
                     ),
-
                     SizedBox(height: 24.h),
-
-                    // Log In Button
                     SizedBox(
                       width: 352.w,
                       child: ElevatedButton(
-                        onPressed: () {
-                          if (phoneController.text.isNotEmpty) {
-                            Get.to(
-                              () => const LoginOtp(),
-                              arguments: {'phone': phoneController.text},
-                            );
-                          }
-                        },
+                        onPressed: controller.navigateToOtp,
                         style: ElevatedButton.styleFrom(
+                          side: BorderSide.none,
                           backgroundColor: Colors.black,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12.r),
@@ -192,9 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-
                     SizedBox(height: 50.h),
-
                     Center(
                       child: Text(
                         "Don't have an account?",
@@ -206,17 +162,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-
                     SizedBox(height: 12.h),
-
                     SizedBox(
                       width: 352.w,
                       height: 48.h,
                       child: OutlinedButton(
-                        onPressed: () {
-                          // Navigate to the CreateAccount screen
-                          Get.to(() => const CreateAccount());
-                        },
+                        onPressed: () => Get.to(() => const CreateAccount()),
                         style: OutlinedButton.styleFrom(
                           side: const BorderSide(color: Colors.black),
                           shape: RoundedRectangleBorder(
@@ -234,7 +185,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-
                     SizedBox(height: 20.h),
                   ],
                 ),

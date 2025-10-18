@@ -75,7 +75,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             height: 64.h,
                             child: Image.asset(
                               // Changed from Icon to Image.asset
-                              'assets/images/welcomeimage.png',
+                              'assets/images/logo.png',
                               fit: BoxFit.contain,
                               width: 32
                                   .sp, // Using sp for consistency with original Icon size
@@ -83,7 +83,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             ),
                           ),
 
-                          SizedBox(height: 30.h),
+                          SizedBox(height:20.h),
 
                           // Welcome Text
                           RichText(

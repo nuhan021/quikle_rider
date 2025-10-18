@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_controller.dart';
 import 'package:quikle_rider/features/all_orders/presentation/screen/all_order_single.dart';
@@ -32,7 +33,7 @@ class _AllOrdersState extends State<AllOrders>
   Widget build(BuildContext context) {
     return Obx(
       () => Scaffold(
-        backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF5F5F5),
         appBar: CustomTabBar(
           currentIndex: 1,
           title: 'Orders',
@@ -57,14 +58,12 @@ class _AllOrdersState extends State<AllOrders>
                   ),
                   labelColor: Colors.white,
                   unselectedLabelColor: Colors.black,
-                  labelStyle: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 18.sp,
+                  labelStyle: getTextStyle(
+                    fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),
-                  unselectedLabelStyle: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 18.sp,
+                  unselectedLabelStyle: getTextStyle(
+                    fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),
                   tabs: const [

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 
 class ParcelDone extends StatelessWidget {
   const ParcelDone({Key? key}) : super(key: key);
@@ -35,16 +36,10 @@ class ParcelDone extends StatelessWidget {
               const SizedBox(height: 32),
 
               // Success Message
-              const Text(
+              Text(
                 'Parcel Has Been\nSuccessfully Delivered',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Obviously',
-                  fontSize: 24,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                  height: 1.3,
-                ),
+                style: headingStyle1(color: Colors.black87),
               ),
 
               const SizedBox(height: 48),
@@ -65,11 +60,10 @@ class ParcelDone extends StatelessWidget {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
+                  child: Text(
                     'Back to Home',
-                    style: TextStyle(
-                      fontFamily: 'Obviously',
-                      fontSize: 16,
+                    style: buttonTextStyle(
+                      color: Colors.white,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -92,11 +86,10 @@ class ParcelDone extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Track Another Parcel',
-                    style: TextStyle(
-                      fontFamily: 'Obviously',
-                      fontSize: 16,
+                    style: buttonTextStyle(
+                      color: Colors.green,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -211,16 +204,10 @@ class _ParcelDoneAnimatedState extends State<ParcelDoneAnimated>
                     opacity: _fadeAnimation.value,
                     child: Transform.translate(
                       offset: Offset(0, 20 * (1 - _fadeAnimation.value)),
-                      child: const Text(
+                      child: Text(
                         'Parcel Has Been\nSuccessfully Delivered',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Obviously',
-                          fontSize: 22,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black87,
-                          height: 1.3,
-                        ),
+                        style: headingStyle2(color: Colors.black87),
                       ),
                     ),
                   );
@@ -254,11 +241,10 @@ class _ParcelDoneAnimatedState extends State<ParcelDoneAnimated>
                               ),
                               elevation: 0,
                             ),
-                            child: const Text(
+                            child: Text(
                               'Back to Home',
-                              style: TextStyle(
-                                fontFamily: 'Obviously',
-                                fontSize: 16,
+                              style: buttonTextStyle(
+                                color: Colors.white,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -278,11 +264,10 @@ class _ParcelDoneAnimatedState extends State<ParcelDoneAnimated>
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: const Text(
+                            child: Text(
                               'Track Another Parcel',
-                              style: TextStyle(
-                                fontFamily: 'Obviously',
-                                fontSize: 16,
+                              style: buttonTextStyle(
+                                color: Colors.green,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
