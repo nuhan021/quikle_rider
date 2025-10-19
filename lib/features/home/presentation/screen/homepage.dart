@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:quikle_rider/core/widgets/connection_lost_view.dart';
 import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
 import 'package:quikle_rider/features/home/controllers/homepage_controller.dart';
 import 'package:quikle_rider/features/home/models/home_dashboard_models.dart';
@@ -22,9 +23,11 @@ class HomeScreen extends GetView<HomepageController> {
           isOnline: controller.isOnline.value,
           onToggle: controller.onToggleSwitch,
         ),
-        body: controller.isOnline.value
-            ? _buildOnlineView(context)
-            : _buildOfflineView(),
+        body: controller.hasConnection.value
+            ? (controller.isOnline.value
+                ? _buildOnlineView(context)
+                : _buildOfflineView())
+            : const ConnectionLostView(),
       ),
     );
   }

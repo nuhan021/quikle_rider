@@ -1,8 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:quikle_rider/features/all_orders/models/oder_model.dart';
-import 'package:quikle_rider/features/map/presentation/screen/map.dart';
+import 'package:quikle_rider/features/all_orders/models/single_oder_model.dart';
 
 class OrderController extends GetxController {
   final Rx<OrderModel> order = _getDummyOrder().obs;
