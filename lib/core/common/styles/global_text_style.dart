@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:quikle_rider/core/utils/constants/enums.dart';
 
 const double _heading1Size = 24;
@@ -16,38 +15,30 @@ TextStyle _buildStyle(
   Color? color,
 }) {
   final scaledSize = fontSize.sp;
+  final String? fontFamily;
+
   switch (font) {
     case CustomFonts.obviously:
-      return TextStyle(
-        fontFamily: 'Obviously',
-        fontSize: scaledSize,
-        fontWeight: fontWeight,
-        height: lineHeight,
-        color: color,
-      );
+      fontFamily = 'Obviously';
+      break;
     case CustomFonts.manrope:
-      return GoogleFonts.manrope(
-        fontSize: scaledSize,
-        fontWeight: fontWeight,
-        height: lineHeight,
-        color: color,
-      );
+      fontFamily = 'Manrope';
+      break;
     case CustomFonts.poppins:
-      return GoogleFonts.poppins(
-        fontSize: scaledSize,
-        fontWeight: fontWeight,
-        height: lineHeight,
-        color: color,
-      );
+      fontFamily = 'Poppins';
+      break;
     case CustomFonts.inter:
-    default:
-      return GoogleFonts.inter(
-        fontSize: scaledSize,
-        fontWeight: fontWeight,
-        height: lineHeight,
-        color: color,
-      );
+    fontFamily = 'Inter';
+      break;
   }
+
+  return TextStyle(
+    fontFamily: fontFamily,
+    fontSize: scaledSize,
+    fontWeight: fontWeight,
+    height: lineHeight,
+    color: color,
+  );
 }
 
 TextStyle getTextStyle({

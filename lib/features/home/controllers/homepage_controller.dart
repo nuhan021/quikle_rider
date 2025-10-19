@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/features/home/models/home_dashboard_models.dart';
 import 'package:quikle_rider/features/home/presentation/screen/goonline.dart';
@@ -10,6 +11,7 @@ import 'package:quikle_rider/features/home/presentation/widgets/incoming_assignm
 class HomepageController extends GetxController {
   var isOnline = false.obs;
   var isLoading = false.obs;
+  final hasConnection = true.obs;
   final errorMessage = RxnString();
   final stats = <HomeStat>[].obs;
   final assignments = <Assignment>[].obs;
@@ -19,6 +21,7 @@ class HomepageController extends GetxController {
   Timer? _incomingAssignmentTimer;
   Timer? _dialogAutoCloseTimer;
   int _assignmentSequence = 6000;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
   void onToggleSwitch() async {
     if (!isOnline.value) {
@@ -49,6 +52,7 @@ class HomepageController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _initConnectivityMonitoring();
     fetchDashboardData();
   }
 
@@ -203,6 +207,26 @@ class HomepageController extends GetxController {
     }
   }
 
+  void _initConnectivityMonitoring() {
+    final connectivity = Connectivity();
+    _connectivitySubscription =
+        connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+    connectivity.checkConnectivity().then(_updateConnectionStatus).catchError(
+      (_) => hasConnection.value = true,
+    );
+  }
+
+  void _updateConnectionStatus(List<ConnectivityResult> results) {
+    final isConnected =
+        results.any((result) => result != ConnectivityResult.none);
+    final previousState = hasConnection.value;
+    hasConnection.value = isConnected;
+
+    if (isConnected && !previousState && stats.isEmpty && !isLoading.value) {
+      fetchDashboardData();
+    }
+  }
+
   Assignment _createIncomingAssignment() {
     _assignmentSequence += 1;
     final now = DateTime.now();
@@ -315,6 +339,7 @@ class HomepageController extends GetxController {
 
   @override
   void onClose() {
+    _connectivitySubscription?.cancel();
     _cancelIncomingAssignment();
     super.onClose();
   }

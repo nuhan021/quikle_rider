@@ -186,12 +186,10 @@ class WalletScreen extends GetView<WalletController> {
                       ],
                     ),
                     SizedBox(height: 16.h),
-                    Expanded(
-                      child: StatTile(
-                        title: 'Total Orders',
-                        value: controller.totalDeliveries.value,
-                        box: cardBox,
-                      ),
+                    StatTile(
+                      title: 'Total Orders',
+                      value: controller.totalDeliveries.value,
+                      box: cardBox,
                     ),
                     SizedBox(height: 16.h),
                     Text(
