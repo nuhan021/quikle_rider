@@ -16,7 +16,8 @@ class OrderController extends GetxController {
       estimatedTime: '25 min',
       distance: '1.5 miles',
       amount: '\$18.50',
-      status: OrderStatus.readyForPickup, // Ensures "Pick Up" button shows initially
+      status: OrderStatus
+          .readyForPickup, // Ensures "Pick Up" button shows initially
       restaurantImage: 'assets/images/foodimage.png',
       customerImage: 'assets/images/avatar.png',
       items: [
@@ -38,7 +39,6 @@ class OrderController extends GetxController {
       ),
     );
   }
-
 
   void markAsPickedUp() {
     this.order.value = this.order.value.copyWith(
@@ -64,7 +64,6 @@ class OrderController extends GetxController {
   void sendMessage() {
     _showSnackbar('Opening chat with ${order.value.customerName}');
   }
-
 
   Widget _buildActionDialog(
     String title,
@@ -150,4 +149,3 @@ class OrderController extends GetxController {
     );
   }
 }
-
