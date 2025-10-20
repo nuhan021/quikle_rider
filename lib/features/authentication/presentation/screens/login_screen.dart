@@ -5,7 +5,6 @@ import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/utils/constants/enums.dart';
 import 'package:quikle_rider/features/authentication/controllers/auth_controller.dart';
 import 'package:quikle_rider/features/authentication/presentation/screens/create_account.dart';
-
 class LoginScreen extends GetView<AuthController> {
   const LoginScreen({super.key});
 
@@ -14,10 +13,13 @@ class LoginScreen extends GetView<AuthController> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Column(
+        child: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          behavior: HitTestBehavior.translucent,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
+              child: Column(
               children: [
                 SizedBox(height: 60.h),
                 Column(
@@ -84,9 +86,12 @@ class LoginScreen extends GetView<AuthController> {
                         child: TextFormField(
                           controller: controller.phoneController,
                           focusNode: controller.phoneFocusNode,
-                          keyboardType: TextInputType.number,
-                          
-
+                          autofocus: true,
+                          keyboardType: TextInputType.phone,
+                          textInputAction: TextInputAction.done,
+                          onTapOutside: (_) => FocusScope.of(context).unfocus(),
+                          onFieldSubmitted: (_) =>
+                              FocusScope.of(context).unfocus(),
                           style: getTextStyle(font: CustomFonts.inter),
                           decoration: InputDecoration(
                             hintText: "Enter Your Phone Number",
@@ -193,6 +198,6 @@ class LoginScreen extends GetView<AuthController> {
           ),
         ),
       ),
-    );
+      ));
   }
 }
