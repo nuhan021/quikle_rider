@@ -48,18 +48,18 @@ class UnifiedProfileAppBar extends StatelessWidget
         padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
         child: Row(
           children: [
-            // Back button
-            GestureDetector(
-              onTap: () => Get.back(),
-              child: Container(
-                padding: EdgeInsets.all(8.w),
-                child: Icon(
-                  Icons.arrow_back_ios,
-                  color: AppColors.blackText,
-                  size: 20.sp,
-                ),
-              ),
-            ),
+            // // Back button
+            // GestureDetector(
+            //   onTap: () => Get.back(),
+            //   child: Container(
+            //     padding: EdgeInsets.all(8.w),
+            //     child: Icon(
+            //       Icons.arrow_back_ios,
+            //       color: AppColors.blackText,
+            //       size: 20.sp,
+            //     ),
+            //   ),
+            // ),
 
             SizedBox(width: 8.w),
 

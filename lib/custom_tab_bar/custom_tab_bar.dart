@@ -1,25 +1,10 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/custom_tab_bar/notifications.dart';
-
-class _BottomCurveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    final path = Path();
-    path.lineTo(0, 0);
-    path.lineTo(size.width, 0);
-    path.lineTo(size.width, size.height);
-    path.quadraticBezierTo(size.width / 2, size.height + 10, 0, size.height);
-    path.close();
-    return path;
-  }
-
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
-    return false;
-  }
-}
 
 class CustomTabBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
@@ -94,43 +79,57 @@ class _CustomTabBarState extends State<CustomTabBar>
   Widget build(BuildContext context) {
     final bool showToggle = widget.currentIndex == 0;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        leading: widget.leading,
-        title: Row(
-          children: [
-            SizedBox(width: 8.w),
-            Text(
-              widget.title,
-              style: TextStyle(
-                fontFamily: 'Obviously',
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w900,
-                color: Colors.black,
-              ),
-            ),
-            const Spacer(),
-            if (showToggle) _buildResponsiveToggle(),
-            if (showToggle) const Spacer(),
-            _buildNotificationButton(),
-            SizedBox(width: 16.w),
-          ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(20.r)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0x0A616161),
+            blurRadius: 8.r,
+            offset: Offset(0, 2.h),
+            spreadRadius: 0,
+          ),
+        ],
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.gradientColor, // unified bottom border color
+            width: 2.w,
+          ),
         ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(3.h),
-          child: ClipPath(
-            clipper: _BottomCurveClipper(),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(20.r)),
+        child: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          leading: widget.leading,
+          title: Row(
+            children: [
+              SizedBox(width: 8.w),
+              Text(
+                widget.title,
+                style: TextStyle(
+                  fontFamily: 'Obviously',
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.black,
+                ),
+              ),
+              const Spacer(),
+              if (showToggle) _buildResponsiveToggle(),
+              if (showToggle) const Spacer(),
+              _buildNotificationButton(),
+              SizedBox(width: 16.w),
+            ],
+          ),
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(3.h),
             child: Container(
-              height: 3.h,
               decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Color(0xFFFFB800), Color(0xFFFF8C00)],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(20), // same smooth rounded bottom
                 ),
               ),
             ),
@@ -177,22 +176,6 @@ class _CustomTabBarState extends State<CustomTabBar>
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Online/Offline text indicator
-                  AnimatedOpacity(
-                    duration: const Duration(milliseconds: 200),
-                    opacity: 0.7,
-                    child: Text(
-                      widget.isOnline ? '' : '',
-                      style: TextStyle(
-                        fontSize: 8.sp,
-                        fontWeight: FontWeight.w600,
-                        color: widget.isOnline
-                            ? Colors.white
-                            : Colors.grey[600],
-                      ),
-                    ),
-                  ),
-                  // Sliding toggle button
                   AnimatedPositioned(
                     duration: const Duration(milliseconds: 200),
                     curve: Curves.easeInOut,
@@ -252,7 +235,6 @@ class _CustomTabBarState extends State<CustomTabBar>
   Widget _buildNotificationButton() {
     return GestureDetector(
       onTap: () {
-        // Add haptic feedback
         HapticFeedback.lightImpact();
         Navigator.push(
           context,
@@ -261,7 +243,7 @@ class _CustomTabBarState extends State<CustomTabBar>
       },
       child: Container(
         padding: EdgeInsets.all(4.w),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.transparent,
         ),

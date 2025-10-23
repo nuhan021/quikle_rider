@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/features/home/models/home_dashboard_models.dart';
 import 'package:quikle_rider/features/home/presentation/screen/goonline.dart';
 import 'package:quikle_rider/features/home/presentation/screen/gooffline.dart';
 import 'package:quikle_rider/features/home/presentation/widgets/alert_dialog.dart';
 import 'package:quikle_rider/features/home/presentation/widgets/incoming_assignment_dialog.dart';
+import 'package:quikle_rider/custom_tab_bar/notifications.dart';
 
 class HomepageController extends GetxController {
   var isOnline = false.obs;
@@ -47,6 +49,14 @@ class HomepageController extends GetxController {
         _cancelIncomingAssignment();
       }
     }
+  }
+
+  void openNotifications() {
+    HapticFeedback.lightImpact();
+    Get.to(
+      () => const NotificationsPage(),
+      transition: Transition.fadeIn,
+    );
   }
 
   @override

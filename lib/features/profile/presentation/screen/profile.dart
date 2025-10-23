@@ -25,188 +25,190 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      appBar: UnifiedProfileAppBar(
-        showActionButton: true,
-        title: "Profile",
-        action: "Notification",
-        onActionPressed: () {},
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.w),
-        child: Column(
-          children: [
-            /// Profile Header
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: .05),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8F9FA),
+        appBar: UnifiedProfileAppBar(
+          showActionButton: true,
+          title: "Profile",
+          action: "Notification",
+          onActionPressed: () {},
+        ),
+        body: SingleChildScrollView(
+          padding: EdgeInsets.all(20.w),
+          child: Column(
+            children: [
+              /// Profile Header
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: .05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [TierBadge(tier: "Silver")],
+                      ),
+                    ),
+                    CircleAvatar(
+                      radius: 45,
+                      backgroundImage: AssetImage("assets/images/avatar.png"),
+                    ),
+      
+                    SizedBox(height: 12),
+                    Text(
+                      "Vikram Rajput",
+                      style: getTextStyle2(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      "vikramrajput@gmail.com",
+                      style: getTextStyle2(fontSize: 14, color: Colors.black54),
+                    ),
+                  ],
+                ),
               ),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [TierBadge(tier: "Silver")],
-                    ),
-                  ),
-                  CircleAvatar(
-                    radius: 45,
-                    backgroundImage: AssetImage("assets/images/avatar.png"),
-                  ),
-
-                  SizedBox(height: 12),
-                  Text(
-                    "Vikram Rajput",
-                    style: getTextStyle2(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    "vikramrajput@gmail.com",
-                    style: getTextStyle2(fontSize: 14, color: Colors.black54),
-                  ),
+              SizedBox(height: 16.h),
+              const ProfileCompletionCard(
+                completionPercent: 85,
+                missingItems: [
+                  'Vehicle Insurance certificate',
+                  'Emergency contact',
                 ],
+                motivationMessage: 'Complete 100% to unlock Gold tier',
+                onCompleteNow: null,
               ),
-            ),
-            SizedBox(height: 16.h),
-            const ProfileCompletionCard(
-              completionPercent: 85,
-              missingItems: [
-                'Vehicle Insurance certificate',
-                'Emergency contact',
-              ],
-              motivationMessage: 'Complete 100% to unlock Gold tier',
-              onCompleteNow: null,
-            ),
-            SizedBox(height: 30.h),
-
-            // Menu Items Container
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 10.h),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    spreadRadius: 0,
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+              SizedBox(height: 30.h),
+      
+              // Menu Items Container
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 10.h),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      spreadRadius: 0,
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    _buildMenuItem(
+                      imagepath: "assets/icons/profileicon.png",
+                      title: 'My Profile',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MyProfilePage(),
+                        ),
+                      ),
+                    ),
+                    _buildDivider(),
+                    _buildMenuItem(
+                      imagepath: "assets/icons/vehicle.png",
+                      title: 'Vehicle Information',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const VehicleInformationPage(),
+                        ),
+                      ),
+                    ),
+                    _buildDivider(),
+                    _buildMenuItem(
+                      imagepath: "assets/icons/location.png",
+                      title: 'Delivery Zone',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const DeliveryZonePage(),
+                        ),
+                      ),
+                    ),
+                    _buildDivider(),
+                    _buildMenuItem(
+                      imagepath: "assets/icons/payment.png",
+                      title: 'Payment Method',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PaymentMethodPage(),
+                        ),
+                      ),
+                    ),
+                    _buildDivider(),
+                    _buildMenuItem(
+                      imagepath: "assets/icons/avaiability.png",
+                      title: 'Availability Settings',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AvailabilitySettingsPage(),
+                        ),
+                      ),
+                    ),
+                    _buildDivider(),
+                    _buildMenuItem(
+                      imagepath: "assets/icons/notification.png",
+                      title: 'Notification Settings',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NotificationSettingsPage(),
+                        ),
+                      ),
+                    ),
+                    _buildDivider(),
+                    _buildMenuItem(
+                      imagepath: "assets/icons/language.png",
+                      title: 'Language Settings',
+                      onTap: () {
+                        _showLanguageDialog(context);
+                      },
+                    ),
+                    _buildDivider(),
+                    _buildMenuItem(
+                      imagepath: "assets/icons/help.png",
+                      title: 'Help & Support',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HelpSupportPage(),
+                        ),
+                      ),
+                    ),
+                    _buildDivider(),
+                    _buildMenuItem(
+                      imagepath: "assets/icons/signout.png",
+                      title: 'Sign out',
+                      onTap: () => _showSignOutDialog(context),
+                      isSignOut: true,
+                    ),
+                  ],
+                ),
               ),
-              child: Column(
-                children: [
-                  _buildMenuItem(
-                    imagepath: "assets/icons/profileicon.png",
-                    title: 'My Profile',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const MyProfilePage(),
-                      ),
-                    ),
-                  ),
-                  _buildDivider(),
-                  _buildMenuItem(
-                    imagepath: "assets/icons/vehicle.png",
-                    title: 'Vehicle Information',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const VehicleInformationPage(),
-                      ),
-                    ),
-                  ),
-                  _buildDivider(),
-                  _buildMenuItem(
-                    imagepath: "assets/icons/location.png",
-                    title: 'Delivery Zone',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const DeliveryZonePage(),
-                      ),
-                    ),
-                  ),
-                  _buildDivider(),
-                  _buildMenuItem(
-                    imagepath: "assets/icons/payment.png",
-                    title: 'Payment Method',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const PaymentMethodPage(),
-                      ),
-                    ),
-                  ),
-                  _buildDivider(),
-                  _buildMenuItem(
-                    imagepath: "assets/icons/avaiability.png",
-                    title: 'Availability Settings',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AvailabilitySettingsPage(),
-                      ),
-                    ),
-                  ),
-                  _buildDivider(),
-                  _buildMenuItem(
-                    imagepath: "assets/icons/notification.png",
-                    title: 'Notification Settings',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const NotificationSettingsPage(),
-                      ),
-                    ),
-                  ),
-                  _buildDivider(),
-                  _buildMenuItem(
-                    imagepath: "assets/icons/language.png",
-                    title: 'Language Settings',
-                    onTap: () {
-                      _showLanguageDialog(context);
-                    },
-                  ),
-                  _buildDivider(),
-                  _buildMenuItem(
-                    imagepath: "assets/icons/help.png",
-                    title: 'Help & Support',
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const HelpSupportPage(),
-                      ),
-                    ),
-                  ),
-                  _buildDivider(),
-                  _buildMenuItem(
-                    imagepath: "assets/icons/signout.png",
-                    title: 'Sign out',
-                    onTap: () => _showSignOutDialog(context),
-                    isSignOut: true,
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

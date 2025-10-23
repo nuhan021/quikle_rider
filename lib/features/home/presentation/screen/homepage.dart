@@ -15,19 +15,21 @@ class HomeScreen extends GetView<HomepageController> {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => Scaffold(
-        backgroundColor: Colors.white,
-        appBar: CustomTabBar(
-          currentIndex: 0,
-          title: 'Home',
-          isOnline: controller.isOnline.value,
-          onToggle: controller.onToggleSwitch,
+      () => SafeArea(
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          appBar: CustomTabBar(
+            currentIndex: 0,
+            title: 'Home',
+            isOnline: controller.isOnline.value,
+            onToggle: controller.onToggleSwitch,
+          ),
+          body: controller.hasConnection.value
+              ? (controller.isOnline.value
+                  ? _buildOnlineView(context)
+                  : _buildOfflineView())
+              : const ConnectionLostView(),
         ),
-        body: controller.hasConnection.value
-            ? (controller.isOnline.value
-                ? _buildOnlineView(context)
-                : _buildOfflineView())
-            : const ConnectionLostView(),
       ),
     );
   }

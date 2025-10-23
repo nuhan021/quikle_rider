@@ -1,12 +1,13 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
-import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
+import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/features/map/presentation/controller/map_controller.dart';
 import 'package:quikle_rider/features/map/presentation/model/delivery_model.dart';
-import 'package:quikle_rider/features/map/presentation/screen/parcel_done.dart';
 
 class MapScreen extends StatelessWidget {
   const MapScreen({super.key});
@@ -22,28 +23,27 @@ class MapScreen extends StatelessWidget {
               Get.back(); // Handle device back button
               return false; // Prevent default pop
             },
-            child: Scaffold(
-              backgroundColor: Colors.white,
-              appBar: CustomTabBar(
-                title: 'Map',
-                isOnline: controller.isOnline,
-                onToggle: controller.toggleOnlineStatus,
-                currentIndex: 2,
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.black87),
-                  onPressed: () => Get.back(), // UI back button
+            child: SafeArea(
+              child: Scaffold(
+                backgroundColor: Colors.white,
+                appBar: UnifiedProfileAppBar(
+                  
+                  showActionButton: true,
+                  title: "Map",
+                  action: "Notification",
+                  onActionPressed: () {},
                 ),
+                body: controller.currentDelivery == null
+                    ? const Center(child: CircularProgressIndicator())
+                    : Column(
+                        children: [
+                          // Map Area
+                          _buildMapArea(),
+                          // Delivery Information
+                          _buildDeliveryInfo(context, controller),
+                        ],
+                      ),
               ),
-              body: controller.currentDelivery == null
-                  ? const Center(child: CircularProgressIndicator())
-                  : Column(
-                      children: [
-                        // Map Area
-                        _buildMapArea(),
-                        // Delivery Information
-                        _buildDeliveryInfo(context, controller),
-                      ],
-                    ),
             ),
           );
         },
@@ -146,12 +146,8 @@ class MapScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          'Delivery Address',
-          style: headingStyle2(color: Colors.black87),
-        ),
+        Text('Delivery Address', style: headingStyle2(color: Colors.black87)),
         Container(
-  
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
           decoration: BoxDecoration(
             color: Colors.white10,
@@ -193,10 +189,7 @@ class MapScreen extends StatelessWidget {
               ),
               Text(
                 delivery.customerAddress,
-                style: getTextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: getTextStyle(fontSize: 14, color: Colors.grey[600]),
               ),
             ],
           ),
@@ -248,10 +241,7 @@ class MapScreen extends StatelessWidget {
         Expanded(
           child: Text(
             delivery.deliveryAddress,
-            style: getTextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
+            style: getTextStyle(fontSize: 14, color: Colors.grey[600]),
           ),
         ),
       ],
@@ -262,10 +252,7 @@ class MapScreen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Items to Deliver',
-          style: headingStyle2(color: Colors.black87),
-        ),
+        Text('Items to Deliver', style: headingStyle2(color: Colors.black87)),
         SizedBox(height: 10.h),
         Text(
           delivery.restaurantName,
@@ -323,10 +310,7 @@ class MapScreen extends StatelessWidget {
                 ),
                 Text(
                   item.description,
-                  style: getTextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
+                  style: getTextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
             ),
