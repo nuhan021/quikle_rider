@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
-import 'package:quikle_rider/core/widgets/connection_lost_view.dart';
+import 'package:quikle_rider/core/widgets/connection_lost.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_controller.dart';
 import 'package:quikle_rider/features/all_orders/presentation/screen/all_order_single.dart';
 import 'all_orders_combined.dart';
@@ -35,14 +35,13 @@ class _AllOrdersState extends State<AllOrders>
     return Obx(
       () => SafeArea(
         child: Scaffold(
-        backgroundColor: const Color(0xFFF5F5F5),
+          backgroundColor: const Color(0xFFF5F5F5),
           appBar: UnifiedProfileAppBar(
-                    
-                    showActionButton: true,
-                    title: "All Oders",
-                    action: "Notification",
-                    onActionPressed: () {},
-                  ),
+            showActionButton: true,
+            title: "All Oders",
+            action: "Notification",
+            onActionPressed: () {},
+          ),
           body: controller.hasConnection.value
               ? Padding(
                   padding: EdgeInsets.only(top: 16.h, left: 16.w, right: 16.w),
@@ -80,18 +79,19 @@ class _AllOrdersState extends State<AllOrders>
                           controller: controller.tabController,
                           children: const [
                             AllOrdersCombined(),
-                            AllOrdersSingle()
+                            AllOrdersSingle(),
                           ],
                         ),
                       ),
                     ],
                   ),
                 )
-              : const ConnectionLostView(),
+              : const ConnectionLost(),
         ),
       ),
     );
   }
+
   @override
   void dispose() {
     controller.tabController.dispose();
