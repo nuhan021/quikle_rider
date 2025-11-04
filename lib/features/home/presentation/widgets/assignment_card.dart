@@ -42,8 +42,9 @@ class AssignmentCard extends StatelessWidget {
     final AssignmentStatus? currentStatus = status;
     final bool isPending =
         currentStatus == null || currentStatus == AssignmentStatus.pending;
-    final List<String> breakdownLines =
-        breakdown == null ? const [] : breakdown!.split('\n');
+    final List<String> breakdownLines = breakdown == null
+        ? const []
+        : breakdown!.split('\n');
 
     Color? statusColor;
     if (currentStatus != null) {
@@ -93,10 +94,7 @@ class AssignmentCard extends StatelessWidget {
 
               if (isUrgent)
                 Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 12.w,
-                    vertical: 4.h,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                   decoration: BoxDecoration(
                     color: const Color(0x26FF0000),
                     borderRadius: BorderRadius.circular(4.r),
@@ -130,10 +128,7 @@ class AssignmentCard extends StatelessWidget {
               ),
               if (currentStatus != null) ...[
                 Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 12.w,
-                    vertical: 4.h,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                   decoration: BoxDecoration(
                     color:
                         statusColor?.withOpacity(0.12) ??
@@ -260,7 +255,7 @@ class AssignmentCard extends StatelessWidget {
                     ),
                   ),
               ],
-            )
+            ),
           ],
 
           SizedBox(height: 16.h),

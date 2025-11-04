@@ -19,6 +19,7 @@ class CustomTabBar extends StatefulWidget implements PreferredSizeWidget {
     required this.isOnline,
     required this.onToggle,
     required this.currentIndex,
+
     this.leading,
   });
 
