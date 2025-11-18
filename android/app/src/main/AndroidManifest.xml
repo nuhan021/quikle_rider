@@ -1,8 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <application
         android:label="quikle_rider"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <uses-library android:name="com.google.android.maps" android:required="true" />
+        <meta-data android:name="com.google.android.geo.API_KEY"
+               android:value="AIzaSyD65cza7lynnmbhCN44gs7HupKMnuoU-bo"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
@@ -27,7 +28,6 @@ class MapScreen extends StatelessWidget {
               child: Scaffold(
                 backgroundColor: Colors.white,
                 appBar: UnifiedProfileAppBar(
-                  
                   showActionButton: true,
                   title: "Map",
                   action: "Notification",
@@ -35,13 +35,13 @@ class MapScreen extends StatelessWidget {
                 ),
                 body: controller.currentDelivery == null
                     ? const Center(child: CircularProgressIndicator())
-                    : Column(
-                        children: [
-                          // Map Area
-                          _buildMapArea(),
-                          // Delivery Information
-                          _buildDeliveryInfo(context, controller),
-                        ],
+                    : SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            _buildMapArea(controller),
+                            _buildDeliveryInfo(context, controller),
+                          ],
+                        ),
                       ),
               ),
             ),
@@ -51,57 +51,102 @@ class MapScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMapArea() {
-    return Expanded(
-      child: SizedBox(
-        width: double.infinity,
-        child: Stack(
-          children: [
-            // Map background
-            Container(
-              height: double.infinity,
-              decoration: BoxDecoration(
-                image: const DecorationImage(
-                  image: AssetImage('assets/images/map.png'),
-                  fit: BoxFit.cover,
-                ),
-              ),
+  Widget _buildMapArea(MapController controller) {
+    final target = controller.currentPosition ?? controller.fallbackLocation;
+    final zoom = controller.currentPosition != null ? 15.5 : 14.0;
+
+    return Container(
+      height: 320.h,
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          GoogleMap(
+            initialCameraPosition: CameraPosition(
+              target: target,
+              zoom: zoom,
             ),
-            // Route line and markers
+            myLocationEnabled: controller.hasUserLocation,
+            myLocationButtonEnabled: false,
+            zoomControlsEnabled: false,
+            onMapCreated: controller.attachMapController,
+          ),
+          Positioned(
+            bottom: 16.h,
+            right: 16.w,
+            child: FloatingActionButton.small(
+              heroTag: 'current-location-button',
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black87,
+              onPressed: controller.isFetchingLocation
+                  ? null
+                  : () {
+                      controller.requestCurrentLocation();
+                    },
+              child: controller.isFetchingLocation
+                  ? SizedBox(
+                      width: 18.w,
+                      height: 18.w,
+                      child: const CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.my_location),
+            ),
+          ),
+          if (controller.locationError != null)
             Positioned(
-              top: 50.h,
-              right: 20.w,
-              child: Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: Colors.yellow[700],
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.location_on,
-                  color: Colors.white,
-                  size: 20.sp,
-                ),
-              ),
+              top: 16.h,
+              left: 16.w,
+              right: 16.w,
+              child: _buildLocationBanner(controller),
             ),
-            Positioned(
-              bottom: 80.h,
-              left: 20.w,
-              child: Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: Colors.yellow[700],
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.location_on,
-                  color: Colors.white,
-                  size: 20.sp,
-                ),
-              ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationBanner(MapController controller) {
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.location_off, color: Colors.red[400], size: 20.sp),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Text(
+              controller.locationError!,
+              style: getTextStyle(fontSize: 13, color: Colors.black87),
             ),
-          ],
-        ),
+          ),
+          TextButton(
+            onPressed: controller.isFetchingLocation
+                ? null
+                : () {
+                    controller.requestCurrentLocation();
+                  },
+            child: const Text('Retry'),
+          ),
+        ],
       ),
     );
   }
