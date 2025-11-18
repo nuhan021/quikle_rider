@@ -53,10 +53,7 @@ class HomepageController extends GetxController {
 
   void openNotifications() {
     HapticFeedback.lightImpact();
-    Get.to(
-      () => const NotificationsPage(),
-      transition: Transition.fadeIn,
-    );
+    Get.to(() => const NotificationsPage(), transition: Transition.fadeIn);
   }
 
   @override
@@ -219,16 +216,19 @@ class HomepageController extends GetxController {
 
   void _initConnectivityMonitoring() {
     final connectivity = Connectivity();
-    _connectivitySubscription =
-        connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
-    connectivity.checkConnectivity().then(_updateConnectionStatus).catchError(
-      (_) => hasConnection.value = true,
+    _connectivitySubscription = connectivity.onConnectivityChanged.listen(
+      _updateConnectionStatus,
     );
+    connectivity
+        .checkConnectivity()
+        .then(_updateConnectionStatus)
+        .catchError((_) => hasConnection.value = true);
   }
 
   void _updateConnectionStatus(List<ConnectivityResult> results) {
-    final isConnected =
-        results.any((result) => result != ConnectivityResult.none);
+    final isConnected = results.any(
+      (result) => result != ConnectivityResult.none,
+    );
     final previousState = hasConnection.value;
     hasConnection.value = isConnected;
 
