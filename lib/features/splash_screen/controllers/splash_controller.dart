@@ -1,9 +1,10 @@
-
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:quikle_rider/features/authentication/presentation/screens/login_screen.dart';
+import 'package:quikle_rider/core/services/storage_service.dart';
+import 'package:quikle_rider/core/utils/logging/logger.dart';
+import 'package:quikle_rider/routes/app_routes.dart';
 import 'package:video_player/video_player.dart';
-
 
 class SplashController extends GetxController {
   late final VideoPlayerController video;
@@ -61,8 +62,18 @@ class SplashController extends GetxController {
     final v = video.value;
     if (v.isInitialized && v.position >= playDuration) {
       video.pause();
-      Get.off(() => const LoginScreen());
+      AppLoggerHelper.debug('has token ${StorageService.tokenType}');
+      _handleNavigation();
+
       video.removeListener(_listenDuration);
+    }
+  }
+
+  void _handleNavigation() {
+    if (StorageService.hasToken()) {
+      Get.offAllNamed(AppRoute.getBottomNavBar());
+    } else {
+      Get.offAllNamed(AppRoute.getLoginScreen());
     }
   }
 
