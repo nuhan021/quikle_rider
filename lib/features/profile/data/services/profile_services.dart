@@ -44,6 +44,42 @@ class ProfileServices {
     }
   }
 
+  Future<ResponseData> updateProfile({
+    required String accessToken,
+    required Map<String, dynamic> payload,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/rider/rider-profile/me/');
+
+    try {
+      final response = await _client.put(
+        uri,
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode(payload),
+      );
+
+      final decodedBody = _decodeResponseBody(response.body);
+      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+
+      return ResponseData(
+        isSuccess: isSuccess,
+        statusCode: response.statusCode,
+        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to update profile. Please try again.',
+        responseData: error.toString(),
+      );
+    }
+  }
+
   dynamic _decodeResponseBody(String body) {
     try {
       return jsonDecode(body);

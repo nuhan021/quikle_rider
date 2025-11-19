@@ -12,6 +12,8 @@ class ProfileController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxnString errorMessage = RxnString();
   final Rxn<ProfileModel> profile = Rxn<ProfileModel>();
+  final RxBool isUpdatingProfile = false.obs;
+  final RxnString profileUpdateError = RxnString();
 
   bool get shouldShowLoadingHeader => isLoading.value && profile.value == null;
 
@@ -41,6 +43,13 @@ class ProfileController extends GetxController {
     if (trimmed.isEmpty) return null;
     return trimmed;
   }
+
+  String? get phoneNumber => profile.value?.phone;
+
+  String get profileUpdateErrorText =>
+      profileUpdateError.value?.isNotEmpty == true
+          ? profileUpdateError.value!
+          : 'Unable to update profile.';
 
   @override
   void onInit() {
@@ -79,6 +88,49 @@ class ProfileController extends GetxController {
       }
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<bool> updateProfileData({
+    required String name,
+    required String email,
+    required String drivingLicense,
+    required String nid,
+  }) async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null) {
+      profileUpdateError.value = 'Missing credentials. Please login again.';
+      return false;
+    }
+
+    isUpdatingProfile.value = true;
+    profileUpdateError.value = null;
+    try {
+      final response = await _profileServices.updateProfile(
+        accessToken: accessToken,
+        payload: {
+          'name': name,
+          'email': email,
+          'driving_license': drivingLicense,
+          'nid': nid,
+        },
+      );
+
+      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+        final updatedProfile = ProfileModel.fromJson(
+          response.responseData as Map<String, dynamic>,
+        );
+        profile.value = updatedProfile;
+        errorMessage.value = null;
+        return true;
+      } else {
+        profileUpdateError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to update profile.';
+        return false;
+      }
+    } finally {
+      isUpdatingProfile.value = false;
     }
   }
 }
