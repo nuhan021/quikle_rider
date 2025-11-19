@@ -22,7 +22,7 @@ class BottomNavBar extends StatelessWidget {
       const AllOrders(),
       MapScreen(),
       const WalletScreen(),
-      const ProfileScreen(),
+       ProfileScreen(),
     ];
     return PopScope(
       canPop: false, // Prevent popping unless explicitly handled

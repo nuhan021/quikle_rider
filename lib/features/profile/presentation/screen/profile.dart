@@ -1,28 +1,31 @@
-// ignore_for_file: deprecated_member_use, library_private_types_in_public_api
+// ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
+import 'package:quikle_rider/features/profile/presentation/screen/availability_settings.dart';
+import 'package:quikle_rider/features/profile/presentation/screen/delivery_zone.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/help_support.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/my_profile.dart';
+import 'package:quikle_rider/features/profile/presentation/screen/notification_settings.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/payment_method.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/vehicle_information.dart';
-import 'package:quikle_rider/features/profile/presentation/screen/delivery_zone.dart';
-import 'package:quikle_rider/features/profile/presentation/screen/availability_settings.dart';
-import 'package:quikle_rider/features/profile/presentation/screen/notification_settings.dart';
 import 'package:quikle_rider/features/profile/widgets/profile_completion_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/tier_badge.dart';
 
-class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+class ProfileScreen extends StatelessWidget {
+  ProfileScreen({super.key}) {
+    _controller = Get.isRegistered<ProfileController>()
+        ? Get.find<ProfileController>()
+        : Get.put(ProfileController());
+  }
 
-  @override
-  _ProfileScreenState createState() => _ProfileScreenState();
-}
+  late final ProfileController _controller;
 
-class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -39,51 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             children: [
               /// Profile Header
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: .05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [TierBadge(tier: "Silver")],
-                      ),
-                    ),
-                    CircleAvatar(
-                      radius: 45,
-                      backgroundImage: AssetImage("assets/images/avatar.png"),
-                    ),
-      
-                    SizedBox(height: 12),
-                    Text(
-                      "Vikram Rajput",
-                      style: getTextStyle2(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      "vikramrajput@gmail.com",
-                      style: getTextStyle2(fontSize: 14, color: Colors.black54),
-                    ),
-                  ],
-                ),
-              ),
+              _buildProfileHeader(),
               SizedBox(height: 16.h),
               const ProfileCompletionCard(
                 completionPercent: 85,
@@ -211,6 +170,143 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildProfileHeader() {
+    return Obx(() {
+      if (_controller.shouldShowLoadingHeader) {
+        return _buildLoadingHeader();
+      }
+
+      if (_controller.shouldShowErrorHeader) {
+        return _buildErrorHeader(_controller.headerErrorText);
+      }
+
+      return _buildProfileDetailsCard(
+        name: _controller.displayName,
+        email: _controller.displayEmail,
+        imageUrl: _controller.profileImageUrl,
+      );
+    });
+  }
+
+  Widget _buildProfileDetailsCard({
+    required String name,
+    required String email,
+    String? imageUrl,
+  }) {
+    final hasImage = imageUrl != null && imageUrl.trim().isNotEmpty;
+    final displayName = name.trim().isNotEmpty ? name : 'Rider';
+    final displayEmail =
+        email.trim().isNotEmpty ? email : 'Email not available';
+    final ImageProvider avatarProvider = hasImage
+        ? NetworkImage(imageUrl!)
+        : const AssetImage("assets/images/avatar.png");
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      decoration: _profileCardDecoration(),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [TierBadge(tier: "Silver")],
+            ),
+          ),
+          CircleAvatar(
+            radius: 45,
+            backgroundColor: Colors.grey.shade200,
+            backgroundImage: avatarProvider,
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            displayName,
+            style: getTextStyle2(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            displayEmail,
+            style: getTextStyle2(fontSize: 14, color: Colors.black54),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 40),
+      decoration: _profileCardDecoration(),
+      child: const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+
+  Widget _buildErrorHeader(String message) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: _profileCardDecoration(),
+      child: Column(
+        children: [
+          Icon(
+            Icons.warning_amber_rounded,
+            color: Colors.red[600],
+            size: 40,
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            'Unable to load profile',
+            style: getTextStyle2(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            message,
+            style: getTextStyle2(fontSize: 14, color: Colors.black54),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 16.h),
+          ElevatedButton(
+            onPressed: _controller.fetchProfile,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  BoxDecoration _profileCardDecoration() {
+    return BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: .05),
+          blurRadius: 8,
+          offset: const Offset(0, 3),
+        ),
+      ],
     );
   }
 
