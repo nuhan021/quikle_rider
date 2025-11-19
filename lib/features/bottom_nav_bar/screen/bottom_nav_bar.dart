@@ -20,7 +20,7 @@ class BottomNavBar extends StatelessWidget {
     final List<Widget> screens = [
       const HomeScreen(),
       const AllOrders(),
-      const MapScreen(),
+      MapScreen(),
       const WalletScreen(),
       const ProfileScreen(),
     ];
