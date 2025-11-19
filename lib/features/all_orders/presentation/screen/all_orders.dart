@@ -37,6 +37,7 @@ class _AllOrdersState extends State<AllOrders>
         child: Scaffold(
           backgroundColor: const Color(0xFFF5F5F5),
           appBar: UnifiedProfileAppBar(
+            isback: false,
             showActionButton: true,
             title: "All Oders",
             action: "Notification",

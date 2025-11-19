@@ -33,6 +33,7 @@ class MapScreen extends StatelessWidget {
             child: Scaffold(
               backgroundColor: Colors.white,
               appBar: UnifiedProfileAppBar(
+                isback: false,
                 showActionButton: true,
                 title: "Map",
                 action: "Notification",

@@ -33,6 +33,7 @@ class ProfileScreen extends StatelessWidget {
         backgroundColor: const Color(0xFFF8F9FA),
         appBar: UnifiedProfileAppBar(
           showActionButton: true,
+          isback: false,
           title: "Profile",
           action: "Notification",
           onActionPressed: () {},
@@ -54,7 +55,7 @@ class ProfileScreen extends StatelessWidget {
                 onCompleteNow: null,
               ),
               SizedBox(height: 30.h),
-      
+
               // Menu Items Container
               Container(
                 padding: EdgeInsets.symmetric(vertical: 10.h),
@@ -78,7 +79,7 @@ class ProfileScreen extends StatelessWidget {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const MyProfilePage(),
+                          builder: (context) => MyProfilePage(),
                         ),
                       ),
                     ),
@@ -100,7 +101,7 @@ class ProfileScreen extends StatelessWidget {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>  DeliveryZonePage(),
+                          builder: (context) => DeliveryZonePage(),
                         ),
                       ),
                     ),
@@ -122,7 +123,8 @@ class ProfileScreen extends StatelessWidget {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const AvailabilitySettingsPage(),
+                          builder: (context) =>
+                              const AvailabilitySettingsPage(),
                         ),
                       ),
                     ),
@@ -133,7 +135,8 @@ class ProfileScreen extends StatelessWidget {
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const NotificationSettingsPage(),
+                          builder: (context) =>
+                              const NotificationSettingsPage(),
                         ),
                       ),
                     ),
@@ -198,8 +201,9 @@ class ProfileScreen extends StatelessWidget {
   }) {
     final hasImage = imageUrl != null && imageUrl.trim().isNotEmpty;
     final displayName = name.trim().isNotEmpty ? name : 'Rider';
-    final displayEmail =
-        email.trim().isNotEmpty ? email : 'Email not available';
+    final displayEmail = email.trim().isNotEmpty
+        ? email
+        : 'Email not available';
     final ImageProvider avatarProvider = hasImage
         ? NetworkImage(imageUrl!)
         : const AssetImage("assets/images/avatar.png");
@@ -246,9 +250,7 @@ class ProfileScreen extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 40),
       decoration: _profileCardDecoration(),
-      child: const Center(
-        child: CircularProgressIndicator(),
-      ),
+      child: const Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -259,18 +261,11 @@ class ProfileScreen extends StatelessWidget {
       decoration: _profileCardDecoration(),
       child: Column(
         children: [
-          Icon(
-            Icons.warning_amber_rounded,
-            color: Colors.red[600],
-            size: 40,
-          ),
+          Icon(Icons.warning_amber_rounded, color: Colors.red[600], size: 40),
           SizedBox(height: 12.h),
           Text(
             'Unable to load profile',
-            style: getTextStyle2(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+            style: getTextStyle2(fontSize: 16, fontWeight: FontWeight.w600),
           ),
           SizedBox(height: 8.h),
           Text(

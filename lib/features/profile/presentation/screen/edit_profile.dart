@@ -47,7 +47,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: UnifiedProfileAppBar(title: "Edit Profile"),
+      appBar: UnifiedProfileAppBar( title: "Edit Profile"),
       body: SingleChildScrollView(
         padding: EdgeInsets.only(bottom: 30.h),
         child: Form(
@@ -88,7 +88,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         final imageProvider = imageUrl != null
             ? NetworkImage(imageUrl)
             : const AssetImage('assets/images/loginriderimage.png')
-                as ImageProvider;
+                  as ImageProvider;
         final displayName = _controller.displayName;
         final displayEmail = _controller.displayEmail;
 
@@ -275,7 +275,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             controller: controller,
             readOnly: readOnly,
             keyboardType: keyboardType,
-            validator: validator ??
+            validator:
+                validator ??
                 (value) => readOnly ? null : _requiredValidator(value, label),
             style: TextStyle(fontSize: 14, color: Colors.grey[800]),
             decoration: InputDecoration(

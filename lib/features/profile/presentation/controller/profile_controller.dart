@@ -1,11 +1,14 @@
+import 'dart:io';
+
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/features/profile/data/models/profile_model.dart';
+import 'package:quikle_rider/features/profile/data/models/rider_documents_model.dart';
 import 'package:quikle_rider/features/profile/data/services/profile_services.dart';
 
 class ProfileController extends GetxController {
   ProfileController({ProfileServices? profileServices})
-      : _profileServices = profileServices ?? ProfileServices();
+    : _profileServices = profileServices ?? ProfileServices();
 
   final ProfileServices _profileServices;
 
@@ -14,16 +17,21 @@ class ProfileController extends GetxController {
   final Rxn<ProfileModel> profile = Rxn<ProfileModel>();
   final RxBool isUpdatingProfile = false.obs;
   final RxnString profileUpdateError = RxnString();
+  final RxBool isUploadingDocuments = false.obs;
+  final RxnString documentUploadError = RxnString();
+  final Rxn<RiderDocumentsModel> riderDocuments = Rxn<RiderDocumentsModel>();
 
   bool get shouldShowLoadingHeader => isLoading.value && profile.value == null;
 
   bool get shouldShowErrorHeader {
-    final hasError = errorMessage.value != null && errorMessage.value!.isNotEmpty;
+    final hasError =
+        errorMessage.value != null && errorMessage.value!.isNotEmpty;
     return hasError && profile.value == null;
   }
 
-  String get headerErrorText =>
-      errorMessage.value?.isNotEmpty == true ? errorMessage.value! : 'Unable to fetch profile.';
+  String get headerErrorText => errorMessage.value?.isNotEmpty == true
+      ? errorMessage.value!
+      : 'Unable to fetch profile.';
 
   String get displayName {
     final name = profile.value?.name ?? '';
@@ -48,8 +56,13 @@ class ProfileController extends GetxController {
 
   String get profileUpdateErrorText =>
       profileUpdateError.value?.isNotEmpty == true
-          ? profileUpdateError.value!
-          : 'Unable to update profile.';
+      ? profileUpdateError.value!
+      : 'Unable to update profile.';
+
+  String get documentUploadErrorText =>
+      documentUploadError.value?.isNotEmpty == true
+      ? documentUploadError.value!
+      : 'Unable to upload documents.';
 
   @override
   void onInit() {
@@ -131,6 +144,70 @@ class ProfileController extends GetxController {
       }
     } finally {
       isUpdatingProfile.value = false;
+    }
+  }
+
+  Future<bool> uploadDocuments({
+    File? profileImage,
+    File? nationalId,
+    File? drivingLicense,
+    File? vehicleRegistration,
+    File? vehicleInsurance,
+  }) async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null) {
+      documentUploadError.value = 'Missing credentials. Please login again.';
+      return false;
+    }
+
+    final hasSelection = [
+      profileImage,
+      nationalId,
+      drivingLicense,
+      vehicleRegistration,
+      vehicleInsurance,
+    ].any((file) => file != null);
+
+    if (!hasSelection) {
+      documentUploadError.value = 'Select at least one document to upload.';
+      return false;
+    }
+
+    isUploadingDocuments.value = true;
+    documentUploadError.value = null;
+    try {
+      final response = await _profileServices.uploadDocuments(
+        accessToken: accessToken,
+        profileImage: profileImage,
+        nationalId: nationalId,
+        drivingLicense: drivingLicense,
+        vehicleRegistration: vehicleRegistration,
+        vehicleInsurance: vehicleInsurance,
+      );
+
+      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+        final docs = RiderDocumentsModel.fromJson(
+          response.responseData as Map<String, dynamic>,
+        );
+        riderDocuments.value = docs;
+        final profileImageUrl = docs.profileImage;
+        if (profileImageUrl != null && profileImageUrl.isNotEmpty) {
+          final currentProfile = profile.value;
+          if (currentProfile != null) {
+            profile.value = currentProfile.copyWith(
+              profileImage: profileImageUrl,
+            );
+          }
+        }
+        return true;
+      } else {
+        documentUploadError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to upload documents.';
+        return false;
+      }
+    } finally {
+      isUploadingDocuments.value = false;
     }
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:quikle_rider/core/models/response_data.dart';
@@ -98,5 +99,54 @@ class ProfileServices {
       }
     }
     return 'Something went wrong. Please try again.';
+  }
+
+  Future<ResponseData> uploadDocuments({
+    required String accessToken,
+    File? profileImage,
+    File? nationalId,
+    File? drivingLicense,
+    File? vehicleRegistration,
+    File? vehicleInsurance,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/rider/rider-documents/me/');
+
+    try {
+      final request = http.MultipartRequest('PUT', uri);
+      request.headers.addAll({
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      });
+
+      Future<void> addFile(String field, File? file) async {
+        if (file == null) return;
+        request.files.add(await http.MultipartFile.fromPath(field, file.path));
+      }
+
+      await addFile('pi', profileImage);
+      await addFile('nid', nationalId);
+      await addFile('dl', drivingLicense);
+      await addFile('vr', vehicleRegistration);
+      await addFile('vi', vehicleInsurance);
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      final decodedBody = _decodeResponseBody(response.body);
+      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+
+      return ResponseData(
+        isSuccess: isSuccess,
+        statusCode: response.statusCode,
+        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to upload documents. Please try again.',
+        responseData: error.toString(),
+      );
+    }
   }
 }
