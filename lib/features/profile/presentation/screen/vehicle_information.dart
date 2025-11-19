@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 
 class VehicleInformationPage extends StatefulWidget {
   const VehicleInformationPage({Key? key}) : super(key: key);
@@ -22,35 +23,9 @@ class _VehicleInformationPageState extends State<VehicleInformationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(
-          'Vehicle Information',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
+      appBar: UnifiedProfileAppBar(title: "Vehicle Information"),
       body: Column(
         children: [
-          Container(
-            width: double.infinity,
-            height: 3,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.orange, Colors.yellow],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-            ),
-          ),
           Expanded(
             child: SingleChildScrollView(
               child: Column(

@@ -1,42 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:get/get.dart';
 import 'package:quikle_rider/features/map/presentation/model/delivery_model.dart';
 
-class MapController extends ChangeNotifier {
-  bool _isOnline = true;
-  DeliveryModel? _currentDelivery;
-  bool _isFetchingLocation = false;
-  LatLng? _currentPosition;
-  String? _locationError;
+class MapController extends GetxController {
+  final RxBool isOnline = true.obs;
+  final Rx<DeliveryModel?> currentDelivery = Rx<DeliveryModel?>(null);
+  final RxBool isFetchingLocation = false.obs;
+  final Rxn<LatLng> currentPosition = Rxn<LatLng>();
+  final RxnString locationError = RxnString();
+  final RxString currentAddress = 'Fetching location...'.obs;
   GoogleMapController? _mapController;
-
-  // Getters
-  bool get isOnline => _isOnline;
-  DeliveryModel? get currentDelivery => _currentDelivery;
-  bool get isFetchingLocation => _isFetchingLocation;
-  LatLng? get currentPosition => _currentPosition;
-  bool get hasUserLocation => _currentPosition != null;
-  String? get locationError => _locationError;
 
   LatLng get fallbackLocation =>
       const LatLng(37.42796133580664, -122.085749655962);
 
-  // Constructor
-  MapController() {
+  bool get hasUserLocation => currentPosition.value != null;
+
+  @override
+  void onInit() {
     _loadDeliveryData();
     requestCurrentLocation();
+    super.onInit();
   }
 
   // Toggle online status
   void toggleOnlineStatus() {
-    _isOnline = !_isOnline;
-    notifyListeners();
+    isOnline.toggle();
   }
 
   // Load delivery data (simulate API call)
   void _loadDeliveryData() {
-    _currentDelivery = const DeliveryModel(
+    currentDelivery.value = const DeliveryModel(
       customerName: 'Aanya Desai',
       customerAddress: '123 Main St, Bangkok',
       deliveryAddress: '789 River Rd, Apartment 3B, Riverside Mohakhali',
@@ -58,38 +55,40 @@ class MapController extends ChangeNotifier {
         ),
       ],
     );
-    notifyListeners();
   }
 
   Future<void> requestCurrentLocation() async {
-    _isFetchingLocation = true;
-    _locationError = null;
-    notifyListeners();
+    isFetchingLocation.value = true;
+    locationError.value = null;
+    currentAddress.value = 'Fetching location...';
 
     try {
       final hasPermission = await _ensurePermissions();
-      if (!hasPermission) return;
+      if (!hasPermission) {
+        return;
+      }
 
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
           accuracy: LocationAccuracy.high,
         ),
       );
-      _currentPosition = LatLng(position.latitude, position.longitude);
+      currentPosition.value = LatLng(position.latitude, position.longitude);
+      await _updateAddressFromCoordinates();
       _moveCameraToCurrentLocation();
     } catch (error) {
-      _locationError = 'Unable to fetch current location. Please try again.';
+      locationError.value =
+          'Unable to fetch current location. Please try again.';
       debugPrint('MapController: $error');
     } finally {
-      _isFetchingLocation = false;
-      notifyListeners();
+      isFetchingLocation.value = false;
     }
   }
 
   Future<bool> _ensurePermissions() async {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      _locationError =
+      locationError.value =
           'Enable location services to view your position on the map.';
       return false;
     }
@@ -100,13 +99,13 @@ class MapController extends ChangeNotifier {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      _locationError =
+      locationError.value =
           'Location permission is permanently denied. Please enable it from Settings.';
       return false;
     }
 
     if (permission == LocationPermission.denied) {
-      _locationError =
+      locationError.value =
           'Location permission denied. Please allow access to continue.';
       return false;
     }
@@ -120,24 +119,64 @@ class MapController extends ChangeNotifier {
   }
 
   void _moveCameraToCurrentLocation() {
-    if (_mapController == null || _currentPosition == null) return;
+    final target = currentPosition.value;
+    if (_mapController == null || target == null) return;
     _mapController!.animateCamera(
       CameraUpdate.newCameraPosition(
-        CameraPosition(target: _currentPosition!, zoom: 15.5),
+        CameraPosition(target: target, zoom: 15.5),
       ),
     );
+  }
+
+  Future<void> _updateAddressFromCoordinates() async {
+    final position = currentPosition.value;
+    if (position == null) return;
+
+    try {
+      final placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isEmpty) {
+        currentAddress.value = 'No address found for the current location.';
+        return;
+      }
+
+      final place = placemarks.first;
+      final line1Segments = <String>[
+        if ((place.street ?? '').trim().isNotEmpty) place.street!,
+        if ((place.locality ?? '').trim().isNotEmpty) place.locality!,
+      ];
+      final line2Segments = <String>[
+        if ((place.administrativeArea ?? '').trim().isNotEmpty)
+          place.administrativeArea!,
+        if ((place.country ?? '').trim().isNotEmpty) place.country!,
+      ];
+
+      final formatted = [
+        line1Segments.join(', '),
+        line2Segments.join(', '),
+      ].where((line) => line.trim().isNotEmpty).join('\n');
+
+      currentAddress.value =
+          formatted.isNotEmpty ? formatted : 'Unable to determine address.';
+    } catch (error) {
+      debugPrint('MapController: Failed to resolve address - $error');
+      currentAddress.value = 'Unable to determine address.';
+    }
   }
 
   // Call customer
   void callCustomer() {
     // Implement call functionality
-    debugPrint('Calling customer: ${_currentDelivery?.customerName}');
+    debugPrint('Calling customer: ${currentDelivery.value?.customerName}');
   }
 
   // Message customer
   void messageCustomer() {
     // Implement message functionality
-    debugPrint('Messaging customer: ${_currentDelivery?.customerName}');
+    debugPrint('Messaging customer: ${currentDelivery.value?.customerName}');
   }
 
   // Mark as delivered
@@ -147,8 +186,8 @@ class MapController extends ChangeNotifier {
   }
 
   @override
-  void dispose() {
+  void onClose() {
     _mapController?.dispose();
-    super.dispose();
+    super.onClose();
   }
 }

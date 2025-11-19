@@ -33,7 +33,7 @@ class WalletScreen extends GetView<WalletController> {
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: UnifiedProfileAppBar(title: "Wallet"),
+        appBar: UnifiedProfileAppBar(isback: false, title: "Wallet"),
 
         body: Column(
           children: [

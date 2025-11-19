@@ -51,9 +51,9 @@ class AppRoute {
     GetPage(name: bottomNavBar, page: () => const BottomNavBar()),
     GetPage(name: homeScreen, page: () => const HomeScreen()),
     GetPage(name: allOrders, page: () => const AllOrders()),
-    GetPage(name: mapScreen, page: () => const MapScreen()),
+    GetPage(name: mapScreen, page: () => MapScreen()),
     GetPage(name: walletScreen, page: () => const WalletScreen()),
-    GetPage(name: profileScreen, page: () => const ProfileScreen()),
+    GetPage(name: profileScreen, page: () => ProfileScreen()),
     GetPage(name: parcelDone, page: () => const ParcelDone()),
   ];
 }
