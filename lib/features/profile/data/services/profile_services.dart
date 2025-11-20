@@ -81,6 +81,85 @@ class ProfileServices {
     }
   }
 
+  Future<ResponseData> createVehicle({
+    required String accessToken,
+    required String vehicleType,
+    required String licensePlateNumber,
+    String? model,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/rider/vehicles/me/');
+    final Map<String, dynamic> payload = {
+      'vehicle_type': vehicleType,
+      'license_plate_number': licensePlateNumber,
+    };
+    if (model != null && model.trim().isNotEmpty) {
+      payload['model'] = model;
+    }
+
+    try {
+      final response = await _client.post(
+        uri,
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode(payload),
+      );
+
+      final decodedBody = _decodeResponseBody(response.body);
+      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+
+      return ResponseData(
+        isSuccess: isSuccess,
+        statusCode: response.statusCode,
+        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to save vehicle information. Please try again.',
+        responseData: error.toString(),
+      );
+    }
+  }
+
+  Future<ResponseData> getVehicle({
+    required String accessToken,
+    required int vehicleId,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/rider/vehicles/$vehicleId/');
+
+    try {
+      final response = await _client.get(
+        uri,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      final decodedBody = _decodeResponseBody(response.body);
+      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+
+      return ResponseData(
+        isSuccess: isSuccess,
+        statusCode: response.statusCode,
+        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to load vehicle information. Please try again.',
+        responseData: error.toString(),
+      );
+    }
+  }
+
   dynamic _decodeResponseBody(String body) {
     try {
       return jsonDecode(body);
