@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/features/wallet/data/services/wallet_services.dart';
+import 'package:quikle_rider/features/wallet/models/leaderboard_standing.dart';
+import 'package:quikle_rider/features/wallet/models/rider_performance.dart';
 import 'package:quikle_rider/features/wallet/models/wallet_summary.dart';
 import 'package:quikle_rider/features/wallet/widgets/delevery_card.dart';
 
@@ -32,48 +34,24 @@ class WalletController extends GetxController
     with GetSingleTickerProviderStateMixin {
   WalletController({WalletServices? walletServices})
     : _walletServices = walletServices ?? WalletServices();
-  static const List<String> _periodFilters = ['all', 'week', 'month', 'year'];
+  static const List<String> _periodFilters = ['week', 'month', 'year'];
   late TabController tabController;
   final WalletServices _walletServices;
   final walletSummary = Rxn<WalletSummary>();
   final isWalletLoading = false.obs;
   final walletError = RxnString();
+  final riderPerformance = Rxn<RiderPerformance>();
+  final leaderboardStanding = Rxn<LeaderboardStanding>();
+  final isPerformanceLoading = false.obs;
+  final isLeaderboardLoading = false.obs;
+  final performanceError = RxnString();
+  final leaderboardError = RxnString();
   final avgDeliveryTime = '18'.obs;
   final customerRating = '4.8'.obs;
   final completionRate = '98%'.obs;
   var isOnline = true.obs;
   int _selectedPeriodIndex = 0;
-
   // Data for different periods
-  final _allDeliveries = <DeliveryItem>[
-    const DeliveryItem(
-      id: '1023',
-      status: DeliveryStatus.delivered,
-      amount: '\$12.50',
-      customer: 'John Doe',
-      dateTime: 'Sep 8, 2025 10:15 AM',
-      distance: '2.1 miles',
-      rightSubline: '+\$1.50 tip',
-    ),
-    const DeliveryItem(
-      id: '1022',
-      status: DeliveryStatus.cancelled,
-      amount: '\$0.00',
-      customer: 'Jane Smith',
-      dateTime: 'Sep 7, 2025 4:20 PM',
-      distance: '—',
-      bottomNote: 'Customer cancelled',
-    ),
-    const DeliveryItem(
-      id: '1021',
-      status: DeliveryStatus.delivered,
-      amount: '\$8.20',
-      customer: 'Alice Johnson',
-      dateTime: 'Sep 6, 2025 1:05 PM',
-      distance: '1.3 miles',
-    ),
-  ].obs;
-
   final _weekDeliveries = <DeliveryItem>[
     const DeliveryItem(
       id: '1023',
@@ -141,12 +119,14 @@ class WalletController extends GetxController
   @override
   void onInit() {
     super.onInit();
-    tabController = TabController(length: 4, vsync: this);
+    tabController = TabController(length: _periodFilters.length, vsync: this);
     tabController.addListener(() {
       if (tabController.indexIsChanging) return;
       updateDataForPeriod(tabController.index);
     });
     updateDataForPeriod(0);
+    fetchPerformanceData();
+    fetchLeaderboardData();
   }
 
   void updateDataForPeriod(int index) {
@@ -157,25 +137,20 @@ class WalletController extends GetxController
 
   void _applyDeliveriesForPeriod(int index) {
     switch (index) {
-      case 0: // All
-        avgDeliveryTime.value = '18';
-        customerRating.value = '4.8';
-        completionRate.value = '98%';
-        deliveries.value = _allDeliveries;
-        break;
-      case 1: // Week
+      case 0: // Week
         avgDeliveryTime.value = '15';
         customerRating.value = '4.9';
         completionRate.value = '100%';
         deliveries.value = _weekDeliveries;
         break;
-      case 2: // Month
+      case 1: // Month
         avgDeliveryTime.value = '17';
         customerRating.value = '4.8';
         completionRate.value = '99%';
         deliveries.value = _monthDeliveries;
         break;
-      case 3: // Year
+      case 2: // Year
+      default:
         avgDeliveryTime.value = '20';
         customerRating.value = '4.7';
         completionRate.value = '97%';
@@ -222,7 +197,79 @@ class WalletController extends GetxController
     }
   }
 
-  Future<void> refreshCurrentPeriod() => fetchWalletSummary();
+  Future<void> fetchPerformanceData() async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null || accessToken.isEmpty) {
+      performanceError.value = 'Missing access token.';
+      riderPerformance.value = null;
+      return;
+    }
+
+    isPerformanceLoading.value = true;
+    performanceError.value = null;
+
+    try {
+      final response = await _walletServices.fetchPerformance(
+        accessToken: accessToken,
+      );
+      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+        riderPerformance.value = RiderPerformance.fromJson(
+          response.responseData as Map<String, dynamic>,
+        );
+      } else {
+        performanceError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Failed to load performance data.';
+        riderPerformance.value = null;
+      }
+    } catch (_) {
+      performanceError.value = 'Failed to load performance data.';
+      riderPerformance.value = null;
+    } finally {
+      isPerformanceLoading.value = false;
+    }
+  }
+
+  Future<void> fetchLeaderboardData() async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null || accessToken.isEmpty) {
+      leaderboardError.value = 'Missing access token.';
+      leaderboardStanding.value = null;
+      return;
+    }
+
+    isLeaderboardLoading.value = true;
+    leaderboardError.value = null;
+
+    try {
+      final response = await _walletServices.fetchLeaderboard(
+        accessToken: accessToken,
+      );
+      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+        leaderboardStanding.value = LeaderboardStanding.fromJson(
+          response.responseData as Map<String, dynamic>,
+        );
+      } else {
+        leaderboardError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Failed to load leaderboard.';
+        leaderboardStanding.value = null;
+      }
+    } catch (_) {
+      leaderboardError.value = 'Failed to load leaderboard.';
+      leaderboardStanding.value = null;
+    } finally {
+      isLeaderboardLoading.value = false;
+    }
+  }
+
+  Future<void> refreshCurrentPeriod() async {
+    await Future.wait([
+      fetchWalletSummary(),
+      fetchPerformanceData(),
+      fetchLeaderboardData(),
+    ]);
+  }
 
   WalletSummary? get _summary => walletSummary.value;
 
@@ -295,6 +342,10 @@ class WalletController extends GetxController
 
   List<WeeklyStatus> get weeklyStatuses =>
       _summary?.weeklyStatuses ?? const <WeeklyStatus>[];
+
+  RiderPerformance? get performanceData => riderPerformance.value;
+
+  LeaderboardStanding? get leaderboardData => leaderboardStanding.value;
 
   String _currencyOrPlaceholder(double? value) {
     if (value == null) return '--';

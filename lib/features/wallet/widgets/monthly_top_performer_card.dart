@@ -3,11 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:quikle_rider/features/wallet/models/bonus_tracking_models.dart';
 
 class MonthlyTopPerformerCard extends StatelessWidget {
-  final int currentRank;
-  final int totalDeliveries;
-  final int totalParticipants;
+  final int? currentRank;
+  final int? totalDeliveries;
+  final int? totalParticipants;
   final String prize;
-  final int score;
+  final int? score;
   final String payoutDate;
   final List<ScoreBreakdown> scoreBreakdown;
   final List<PrizeTier> prizeTiers;
@@ -75,7 +75,9 @@ class MonthlyTopPerformerCard extends StatelessWidget {
               Expanded(
                 child: _StatCard(
                   label: 'Current Rank',
-                  value: '#$currentRank of $totalParticipants',
+                  value: currentRank != null && totalParticipants != null
+                      ? '#$currentRank of $totalParticipants'
+                      : '--',
                   icon: Icons.military_tech_rounded,
                   color: Colors.amber,
                 ),
@@ -84,7 +86,7 @@ class MonthlyTopPerformerCard extends StatelessWidget {
               Expanded(
                 child: _StatCard(
                   label: 'Total Deliveries',
-                  value: '$totalDeliveries',
+                  value: totalDeliveries?.toString() ?? '--',
                   icon: Icons.inventory_2_rounded,
                   color: Colors.blue,
                 ),
@@ -138,15 +140,15 @@ class MonthlyTopPerformerCard extends StatelessWidget {
               color: Colors.purple.shade50,
               borderRadius: BorderRadius.circular(12.r),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Score: $score points',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.purple.shade700,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      score != null ? 'Score: $score points' : 'Score data unavailable',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.purple.shade700,
                   ),
                 ),
                 SizedBox(height: 8.h),

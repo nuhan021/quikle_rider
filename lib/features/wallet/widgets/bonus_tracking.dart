@@ -1,16 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:quikle_rider/features/wallet/models/bonus_tracking_models.dart';
+import 'package:quikle_rider/features/wallet/models/leaderboard_standing.dart';
+import 'package:quikle_rider/features/wallet/models/rider_performance.dart';
 
 import 'daily_bonus_tracker.dart';
 import 'monthly_top_performer_card.dart';
 import 'weekly_performance_card.dart';
 
 class BonusTracking extends StatelessWidget {
-  const BonusTracking({super.key});
+  const BonusTracking({
+    super.key,
+    this.performance,
+    this.leaderboard,
+  });
+
+  final RiderPerformance? performance;
+  final LeaderboardStanding? leaderboard;
 
   @override
   Widget build(BuildContext context) {
+    final performanceData = performance;
+    final leaderboardData = leaderboard;
+
     return Column(
       children: [
         DailyBonusTracker(
@@ -57,36 +69,19 @@ class BonusTracking extends StatelessWidget {
         ),
         SizedBox(height: 12.h),
         WeeklyPerformanceCard(
-          currentRating: 4.6,
-          targetRating: 4.5,
-          weeklyBonus: '₹400',
-          isEligible: true,
+          acceptanceRate: performanceData?.acceptanceRate ?? '--',
+          onTimeRate: performanceData?.onTimeRate ?? '--',
+          totalDeliveries: performanceData?.totalDeliveries ?? 0,
         ),
         SizedBox(height: 12.h),
         MonthlyTopPerformerCard(
-          currentRank: 3,
-          totalDeliveries: 287,
-          totalParticipants: 47,
-          prize: '₹250',
-          score: 485,
+          currentRank: leaderboardData?.rank,
+          totalDeliveries: leaderboardData?.totalDeliveries,
+          totalParticipants: leaderboardData?.totalRiders,
+          prize: leaderboardData == null ? '--' : _formatCurrency(leaderboardData.prizeMoney),
+          score: leaderboardData?.score,
           payoutDate: 'Paid on 1st of next month',
-          scoreBreakdown: const [
-            ScoreBreakdown(
-              title: 'Deliveries',
-              formula: '287 × 0.5',
-              points: '143 pts',
-            ),
-            ScoreBreakdown(
-              title: 'Rating',
-              formula: '4.8 × 50',
-              points: '240 pts',
-            ),
-            ScoreBreakdown(
-              title: 'On-Time',
-              formula: '98% × 2',
-              points: '196 pts',
-            ),
-          ],
+          scoreBreakdown: _buildBreakdown(leaderboardData),
           prizeTiers: const [
             PrizeTier(rankLabel: 'Rank 1', reward: '₹2,000'),
             PrizeTier(rankLabel: 'Rank 2', reward: '₹1,000'),
@@ -97,5 +92,39 @@ class BonusTracking extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  static List<ScoreBreakdown> _buildBreakdown(LeaderboardStanding? leaderboard) {
+    if (leaderboard == null) {
+      return const [
+        ScoreBreakdown(title: 'Deliveries', formula: '-', points: '--'),
+        ScoreBreakdown(title: 'Rating', formula: '-', points: '--'),
+        ScoreBreakdown(title: 'On-Time', formula: '-', points: '--'),
+      ];
+    }
+
+    return [
+      ScoreBreakdown(
+        title: 'Deliveries',
+        formula: '${leaderboard.totalDeliveries} drops',
+        points: '${leaderboard.breakdown.deliveriesPoints.toStringAsFixed(0)} pts',
+      ),
+      ScoreBreakdown(
+        title: 'Rating',
+        formula: 'Platform rating',
+        points: '${leaderboard.breakdown.ratingPoints.toStringAsFixed(0)} pts',
+      ),
+      ScoreBreakdown(
+        title: 'On-Time',
+        formula: 'Punctuality',
+        points: '${leaderboard.breakdown.onTimePoints.toStringAsFixed(0)} pts',
+      ),
+    ];
+  }
+
+  static String _formatCurrency(double value) {
+    final hasFraction = value % 1 != 0;
+    final formatted = hasFraction ? value.toStringAsFixed(2) : value.toStringAsFixed(0);
+    return '₹$formatted';
   }
 }

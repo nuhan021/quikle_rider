@@ -68,7 +68,6 @@ class WalletScreen extends GetView<WalletController> {
                     fontWeight: FontWeight.w500,
                   ),
                   tabs: const [
-                    Tab(text: 'All'),
                     Tab(text: 'Week'),
                     Tab(text: 'Month'),
                     Tab(text: 'Year'),
@@ -95,7 +94,7 @@ class WalletScreen extends GetView<WalletController> {
                 }
 
                 return RefreshIndicator(
-                  onRefresh: controller.refreshCurrentPeriod,
+                  onRefresh: () => controller.refreshCurrentPeriod(),
                   child: ListView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -165,7 +164,10 @@ class WalletScreen extends GetView<WalletController> {
                       SizedBox(height: 12.h),
                       const WalletDashboardCard(),
                       SizedBox(height: 12.h),
-                      const BonusTracking(),
+                      BonusTracking(
+                        performance: controller.performanceData,
+                        leaderboard: controller.leaderboardData,
+                      ),
                       SizedBox(height: 12.h),
                       Row(
                         children: [
