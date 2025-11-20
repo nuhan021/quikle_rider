@@ -1,9 +1,11 @@
 import 'dart:io';
 
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/features/profile/data/models/profile_model.dart';
 import 'package:quikle_rider/features/profile/data/models/rider_documents_model.dart';
+import 'package:quikle_rider/features/profile/data/models/vehicle_model.dart';
 import 'package:quikle_rider/features/profile/data/services/profile_services.dart';
 
 class ProfileController extends GetxController {
@@ -20,6 +22,9 @@ class ProfileController extends GetxController {
   final RxBool isUploadingDocuments = false.obs;
   final RxnString documentUploadError = RxnString();
   final Rxn<RiderDocumentsModel> riderDocuments = Rxn<RiderDocumentsModel>();
+  final RxBool isCreatingVehicle = false.obs;
+  final RxnString vehicleCreationError = RxnString();
+  final Rxn<VehicleModel> vehicleDetails = Rxn<VehicleModel>();
 
   bool get shouldShowLoadingHeader => isLoading.value && profile.value == null;
 
@@ -63,6 +68,10 @@ class ProfileController extends GetxController {
       documentUploadError.value?.isNotEmpty == true
       ? documentUploadError.value!
       : 'Unable to upload documents.';
+  String get vehicleCreationErrorText =>
+      vehicleCreationError.value?.isNotEmpty == true
+      ? vehicleCreationError.value!
+      : 'Unable to save vehicle information.';
 
   @override
   void onInit() {
@@ -209,5 +218,68 @@ class ProfileController extends GetxController {
     } finally {
       isUploadingDocuments.value = false;
     }
+  }
+
+  Future<bool> createVehicle({
+    required String vehicleType,
+    required String licensePlateNumber,
+    String? model,
+  }) async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null) {
+      vehicleCreationError.value = 'Missing credentials. Please login again.';
+      return false;
+    }
+
+    isCreatingVehicle.value = true;
+    vehicleCreationError.value = null;
+    try {
+      final response = await _profileServices.createVehicle(
+        accessToken: accessToken,
+        vehicleType: vehicleType,
+        licensePlateNumber: licensePlateNumber,
+        model: model,
+      );
+
+      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+        final vehicle = VehicleModel.fromJson(
+          response.responseData as Map<String, dynamic>,
+        );
+        vehicleDetails.value = vehicle;
+        final vehicleId = vehicle.id;
+        if (vehicleId != null) {
+          await fetchVehicleDetails(vehicleId: vehicleId);
+        }
+        return true;
+      } else {
+        vehicleCreationError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to save vehicle information.';
+        return false;
+      }
+    } finally {
+      isCreatingVehicle.value = false;
+    }
+  }
+
+  Future<VehicleModel?> fetchVehicleDetails({required int vehicleId}) async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null) {
+      return null;
+    }
+
+    final response = await _profileServices.getVehicle(
+      accessToken: accessToken,
+      vehicleId: vehicleId,
+    );
+
+    if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+      final vehicle = VehicleModel.fromJson(
+        response.responseData as Map<String, dynamic>,
+      );
+      vehicleDetails.value = vehicle;
+      return vehicle;
+    }
+    return null;
   }
 }

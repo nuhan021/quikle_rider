@@ -16,6 +16,7 @@ import 'package:quikle_rider/features/profile/presentation/screen/payment_method
 import 'package:quikle_rider/features/profile/presentation/screen/vehicle_information.dart';
 import 'package:quikle_rider/features/profile/widgets/profile_completion_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/tier_badge.dart';
+import 'package:quikle_rider/routes/app_routes.dart';
 
 class ProfileScreen extends StatelessWidget {
   ProfileScreen({super.key}) {
@@ -467,7 +468,9 @@ class ProfileScreen extends StatelessWidget {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                Navigator.pop(context);
+              },
               child: Text(
                 'Cancel',
                 style: TextStyle(
@@ -479,8 +482,7 @@ class ProfileScreen extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context);
-                // Handle sign out logic here
+                Get.offAllNamed(AppRoute.loginScreen);
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red[600],

@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/features/wallet/models/wallet_summary.dart';
 import 'package:quikle_rider/features/wallet/controllers/wallet_controller.dart';
 import 'package:quikle_rider/features/wallet/widgets/balance_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/bonus_tracking.dart';
@@ -78,175 +79,418 @@ class WalletScreen extends GetView<WalletController> {
 
             // Scroll content
             Expanded(
-              child: Obx(
-                () => ListView(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  children: [
-                    const MonthlyEarningsForecastCard(
-                      title: 'Monthly Earnings Forecast',
-                      projectedAmount: 'On track for: ₹24,000',
-                      basisNote: '(Based on current pace)',
-                      goals: [
-                        'Complete 5 more deliveries this week',
-                        'Maintain 4.5+ rating',
-                      ],
-                      onViewDetails: null,
-                    ),
-                    SizedBox(height: 12.h),
-                    // Current Balance Card
-                    BalanceCard(
-                      balance: controller.currentBalance.value,
-                      lastUpdated: controller.avgDeliveryTime.value,
-                      onWithdraw: () async {},
-                    ),
-                    SizedBox(height: 12.h),
-                    const WalletDashboardCard(),
-                    SizedBox(height: 12.h),
-                    BonusTracking(),
-                    SizedBox(height: 12.h),
+              child: Obx(() {
+                if (controller.isWalletLoading.value &&
+                    controller.walletSummary.value == null) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-                    // Stats grid (2 x 2)
-                    Row(
-                      children: [
-                        Expanded(
-                          child: StatTile(
-                            title: 'Total Deliveries',
-                            value: controller.totalDeliveries.value,
-                            box: cardBox,
+                final errorMessage = controller.walletError.value;
+                if (errorMessage != null &&
+                    controller.walletSummary.value == null) {
+                  return _WalletErrorState(
+                    message: errorMessage,
+                    onRetry: () => controller.refreshCurrentPeriod(),
+                  );
+                }
+
+                return RefreshIndicator(
+                  onRefresh: controller.refreshCurrentPeriod,
+                  child: ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    children: [
+                      if (controller.isWalletLoading.value)
+                        Padding(
+                          padding: EdgeInsets.only(top: 8.h, bottom: 12.h),
+                          child: const LinearProgressIndicator(minHeight: 4),
+                        ),
+                      if (errorMessage != null)
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 12.h),
+                          child: Container(
+                            padding: EdgeInsets.all(12.w),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF3F0),
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(
+                                color: const Color(0xFFFFC9BF),
+                              ),
+                            ),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Icon(
+                                  Icons.error_outline,
+                                  color: Color(0xFFB3261E),
+                                ),
+                                SizedBox(width: 8.w),
+                                Expanded(
+                                  child: Text(
+                                    errorMessage,
+                                    style: TextStyle(
+                                      color: const Color(0xFFB3261E),
+                                      fontSize: 13.sp,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () =>
+                                      controller.refreshCurrentPeriod(),
+                                  child: const Text('Retry'),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: StatTile(
-                            title: 'Avg. Delivery Time',
-                            value: controller.avgDeliveryTime.value,
-                            box: cardBox,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12.h),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: StatTile(
-                            title: 'Orders Accepted',
-                            value: controller.totalDeliveries.value,
-                            box: cardBox,
-                          ),
-                        ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: StatTile(
-                            title: 'Orders Rejected',
-                            value: controller.totalDeliveries.value,
-                            box: cardBox,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12.h),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: StatTile(
-                            title: 'Customer Rating',
-                            value: controller.customerRating.value,
-                            box: cardBox,
-                          ),
-                        ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: StatTile(
-                            title: 'Completion Rate',
-                            value: controller.completionRate.value,
-                            box: cardBox,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16.h),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: StatTile(
-                            title: 'Acceptance Rate %',
-                            value: "${controller.totalDeliveries.value}%",
-                            box: cardBox,
-                          ),
-                        ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: StatTile(
-                            title: 'On-Time Delivery %',
-                            value: "${controller.avgDeliveryTime.value}%",
-                            box: cardBox,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16.h),
-                    StatTile(
-                      title: 'Total Orders',
-                      value: controller.totalDeliveries.value,
-                      box: cardBox,
-                    ),
-                    SizedBox(height: 16.h),
-                    Text(
-                      'Customer Ratings',
-                      style: headingStyle2(color: Colors.black),
-                    ),
-                    // Custom Rating Icons Card
-                    RatingCard(
-                      rating: 4.5,
-                      totalRatings: '5.2K Ratings',
-                      reviewCount: 18,
-                    ),
-                    // Bronze Tier
-                    //current Tier Card
-                    TierCard(benefits: '₹16,000-18,500/month'),
-                    // Past Deliveries header
-                    Padding(
-                      padding: EdgeInsets.only(
-                        left: 4.w,
-                        bottom: 8.h,
-                        top: 8.h,
+                      MonthlyEarningsForecastCard(
+                        title: 'Monthly Earnings Forecast',
+                        projectedAmount: controller.forecastProjectedAmountText,
+                        basisNote: controller.forecastBasisNoteText,
+                        goals: const [
+                          'Complete 5 more deliveries this week',
+                          'Maintain 4.5+ rating',
+                        ],
+                        onViewDetails: null,
+                        currentAmount: controller.forecastCurrentValue,
+                        targetAmount: controller.forecastTargetValue,
                       ),
-                      child: Text(
-                        'Past Deliveries',
+                      SizedBox(height: 12.h),
+                      BalanceCard(
+                        balance: controller.finalEarningsText,
+                        lastUpdated: controller.balanceSubtitle,
+                        onWithdraw: () async {},
+                      ),
+                      SizedBox(height: 12.h),
+                      const WalletDashboardCard(),
+                      SizedBox(height: 12.h),
+                      const BonusTracking(),
+                      SizedBox(height: 12.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: StatTile(
+                              title: 'Total Deliveries',
+                              value: controller.totalDeliveriesText,
+                              box: cardBox,
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: StatTile(
+                              title: 'Delivery Pay',
+                              value: controller.deliveryPayText,
+                              box: cardBox,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: StatTile(
+                              title: 'Weekly Bonuses',
+                              value: controller.weeklyBonusText,
+                              box: cardBox,
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: StatTile(
+                              title: 'Excellence Bonus',
+                              value: controller.excellenceBonusText,
+                              box: cardBox,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: StatTile(
+                              title: 'Subtotal',
+                              value: controller.subtotalText,
+                              box: cardBox,
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: StatTile(
+                              title: 'Top Up',
+                              value: controller.topUpText,
+                              box: cardBox,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: StatTile(
+                              title: 'Final Earnings',
+                              value: controller.finalEarningsStatText,
+                              box: cardBox,
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: StatTile(
+                              title: 'Forecast Progress',
+                              value: controller.forecastProgressText,
+                              box: cardBox,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: StatTile(
+                              title: 'Bonus Deliveries',
+                              value: controller.bonusDeliveriesText,
+                              box: cardBox,
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: StatTile(
+                              title: 'Acceptance Rate %',
+                              value: controller.bonusAcceptanceText,
+                              box: cardBox,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: StatTile(
+                              title: 'On-Time Delivery %',
+                              value: controller.bonusOnTimeText,
+                              box: cardBox,
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: StatTile(
+                              title: 'Avg. Delivery Time',
+                              value: controller.avgDeliveryTime.value,
+                              box: cardBox,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: StatTile(
+                              title: 'Customer Rating',
+                              value: controller.customerRating.value,
+                              box: cardBox,
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: StatTile(
+                              title: 'Completion Rate',
+                              value: controller.completionRate.value,
+                              box: cardBox,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (controller.weeklyStatuses.isNotEmpty) ...[
+                        SizedBox(height: 16.h),
+                        _WeeklyStatuses(
+                          statuses: controller.weeklyStatuses,
+                          box: cardBox,
+                        ),
+                      ],
+                      SizedBox(height: 16.h),
+                      Text(
+                        'Customer Ratings',
                         style: headingStyle2(color: Colors.black),
                       ),
-                    ),
-
-                    ListView.builder(
-                      itemCount: controller.deliveries.length,
-                      shrinkWrap: true, // important for nested list
-                      physics:
-                          const NeverScrollableScrollPhysics(), // use parent ListView's scroll
-                      itemBuilder: (context, index) {
-                        final d = controller.deliveries[index];
-                        return DeliveryCard(
-                          box: cardBox, // pass decoration via `box`
-                          orderId: d.id,
-                          status: d.status,
-                          amount: d.amount,
-                          customerName: d.customer,
-                          dateTime: d.dateTime,
-                          distance: d.distance,
-                          rightSubline: d.rightSubline,
-                          bottomNote: d.bottomNote,
-                        );
-                      },
-                    ),
-
-                    SizedBox(height: 24.h),
-                  ],
-                ),
-              ),
+                      RatingCard(
+                        rating: 4.5,
+                        totalRatings: '5.2K Ratings',
+                        reviewCount: 18,
+                      ),
+                      TierCard(benefits: '₹16,000-18,500/month'),
+                      Padding(
+                        padding: EdgeInsets.only(
+                          left: 4.w,
+                          bottom: 8.h,
+                          top: 8.h,
+                        ),
+                        child: Text(
+                          'Past Deliveries',
+                          style: headingStyle2(color: Colors.black),
+                        ),
+                      ),
+                      ListView.builder(
+                        itemCount: controller.deliveries.length,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          final d = controller.deliveries[index];
+                          return DeliveryCard(
+                            box: cardBox,
+                            orderId: d.id,
+                            status: d.status,
+                            amount: d.amount,
+                            customerName: d.customer,
+                            dateTime: d.dateTime,
+                            distance: d.distance,
+                            rightSubline: d.rightSubline,
+                            bottomNote: d.bottomNote,
+                          );
+                        },
+                      ),
+                      SizedBox(height: 24.h),
+                    ],
+                  ),
+                );
+              }),
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+class _WalletErrorState extends StatelessWidget {
+  const _WalletErrorState({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 24.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.account_balance_wallet_outlined,
+              size: 48,
+              color: Colors.black54,
+            ),
+            SizedBox(height: 12.h),
+            Text(
+              'Unable to load wallet',
+              style: headingStyle2(color: Colors.black),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.black54, fontSize: 13.sp),
+            ),
+            SizedBox(height: 16.h),
+            ElevatedButton(onPressed: onRetry, child: const Text('Try Again')),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WeeklyStatuses extends StatelessWidget {
+  const _WeeklyStatuses({required this.statuses, required this.box});
+
+  final List<WeeklyStatus> statuses;
+  final BoxDecoration box;
+
+  @override
+  Widget build(BuildContext context) {
+    if (statuses.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      padding: EdgeInsets.all(14.w),
+      decoration: box,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Weekly Bonus Status',
+            style: headingStyle2(color: Colors.black),
+          ),
+          SizedBox(height: 12.h),
+          ...statuses.map(
+            (status) => Padding(
+              padding: EdgeInsets.symmetric(vertical: 6.h),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 4.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFE8A3),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Text(
+                      'Week ${status.week}',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF8C6B00),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          status.status,
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          'Bonus: ${_formatBonus(status.bonus)}',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatBonus(double bonus) {
+    final hasFraction = bonus % 1 != 0;
+    final formatted = hasFraction
+        ? bonus.toStringAsFixed(2)
+        : bonus.toStringAsFixed(0);
+    return '₹$formatted';
   }
 }
