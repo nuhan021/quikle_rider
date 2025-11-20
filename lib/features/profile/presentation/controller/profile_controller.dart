@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/features/profile/data/models/profile_model.dart';
@@ -261,6 +262,21 @@ class ProfileController extends GetxController {
       isCreatingVehicle.value = false;
     }
   }
+
+  RoutesApiRequest request = RoutesApiRequest(
+    origin: PointLatLng(37.7749, -122.4194),
+    destination: PointLatLng(37.3382, -121.8863),
+    travelMode: TravelMode.driving,
+    routeModifiers: RouteModifiers(
+      avoidTolls: true,
+      avoidHighways: false,
+      avoidFerries: true,
+      avoidIndoor: false,
+    ),
+    routingPreference: RoutingPreference.trafficAware,
+    units: Units.metric,
+    polylineQuality: PolylineQuality.highQuality,
+  );
 
   Future<VehicleModel?> fetchVehicleDetails({required int vehicleId}) async {
     final accessToken = StorageService.accessToken;

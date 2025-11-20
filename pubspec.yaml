@@ -82,6 +82,9 @@ dependencies:
   file_picker: ^10.3.2
   app_settings: ^6.1.1
   google_maps_flutter: ^2.6.1
+  flutter_polyline_points: ^3.1.0
+  google_api_headers: ^5.0.0
+  location: ^8.0.1
 
 dev_dependencies:
   flutter_test:
