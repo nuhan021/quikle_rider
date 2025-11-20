@@ -462,6 +462,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.30"
+  flutter_polyline_points:
+    dependency: "direct main"
+    description:
+      name: flutter_polyline_points
+      sha256: c775fe59fbcf1f925d611c039555c7f58ed6d9411747b7a2915bbd9c5e730a51
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   flutter_screenutil:
     dependency: "direct main"
     description:
@@ -608,6 +616,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.3"
+  google_api_headers:
+    dependency: "direct main"
+    description:
+      name: google_api_headers
+      sha256: "458a7accbb0fa1a182a1d21ea0f4360f18c4a30c0a4a44d24df223ad878e019f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.0"
   google_maps:
     dependency: transitive
     description:
@@ -840,6 +856,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.1"
+  location:
+    dependency: "direct main"
+    description:
+      name: location
+      sha256: b080053c181c7d152c43dd576eec6436c40e25f326933051c330da563ddd5333
+      url: "https://pub.dev"
+    source: hosted
+    version: "8.0.1"
+  location_platform_interface:
+    dependency: transitive
+    description:
+      name: location_platform_interface
+      sha256: ca8700bb3f6b1e8b2afbd86bd78b2280d116c613ca7bfa1d4d7b64eba357d749
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.1"
+  location_web:
+    dependency: transitive
+    description:
+      name: location_web
+      sha256: b8e3add5efe0d65c5e692b7a135d80a4015c580d3ea646fa71973e97668dd868
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.1"
   logger:
     dependency: "direct main"
     description:
@@ -920,6 +960,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
+  package_info_plus:
+    dependency: transitive
+    description:
+      name: package_info_plus
+      sha256: f69da0d3189a4b4ceaeb1a3defb0f329b3b352517f52bed4290f83d4f06bc08d
+      url: "https://pub.dev"
+    source: hosted
+    version: "9.0.0"
+  package_info_plus_platform_interface:
+    dependency: transitive
+    description:
+      name: package_info_plus_platform_interface
+      sha256: "202a487f08836a592a6bd4f901ac69b3a8f146af552bbd14407b6b41e1c3f086"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.2.1"
   path:
     dependency: transitive
     description:
@@ -1582,5 +1638,5 @@ packages:
     source: hosted
     version: "3.1.2"
 sdks:
-  dart: ">=3.9.0 <4.0.0"
-  flutter: ">=3.35.0"
+  dart: ">=3.9.2 <4.0.0"
+  flutter: ">=3.35.6"
