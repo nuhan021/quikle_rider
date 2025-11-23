@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:quikle_rider/core/models/response_data.dart';
+import 'package:quikle_rider/core/utils/logging/logger.dart';
 
 class ProfileServices {
   ProfileServices({http.Client? client}) : _client = client ?? http.Client();
@@ -253,6 +254,7 @@ class ProfileServices {
       final response = await http.post(url, headers: headers, body: body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        AppLoggerHelper.debug("result: ${response.body}");
         return jsonDecode(response.body);
       } else {
         return null;

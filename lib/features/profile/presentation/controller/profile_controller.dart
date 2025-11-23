@@ -8,6 +8,7 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
+import 'package:quikle_rider/core/utils/logging/logger.dart';
 import 'package:quikle_rider/features/profile/data/models/profile_model.dart';
 import 'package:quikle_rider/features/profile/data/models/rider_documents_model.dart';
 import 'package:quikle_rider/features/profile/data/models/vehicle_model.dart';
@@ -365,7 +366,7 @@ class ProfileController extends GetxController {
         startAt: startAtStr,
         endAt: endAtStr,
       );
-
+     
       // Handle Response
       if (result != null) {
         Get.snackbar(
