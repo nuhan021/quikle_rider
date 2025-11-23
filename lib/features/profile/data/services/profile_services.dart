@@ -228,4 +228,37 @@ class ProfileServices {
       );
     }
   }
+
+  Future<Map<String, dynamic>?> updateRiderAvailability({
+    required String token,
+    required bool isAvailable,
+    required String startAt,
+    required String endAt,
+  }) async {
+    final url = Uri.parse('$_baseUrl/rider/rider-availability/me/');
+
+    final headers = {
+      'accept': 'application/json',
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/x-www-form-urlencoded',
+    };
+
+    final body = {
+      'is_available': isAvailable.toString(),
+      'start_at': startAt,
+      'end_at': endAt,
+    };
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return jsonDecode(response.body);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
 }

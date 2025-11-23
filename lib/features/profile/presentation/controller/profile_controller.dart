@@ -1,8 +1,12 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/features/profile/data/models/profile_model.dart';
 import 'package:quikle_rider/features/profile/data/models/rider_documents_model.dart';
@@ -14,7 +18,7 @@ class ProfileController extends GetxController {
     : _profileServices = profileServices ?? ProfileServices();
 
   final ProfileServices _profileServices;
-
+  final RxBool isavaiabilityProfile = false.obs;
   final RxBool isLoading = false.obs;
   final RxnString errorMessage = RxnString();
   final Rxn<ProfileModel> profile = Rxn<ProfileModel>();
@@ -26,6 +30,13 @@ class ProfileController extends GetxController {
   final RxBool isCreatingVehicle = false.obs;
   final RxnString vehicleCreationError = RxnString();
   final Rxn<VehicleModel> vehicleDetails = Rxn<VehicleModel>();
+
+  //availability settings
+
+  // Using TimeOfDay for UI selection
+  var startTime = TimeOfDay.now().obs;
+  var endTime = TimeOfDay.now().obs;
+  var isAvailable = false.obs;
 
   bool get shouldShowLoadingHeader => isLoading.value && profile.value == null;
 
@@ -78,6 +89,32 @@ class ProfileController extends GetxController {
   void onInit() {
     super.onInit();
     fetchProfile();
+  }
+
+  /// Formats TimeOfDay to API expected string "HH:mm:ss.SSSZ"
+  String _formatTimeForApi(TimeOfDay time) {
+    final now = DateTime.now();
+    // Create a DateTime with today's date and the selected time
+    final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
+
+    // Format: 04:09:52.681
+    final formatter = DateFormat('HH:mm:ss.SSS');
+
+    // Append 'Z' to indicate UTC/Zulu time as per your curl example
+    return "${formatter.format(dt)}Z";
+  }
+
+  // bool availability funtions
+  void toggleAvailability(bool value) {
+    isAvailable.value = value;
+  }
+
+  void setStartTime(TimeOfDay time) {
+    startTime.value = time;
+  }
+
+  void setEndTime(TimeOfDay time) {
+    endTime.value = time;
   }
 
   Future<void> fetchProfile() async {
@@ -297,5 +334,67 @@ class ProfileController extends GetxController {
       return vehicle;
     }
     return null;
+  }
+
+  // Avaulability settings
+
+  /// Calls the Service to update data
+  Future<void> updateAvailabilitySettings() async {
+    final token = StorageService.accessToken;
+    if (token == null || token.isEmpty) {
+      Get.snackbar(
+        "Error",
+        "Authentication token not found.",
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+
+      // Prepare data
+      String startAtStr = _formatTimeForApi(startTime.value);
+      String endAtStr = _formatTimeForApi(endTime.value);
+
+      // Call the API
+      final result = await _profileServices.updateRiderAvailability(
+        token: token,
+        isAvailable: isAvailable.value,
+        startAt: startAtStr,
+        endAt: endAtStr,
+      );
+
+      // Handle Response
+      if (result != null) {
+        Get.snackbar(
+          "Success",
+          "Availability updated successfully!",
+          backgroundColor: Colors.green.withOpacity(0.2),
+          colorText: Colors.green[900],
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+        );
+      } else {
+        Get.snackbar(
+          "Failed",
+          "Could not update settings. Please try again.",
+          backgroundColor: Colors.red.withOpacity(0.2),
+          colorText: Colors.red[900],
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        "An unexpected error occurred: $e",
+        backgroundColor: Colors.red.withOpacity(0.2),
+        colorText: Colors.red[900],
+      );
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

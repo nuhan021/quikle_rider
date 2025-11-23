@@ -1,11 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/features/map/presentation/controller/map_controller.dart';
@@ -60,125 +57,6 @@ class MapScreen extends StatelessWidget {
 
   Widget _buildlivetracking() {
     return LiveMap();
-  }
-
-  // Widget _buildMapArea(MapController controller) {
-  //   final target =
-  //       controller.currentPosition.value ?? controller.fallbackLocation;
-  //   final zoom = controller.currentPosition.value != null ? 15.5 : 14.0;
-
-  //   return Container(
-  //     height: 320.h,
-  //     margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-  //     decoration: BoxDecoration(
-  //       borderRadius: BorderRadius.circular(16.r),
-  //       boxShadow: [
-  //         BoxShadow(
-  //           color: Colors.black.withOpacity(0.08),
-  //           blurRadius: 12,
-  //           offset: const Offset(0, 4),
-  //         ),
-  //       ],
-  //     ),
-  //     clipBehavior: Clip.antiAlias,
-  //     child: Stack(
-  //       children: [
-  //         GoogleMap(
-  //           circles: {
-  //             Circle(
-  //               circleId: const CircleId('current-location'),
-  //               center: target,
-  //               radius: 100,
-  //               fillColor: Colors.blue.withOpacity(0.1),
-  //               strokeColor: Colors.blue.withOpacity(0.5),
-  //               strokeWidth: 2,
-  //             ),
-  //           },
-  //           markers: {
-  //             Marker(
-  //               markerId: const MarkerId('current-location'),
-  //               position: target,
-  //             ),
-  //           },
-  //           initialCameraPosition: CameraPosition(target: target, zoom: zoom),
-  //           myLocationEnabled: controller.hasUserLocation,
-  //           myLocationButtonEnabled: false,
-  //           zoomControlsEnabled: false,
-  //           onMapCreated: controller.attachMapController,
-  //           gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-  //             Factory<OneSequenceGestureRecognizer>(
-  //               () => EagerGestureRecognizer(),
-  //             ),
-  //           },
-  //         ),
-  //         Positioned(
-  //           bottom: 16.h,
-  //           right: 16.w,
-  //           child: FloatingActionButton.small(
-  //             heroTag: 'current-location-button',
-  //             backgroundColor: Colors.white,
-  //             foregroundColor: Colors.black87,
-  //             onPressed: controller.isFetchingLocation.value
-  //                 ? null
-  //                 : () {
-  //                     controller.requestCurrentLocation();
-  //                   },
-  //             child: controller.isFetchingLocation.value
-  //                 ? SizedBox(
-  //                     width: 18.w,
-  //                     height: 18.w,
-  //                     child: const CircularProgressIndicator(strokeWidth: 2),
-  //                   )
-  //                 : const Icon(Icons.my_location),
-  //           ),
-  //         ),
-  //         if (controller.locationError.value != null)
-  //           Positioned(
-  //             top: 16.h,
-  //             left: 16.w,
-  //             right: 16.w,
-  //             child: _buildLocationBanner(controller),
-  //           ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
-  Widget _buildLocationBanner(MapController controller) {
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.location_off, color: Colors.red[400], size: 20.sp),
-          SizedBox(width: 10.w),
-          Expanded(
-            child: Text(
-              controller.locationError.value!,
-              style: getTextStyle(fontSize: 13, color: Colors.black87),
-            ),
-          ),
-          TextButton(
-            onPressed: controller.isFetchingLocation.value
-                ? null
-                : () {
-                    controller.requestCurrentLocation();
-                  },
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildDeliveryInfo(

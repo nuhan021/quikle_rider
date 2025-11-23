@@ -12,39 +12,46 @@ const String googleMapsApiKey = 'AIzaSyD65cza7lynnmbhCN44gs7HupKMnuoU-bo';
 
 class TrackingController extends GetxController {
   BitmapDescriptor sourceIcon = BitmapDescriptor.defaultMarker;
-  final BitmapDescriptor destinationIcon = BitmapDescriptor.defaultMarker;
-  final BitmapDescriptor currentLocationIcon = BitmapDescriptor.defaultMarker;
-
+  BitmapDescriptor destinationIcon = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor currentLocationIcon = BitmapDescriptor.defaultMarker;
   final Completer<GoogleMapController> mapController = Completer();
-
   final Rxn<LatLng> currentLocation = Rxn<LatLng>();
   final Rxn<LatLng> destination = Rxn<LatLng>();
-
   final RxSet<Marker> markers = <Marker>{}.obs;
   final RxSet<Polyline> polylines = <Polyline>{}.obs;
   final RxList<LatLng> polylineCoordinates = <LatLng>[].obs;
   int polylineIdCounter = 1;
-
   StreamSubscription<Position>? positionSubscription;
   final RxBool isTrackingLive = false.obs;
   bool _mapActive = true;
-
   static const double destinationThresholdMeters = 50.0;
 
-  void onchangeicon() async {
-    await BitmapDescriptor.fromAssetImage(
-      const ImageConfiguration(size: Size(48, 48)),
-      'assets/icons/profile.png',
-    ).then((icon) {
-      sourceIcon = icon;
-    });
+  void onChangeIcon() async {
+    // Load custom marker for source
+    final BitmapDescriptor customSource = await BitmapDescriptor.asset(
+      const ImageConfiguration(size: Size(200, 100)),
+      'assets/images/riderpick.png',
+    );
+
+    // Keep current location icon default
+    currentLocationIcon = BitmapDescriptor.defaultMarker;
+
+    // Set source icon to custom marker
+    sourceIcon = customSource;
+
+    // Destination icon stays unchanged (default)
+    destinationIcon = BitmapDescriptor.defaultMarkerWithHue(
+      BitmapDescriptor.hueGreen,
+    );
+
+    update();
   }
 
   @override
   void onInit() {
     super.onInit();
     _determinePosition();
-    onchangeicon();
+    onChangeIcon();
   }
 
   @override
@@ -102,13 +109,19 @@ class TrackingController extends GetxController {
     }
 
     final position = await Geolocator.getCurrentPosition(
+      // ignore: deprecated_member_use
       desiredAccuracy: LocationAccuracy.high,
     );
 
     final newLocation = LatLng(position.latitude, position.longitude);
     currentLocation.value = newLocation;
     markers.add(
-      _buildMarker('current', 'Current Location', newLocation, sourceIcon),
+      _buildMarker(
+        'current',
+        'Current Location',
+        newLocation,
+        currentLocationIcon,
+      ),
     );
 
     await _moveCameraToPosition(newLocation, 16);
@@ -118,9 +131,22 @@ class TrackingController extends GetxController {
     if (isTrackingLive.value) return;
 
     destination.value = destinationPoint;
+    markers.removeWhere((marker) => marker.markerId.value == 'source');
     markers.removeWhere((marker) => marker.markerId.value == 'destination');
+
+    // Add a static source marker with custom icon
+    final current = currentLocation.value;
+    if (current != null) {
+      markers.add(_buildMarker('source', 'Source', current, sourceIcon));
+    }
+
     markers.add(
-      _buildMarker('destination', 'Destination', destinationPoint, sourceIcon),
+      _buildMarker(
+        'destination',
+        'Destination',
+        destinationPoint,
+        destinationIcon,
+      ),
     );
 
     polylines.clear();
@@ -137,6 +163,7 @@ class TrackingController extends GetxController {
     final polylinePoints = PolylinePoints(apiKey: googleMapsApiKey);
 
     final result = await polylinePoints.getRouteBetweenCoordinates(
+      // ignore: deprecated_member_use
       request: PolylineRequest(
         origin: PointLatLng(
           currentLocation.value!.latitude,
@@ -210,7 +237,7 @@ class TrackingController extends GetxController {
                 'current',
                 'Your Live Location',
                 newLocation,
-                sourceIcon,
+                currentLocationIcon,
               ),
             );
 
@@ -251,11 +278,11 @@ class TrackingController extends GetxController {
   }
 
   void setCustomMarkerIcon() {
+    // ignore: deprecated_member_use
     BitmapDescriptor.fromAssetImage(
       ImageConfiguration.empty,
       'assets/icons/car.png',
     ).then((icon) {
-      // This can be wired to use a custom icon later.
       // ignore: unused_local_variable
       final customIcon = icon;
     });
