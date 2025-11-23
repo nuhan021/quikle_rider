@@ -8,6 +8,7 @@ class MonthlyEarningsForecastCard extends StatefulWidget {
   final String projectedAmount;
   final String basisNote;
   final List<String> goals;
+  final String currentBalanceText;
   final VoidCallback? onViewDetails;
   final double currentAmount;
   final double targetAmount;
@@ -18,16 +19,19 @@ class MonthlyEarningsForecastCard extends StatefulWidget {
     required this.projectedAmount,
     required this.basisNote,
     required this.goals,
+    this.currentBalanceText = '₹0',
     this.onViewDetails,
-    this.currentAmount = 16000,
-    this.targetAmount = 25000,
+    this.currentAmount = 0,
+    this.targetAmount = 0,
   });
 
   @override
-  State<MonthlyEarningsForecastCard> createState() => _MonthlyEarningsForecastCardState();
+  State<MonthlyEarningsForecastCard> createState() =>
+      _MonthlyEarningsForecastCardState();
 }
 
-class _MonthlyEarningsForecastCardState extends State<MonthlyEarningsForecastCard>
+class _MonthlyEarningsForecastCardState
+    extends State<MonthlyEarningsForecastCard>
     with TickerProviderStateMixin {
   late AnimationController _ctrl;
   late AnimationController _progCtrl;
@@ -36,9 +40,18 @@ class _MonthlyEarningsForecastCardState extends State<MonthlyEarningsForecastCar
   @override
   void initState() {
     super.initState();
-    _ctrl = AnimationController(duration: const Duration(milliseconds: 800), vsync: this)..forward();
-    _progCtrl = AnimationController(duration: const Duration(milliseconds: 1500), vsync: this);
-    _pulse = AnimationController(duration: const Duration(milliseconds: 2000), vsync: this)..repeat(reverse: true);
+    _ctrl = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    )..forward();
+    _progCtrl = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    _pulse = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    )..repeat(reverse: true);
     Future.delayed(const Duration(milliseconds: 300), _progCtrl.forward);
   }
 
@@ -55,8 +68,10 @@ class _MonthlyEarningsForecastCardState extends State<MonthlyEarningsForecastCar
     return FadeTransition(
       opacity: _ctrl,
       child: SlideTransition(
-        position: Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero)
-            .animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut)),
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.1),
+          end: Offset.zero,
+        ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeOut)),
         child: Container(
           padding: EdgeInsets.all(20.w),
           decoration: BoxDecoration(
@@ -81,6 +96,8 @@ class _MonthlyEarningsForecastCardState extends State<MonthlyEarningsForecastCar
               _buildHeader(),
               SizedBox(height: 16.h),
               _buildProgress(),
+              SizedBox(height: 12.h),
+              _buildCurrentBalance(),
               SizedBox(height: 18.h),
               _buildGoals(),
               SizedBox(height: 20.h),
@@ -112,12 +129,18 @@ class _MonthlyEarningsForecastCardState extends State<MonthlyEarningsForecastCar
           builder: (_, __) => Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: Color.lerp(const Color(0xFFB87700).withOpacity(0.1),
-                  const Color(0xFFB87700).withOpacity(0.2), _pulse.value),
+              color: Color.lerp(
+                const Color(0xFFB87700).withOpacity(0.1),
+                const Color(0xFFB87700).withOpacity(0.2),
+                _pulse.value,
+              ),
               borderRadius: BorderRadius.circular(8.r),
               border: Border.all(
-                color: Color.lerp(const Color(0xFFB87700).withOpacity(0.3),
-                    const Color(0xFFB87700).withOpacity(0.6), _pulse.value)!,
+                color: Color.lerp(
+                  const Color(0xFFB87700).withOpacity(0.3),
+                  const Color(0xFFB87700).withOpacity(0.6),
+                  _pulse.value,
+                )!,
               ),
             ),
             child: Text(
@@ -135,11 +158,67 @@ class _MonthlyEarningsForecastCardState extends State<MonthlyEarningsForecastCar
     );
   }
 
+  Widget _buildCurrentBalance() {
+    return Container(
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: const Color(0xFFFFD966).withOpacity(0.5)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 38.w,
+            height: 38.w,
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF1C1),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: const Icon(
+              Icons.account_balance_wallet_outlined,
+              color: Color(0xFFB87700),
+            ),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Current Balance',
+                  style: TextStyle(
+                    fontFamily: 'Inter',
+                    fontSize: 12.sp,
+                    color: const Color(0xFF92400E),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  widget.currentBalanceText,
+                  style: TextStyle(
+                    fontFamily: 'Obviously',
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
+                    color: const Color(0xFFB87700),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right, color: Color(0xFFB87700)),
+        ],
+      ),
+    );
+  }
+
   Widget _buildProgress() {
     return AnimatedBuilder(
       animation: _progCtrl,
       builder: (_, __) {
-        final prog = widget.currentAmount / widget.targetAmount * _progCtrl.value;
+        final prog =
+            widget.currentAmount / widget.targetAmount * _progCtrl.value;
         final curr = (widget.currentAmount * _progCtrl.value).toInt();
         final pct = (prog * 100).toInt();
 
@@ -149,7 +228,11 @@ class _MonthlyEarningsForecastCardState extends State<MonthlyEarningsForecastCar
             gradient: LinearGradient(
               colors: [
                 const Color(0xFFFFE799),
-                Color.lerp(const Color(0xFFFFF5D6), const Color(0xFFFFE799), _pulse.value * 0.1)!,
+                Color.lerp(
+                  const Color(0xFFFFF5D6),
+                  const Color(0xFFFFE799),
+                  _pulse.value * 0.1,
+                )!,
               ],
             ),
             borderRadius: BorderRadius.circular(14.r),
@@ -202,7 +285,9 @@ class _MonthlyEarningsForecastCardState extends State<MonthlyEarningsForecastCar
                     child: Container(
                       height: 8.h,
                       decoration: BoxDecoration(
-                        gradient: const LinearGradient(colors: [Color(0xFFB87700), Color(0xFFD97706)]),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFFB87700), Color(0xFFD97706)],
+                        ),
                         borderRadius: BorderRadius.circular(10.r),
                         boxShadow: [
                           BoxShadow(
@@ -271,48 +356,59 @@ class _MonthlyEarningsForecastCardState extends State<MonthlyEarningsForecastCar
           ),
         ),
         SizedBox(height: 10.h),
-        ...widget.goals.asMap().entries.map((e) => TweenAnimationBuilder<double>(
-              duration: Duration(milliseconds: 600 + (e.key * 100)),
-              curve: Curves.easeOutCubic,
-              tween: Tween(begin: 0.0, end: 1.0),
-              builder: (_, v, __) => Transform.translate(
-                offset: Offset(20 * (1 - v), 0),
-                child: Opacity(
-                  opacity: v,
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: e.key == widget.goals.length - 1 ? 0 : 10.h),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 6.w,
-                          height: 6.w,
-                          margin: EdgeInsets.only(top: 6.h),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: const LinearGradient(colors: [Color(0xFFB87700), Color(0xFFD97706)]),
-                            boxShadow: [BoxShadow(color: const Color(0xFFB87700).withOpacity(0.3), blurRadius: 4.r)],
+        ...widget.goals.asMap().entries.map(
+          (e) => TweenAnimationBuilder<double>(
+            duration: Duration(milliseconds: 600 + (e.key * 100)),
+            curve: Curves.easeOutCubic,
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (_, v, __) => Transform.translate(
+              offset: Offset(20 * (1 - v), 0),
+              child: Opacity(
+                opacity: v,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    bottom: e.key == widget.goals.length - 1 ? 0 : 10.h,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 6.w,
+                        height: 6.w,
+                        margin: EdgeInsets.only(top: 6.h),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFB87700), Color(0xFFD97706)],
                           ),
-                        ),
-                        SizedBox(width: 10.w),
-                        Expanded(
-                          child: Text(
-                            e.value,
-                            style: TextStyle(
-                              fontFamily: 'Inter',
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w500,
-                              color: const Color(0xFF4B5563),
-                              height: 1.5,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFB87700).withOpacity(0.3),
+                              blurRadius: 4.r,
                             ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 10.w),
+                      Expanded(
+                        child: Text(
+                          e.value,
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF4B5563),
+                            height: 1.5,
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            )),
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -333,7 +429,9 @@ class _MonthlyEarningsForecastCardState extends State<MonthlyEarningsForecastCar
               onPressed: widget.onViewDetails,
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Color(0xFFB87700), width: 1.5),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
                 foregroundColor: const Color(0xFFB87700),
               ),
               child: Text(

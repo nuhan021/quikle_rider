@@ -42,6 +42,7 @@ class WalletController extends GetxController
   final walletError = RxnString();
   final riderPerformance = Rxn<RiderPerformance>();
   final leaderboardStanding = Rxn<LeaderboardStanding>();
+  final currentBalance = 0.0.obs;
   final isPerformanceLoading = false.obs;
   final isLeaderboardLoading = false.obs;
   final performanceError = RxnString();
@@ -51,6 +52,7 @@ class WalletController extends GetxController
   final completionRate = '98%'.obs;
   var isOnline = true.obs;
   int _selectedPeriodIndex = 0;
+  final Map<String, WalletSummary> _periodSummaries = {};
   // Data for different periods
   final _weekDeliveries = <DeliveryItem>[
     const DeliveryItem(
@@ -127,12 +129,16 @@ class WalletController extends GetxController
     updateDataForPeriod(0);
     fetchPerformanceData();
     fetchLeaderboardData();
+    fetchCurrentBalance();
   }
 
   void updateDataForPeriod(int index) {
     _selectedPeriodIndex = index;
     _applyDeliveriesForPeriod(index);
-    fetchWalletSummary();
+    walletError.value = null;
+    final period = _currentPeriod;
+    walletSummary.value = _periodSummaries[period];
+    fetchWalletSummary(periodOverride: period);
   }
 
   void _applyDeliveriesForPeriod(int index) {
@@ -159,21 +165,25 @@ class WalletController extends GetxController
     }
   }
 
-  Future<void> fetchWalletSummary() async {
+  String get _currentPeriod =>
+      _periodFilters[_selectedPeriodIndex.clamp(0, _periodFilters.length - 1)];
+
+  Future<void> fetchWalletSummary({String? periodOverride}) async {
     final accessToken = StorageService.accessToken;
+    final period = periodOverride ?? _currentPeriod;
     if (accessToken == null || accessToken.isEmpty) {
-      walletError.value = 'Missing access token. Please login again.';
-      walletSummary.value = null;
+      if (period == _currentPeriod) {
+        walletError.value = 'Missing access token. Please login again.';
+        walletSummary.value = null;
+      }
+      _periodSummaries.remove(period);
       return;
     }
 
-    final period =
-        _periodFilters[_selectedPeriodIndex.clamp(
-          0,
-          _periodFilters.length - 1,
-        )];
-    isWalletLoading.value = true;
-    walletError.value = null;
+    if (period == _currentPeriod) {
+      isWalletLoading.value = true;
+      walletError.value = null;
+    }
 
     try {
       final response = await _walletServices.fetchWalletSummary(
@@ -182,18 +192,30 @@ class WalletController extends GetxController
       );
 
       if (response.isSuccess && response.responseData is Map<String, dynamic>) {
-        walletSummary.value = WalletSummary.fromJson(
+        final summary = WalletSummary.fromJson(
           response.responseData as Map<String, dynamic>,
         );
+        _periodSummaries[period] = summary;
+        if (period == _currentPeriod) {
+          walletSummary.value = summary;
+        }
       } else {
-        walletError.value = response.errorMessage.isNotEmpty
-            ? response.errorMessage
-            : 'Failed to load wallet data.';
+        if (period == _currentPeriod) {
+          walletSummary.value = null;
+          walletError.value = response.errorMessage.isNotEmpty
+              ? response.errorMessage
+              : 'Failed to load wallet data.';
+        }
       }
     } catch (_) {
-      walletError.value = 'Failed to load wallet data.';
+      if (period == _currentPeriod) {
+        walletSummary.value = null;
+        walletError.value = 'Failed to load wallet data.';
+      }
     } finally {
-      isWalletLoading.value = false;
+      if (period == _currentPeriod) {
+        isWalletLoading.value = false;
+      }
     }
   }
 
@@ -263,25 +285,55 @@ class WalletController extends GetxController
     }
   }
 
+  Future<void> fetchCurrentBalance() async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null || accessToken.isEmpty) {
+      currentBalance.value = 0;
+      return;
+    }
+
+    try {
+      final response = await _walletServices.getCurrentBalance(
+        accessToken: accessToken,
+      );
+      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+        final body = response.responseData as Map<String, dynamic>;
+        final value = body['current_balance'];
+        if (value is num) {
+          currentBalance.value = value.toDouble();
+        } else if (value is String) {
+          currentBalance.value = double.tryParse(value) ?? 0;
+        } else {
+          currentBalance.value = 0;
+        }
+      } else {
+        currentBalance.value = 0;
+      }
+    } catch (_) {
+      currentBalance.value = 0;
+    }
+  }
+
   Future<void> refreshCurrentPeriod() async {
     await Future.wait([
-      fetchWalletSummary(),
+      fetchWalletSummary(periodOverride: _currentPeriod),
       fetchPerformanceData(),
       fetchLeaderboardData(),
+      fetchCurrentBalance(),
     ]);
   }
 
   WalletSummary? get _summary => walletSummary.value;
 
   String get finalEarningsText =>
-      _summary == null ? '₹0' : _formatCurrency(_summary!.finalEarnings);
+      _summary == null ? '₹0' : formatCurrency(_summary!.finalEarnings);
 
   String get balanceSubtitle {
     final summary = _summary;
     if (summary == null) {
       return 'Latest payout details will appear here';
     }
-    return 'Subtotal ${_formatCurrency(summary.subtotal)} • Top up ${_formatCurrency(summary.topUp)}';
+    return 'Subtotal ${formatCurrency(summary.subtotal)} • Top up ${formatCurrency(summary.topUp)}';
   }
 
   String get totalDeliveriesText => _summary?.deliveries.toString() ?? '--';
@@ -306,7 +358,7 @@ class WalletController extends GetxController
     final displayPercentage = safePercentage == 0
         ? '0%'
         : '${safePercentage.toStringAsFixed(0)}%';
-    return '${_formatCurrency(summary.forecast.current)} / ${_formatCurrency(summary.forecast.target)} ($displayPercentage)';
+    return '${formatCurrency(summary.forecast.current)} / ${formatCurrency(summary.forecast.target)} ($displayPercentage)';
   }
 
   String get bonusDeliveriesText => _summary?.bonusDeliveries ?? '--';
@@ -320,7 +372,7 @@ class WalletController extends GetxController
     if (summary == null) {
       return 'On track for: --';
     }
-    return 'On track for: ${_formatCurrency(summary.forecast.target)}';
+    return 'On track for: ${formatCurrency(summary.forecast.target)}';
   }
 
   String get forecastBasisNoteText {
@@ -349,10 +401,10 @@ class WalletController extends GetxController
 
   String _currencyOrPlaceholder(double? value) {
     if (value == null) return '--';
-    return _formatCurrency(value);
+    return formatCurrency(value);
   }
 
-  String _formatCurrency(double value) {
+  String formatCurrency(double value) {
     final hasFraction = value % 1 != 0;
     final formatted = hasFraction
         ? value.toStringAsFixed(2)
