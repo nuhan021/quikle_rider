@@ -83,8 +83,12 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
               ),
             ),
             Padding(
-              padding:
-                  const EdgeInsets.only(top: 10.0, left: 20.0, bottom: 20, right: 20),
+              padding: const EdgeInsets.only(
+                top: 10.0,
+                left: 20.0,
+                bottom: 20,
+                right: 20,
+              ),
               child: Divider(height: 1.h, thickness: 0.5),
             ),
             _buildSupportHistorySection(),
@@ -97,7 +101,6 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
 
   Widget _buildReportIssueSection() {
     return _card(
-      
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -144,7 +147,9 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                   setState(() => selectedIssueType = newValue);
                 },
                 items: issueTypes
-                    .map((v) => DropdownMenuItem<String>(value: v, child: Text(v)))
+                    .map(
+                      (v) => DropdownMenuItem<String>(value: v, child: Text(v)),
+                    )
                     .toList(),
               ),
             ),
@@ -181,8 +186,10 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: Colors.orange),
               ),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
             ),
           ),
 
@@ -202,7 +209,9 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
             onTap: () {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('File attachment feature will be available soon'),
+                  content: Text(
+                    'File attachment feature will be available soon',
+                  ),
                   backgroundColor: Colors.blue,
                 ),
               );
@@ -211,12 +220,19 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 40),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!, style: BorderStyle.solid),
+                border: Border.all(
+                  color: Colors.grey[300]!,
+                  style: BorderStyle.solid,
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
                 children: [
-                  Icon(Icons.cloud_upload_outlined, size: 40, color: Colors.grey[400]),
+                  Icon(
+                    Icons.cloud_upload_outlined,
+                    size: 40,
+                    color: Colors.grey[400],
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     'Upload a screenshot or photo',
@@ -259,13 +275,18 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 elevation: 0,
               ),
               child: const Text(
                 'Submit Issue',
                 style: TextStyle(
-                  color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ),
@@ -276,23 +297,22 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
 
   /// CHANGE APPLIED HERE:
   /// Build **one item per card**, keeping the exact visual style.
-Widget _buildSupportHistorySection() {
-  return Column(
-    children: supportHistory
-        .map((item) => Padding(
+  Widget _buildSupportHistorySection() {
+    return Column(
+      children: supportHistory
+          .map(
+            (item) => Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: SizedBox(
-                width: double.infinity,      // full width
-                height: 100,                 // fixed height for all cards
-                child: _card(
-                  child: _buildSupportHistoryItem(item),
-                ),
+                width: double.infinity, // full width
+                // height: 100,                 // fixed height for all cards
+                child: _card(child: _buildSupportHistoryItem(item)),
               ),
-            ))
-        .toList(),
-  );
-}
-
+            ),
+          )
+          .toList(),
+    );
+  }
 
   Widget _buildSupportHistoryItem(SupportHistoryItem item) {
     return Column(

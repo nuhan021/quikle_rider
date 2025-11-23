@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "901205065176",
+    "project_id": "quiklerider",
+    "storage_bucket": "quiklerider.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:901205065176:android:5681104c35ba17441106ad",
+        "android_client_info": {
+          "package_name": "com.example.quikle_rider"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGSyidx08fCIMLYjXgxLWS5HmtTJov9Qw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
