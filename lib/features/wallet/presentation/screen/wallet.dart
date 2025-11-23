@@ -145,6 +145,8 @@ class WalletScreen extends GetView<WalletController> {
                           'Complete 5 more deliveries this week',
                           'Maintain 4.5+ rating',
                         ],
+                        currentBalanceText:
+                            controller.formatCurrency(controller.currentBalance.value),
                         onViewDetails: null,
                         currentAmount: controller.forecastCurrentValue,
                         targetAmount: controller.forecastTargetValue,
