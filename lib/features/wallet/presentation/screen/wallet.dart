@@ -13,6 +13,7 @@ import 'package:quikle_rider/features/wallet/widgets/monthly_earnings_forecast_c
 import 'package:quikle_rider/features/wallet/widgets/rating_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/start_tile.dart';
 import 'package:quikle_rider/features/wallet/widgets/tier_card.dart';
+import 'package:quikle_rider/features/wallet/widgets/wallet_shimmer_list.dart';
 
 class WalletScreen extends GetView<WalletController> {
   const WalletScreen({super.key});
@@ -79,18 +80,11 @@ class WalletScreen extends GetView<WalletController> {
             // Scroll content
             Expanded(
               child: Obx(() {
-                if (controller.isWalletLoading.value &&
-                    controller.walletSummary.value == null) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
+                final isLoading = controller.isWalletLoading.value;
                 final errorMessage = controller.walletError.value;
-                if (errorMessage != null &&
-                    controller.walletSummary.value == null) {
-                  return _WalletErrorState(
-                    message: errorMessage,
-                    onRetry: () => controller.refreshCurrentPeriod(),
-                  );
+
+                if (isLoading && controller.walletSummary.value == null) {
+                  return const WalletShimmerList();
                 }
 
                 return RefreshIndicator(
@@ -99,12 +93,12 @@ class WalletScreen extends GetView<WalletController> {
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
                     children: [
-                      if (controller.isWalletLoading.value)
+                      if (isLoading)
                         Padding(
                           padding: EdgeInsets.only(top: 8.h, bottom: 12.h),
                           child: const LinearProgressIndicator(minHeight: 4),
                         ),
-                      if (errorMessage != null)
+                      if (errorMessage != null && controller.walletSummary.value != null)
                         Padding(
                           padding: EdgeInsets.only(bottom: 12.h),
                           child: Container(
@@ -362,45 +356,6 @@ class WalletScreen extends GetView<WalletController> {
                 );
               }),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _WalletErrorState extends StatelessWidget {
-  const _WalletErrorState({required this.message, required this.onRetry});
-
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24.w),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.account_balance_wallet_outlined,
-              size: 48,
-              color: Colors.black54,
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              'Unable to load wallet',
-              style: headingStyle2(color: Colors.black),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.black54, fontSize: 13.sp),
-            ),
-            SizedBox(height: 16.h),
-            ElevatedButton(onPressed: onRetry, child: const Text('Try Again')),
           ],
         ),
       ),

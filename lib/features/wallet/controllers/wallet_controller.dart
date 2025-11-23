@@ -51,6 +51,7 @@ class WalletController extends GetxController
   final completionRate = '98%'.obs;
   var isOnline = true.obs;
   int _selectedPeriodIndex = 0;
+  final Map<String, WalletSummary> _periodSummaries = {};
   // Data for different periods
   final _weekDeliveries = <DeliveryItem>[
     const DeliveryItem(
@@ -132,7 +133,10 @@ class WalletController extends GetxController
   void updateDataForPeriod(int index) {
     _selectedPeriodIndex = index;
     _applyDeliveriesForPeriod(index);
-    fetchWalletSummary();
+    walletError.value = null;
+    final period = _currentPeriod;
+    walletSummary.value = _periodSummaries[period];
+    fetchWalletSummary(periodOverride: period);
   }
 
   void _applyDeliveriesForPeriod(int index) {
@@ -159,21 +163,25 @@ class WalletController extends GetxController
     }
   }
 
-  Future<void> fetchWalletSummary() async {
+  String get _currentPeriod =>
+      _periodFilters[_selectedPeriodIndex.clamp(0, _periodFilters.length - 1)];
+
+  Future<void> fetchWalletSummary({String? periodOverride}) async {
     final accessToken = StorageService.accessToken;
+    final period = periodOverride ?? _currentPeriod;
     if (accessToken == null || accessToken.isEmpty) {
-      walletError.value = 'Missing access token. Please login again.';
-      walletSummary.value = null;
+      if (period == _currentPeriod) {
+        walletError.value = 'Missing access token. Please login again.';
+        walletSummary.value = null;
+      }
+      _periodSummaries.remove(period);
       return;
     }
 
-    final period =
-        _periodFilters[_selectedPeriodIndex.clamp(
-          0,
-          _periodFilters.length - 1,
-        )];
-    isWalletLoading.value = true;
-    walletError.value = null;
+    if (period == _currentPeriod) {
+      isWalletLoading.value = true;
+      walletError.value = null;
+    }
 
     try {
       final response = await _walletServices.fetchWalletSummary(
@@ -182,18 +190,30 @@ class WalletController extends GetxController
       );
 
       if (response.isSuccess && response.responseData is Map<String, dynamic>) {
-        walletSummary.value = WalletSummary.fromJson(
+        final summary = WalletSummary.fromJson(
           response.responseData as Map<String, dynamic>,
         );
+        _periodSummaries[period] = summary;
+        if (period == _currentPeriod) {
+          walletSummary.value = summary;
+        }
       } else {
-        walletError.value = response.errorMessage.isNotEmpty
-            ? response.errorMessage
-            : 'Failed to load wallet data.';
+        if (period == _currentPeriod) {
+          walletSummary.value = null;
+          walletError.value = response.errorMessage.isNotEmpty
+              ? response.errorMessage
+              : 'Failed to load wallet data.';
+        }
       }
     } catch (_) {
-      walletError.value = 'Failed to load wallet data.';
+      if (period == _currentPeriod) {
+        walletSummary.value = null;
+        walletError.value = 'Failed to load wallet data.';
+      }
     } finally {
-      isWalletLoading.value = false;
+      if (period == _currentPeriod) {
+        isWalletLoading.value = false;
+      }
     }
   }
 
@@ -265,7 +285,7 @@ class WalletController extends GetxController
 
   Future<void> refreshCurrentPeriod() async {
     await Future.wait([
-      fetchWalletSummary(),
+      fetchWalletSummary(periodOverride: _currentPeriod),
       fetchPerformanceData(),
       fetchLeaderboardData(),
     ]);
