@@ -11,7 +11,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 const String googleMapsApiKey = 'AIzaSyD65cza7lynnmbhCN44gs7HupKMnuoU-bo';
 
 class TrackingController extends GetxController {
-  BitmapDescriptor sourceIcon = BitmapDescriptor.defaultMarker;
+  BitmapDescriptor sourceIcon = BitmapDescriptor.defaultMarkerWithHue(
+    BitmapDescriptor.hueGreen,
+  );
   BitmapDescriptor destinationIcon = BitmapDescriptor.defaultMarker;
   BitmapDescriptor currentLocationIcon = BitmapDescriptor.defaultMarker;
   final Completer<GoogleMapController> mapController = Completer();
@@ -33,16 +35,13 @@ class TrackingController extends GetxController {
       'assets/images/riderpick.png',
     );
 
-    // Keep current location icon default
+    // Keep current location marker using default styling
     currentLocationIcon = BitmapDescriptor.defaultMarker;
 
-    // Set source icon to custom marker
     sourceIcon = customSource;
 
-    // Destination icon stays unchanged (default)
-    destinationIcon = BitmapDescriptor.defaultMarkerWithHue(
-      BitmapDescriptor.hueGreen,
-    );
+    // Destination marker also uses default styling
+    destinationIcon = BitmapDescriptor.defaultMarker;
 
     update();
   }
@@ -115,14 +114,7 @@ class TrackingController extends GetxController {
 
     final newLocation = LatLng(position.latitude, position.longitude);
     currentLocation.value = newLocation;
-    markers.add(
-      _buildMarker(
-        'current',
-        'Current Location',
-        newLocation,
-        currentLocationIcon,
-      ),
-    );
+    _setCurrentMarker(newLocation);
 
     await _moveCameraToPosition(newLocation, 16);
   }
@@ -134,10 +126,9 @@ class TrackingController extends GetxController {
     markers.removeWhere((marker) => marker.markerId.value == 'source');
     markers.removeWhere((marker) => marker.markerId.value == 'destination');
 
-    // Add a static source marker with custom icon
     final current = currentLocation.value;
     if (current != null) {
-      markers.add(_buildMarker('source', 'Source', current, sourceIcon));
+      _setSourceMarker(current);
     }
 
     markers.add(
@@ -216,9 +207,14 @@ class TrackingController extends GetxController {
     }
 
     isTrackingLive.value = true;
+
     _showInfo(
       'Live tracking started. Move your device to update your position.',
     );
+
+    if (_hasSourceMarker) {
+      markers.removeWhere((marker) => marker.markerId.value == 'current');
+    }
 
     positionSubscription =
         Geolocator.getPositionStream(
@@ -231,15 +227,11 @@ class TrackingController extends GetxController {
             final newLocation = LatLng(position.latitude, position.longitude);
             currentLocation.value = newLocation;
 
-            markers.removeWhere((marker) => marker.markerId.value == 'current');
-            markers.add(
-              _buildMarker(
-                'current',
-                'Your Live Location',
-                newLocation,
-                currentLocationIcon,
-              ),
-            );
+            if (_hasSourceMarker) {
+              _setSourceMarker(newLocation);
+            } else {
+              _setCurrentMarker(newLocation);
+            }
 
             _moveCameraToPosition(newLocation, 18);
             _checkDestinationReached(newLocation);
@@ -288,17 +280,42 @@ class TrackingController extends GetxController {
     });
   }
 
+  void _setCurrentMarker(LatLng position) {
+    markers.removeWhere((marker) => marker.markerId.value == 'current');
+    markers.add(
+      _buildMarker(
+        'current',
+        'Current Location',
+        position,
+        currentLocationIcon,
+        zIndex: 1,
+      ),
+    );
+  }
+
+  void _setSourceMarker(LatLng position) {
+    markers.removeWhere((marker) => marker.markerId.value == 'source');
+    markers.add(
+      _buildMarker('source', 'Source', position, sourceIcon, zIndex: 2),
+    );
+  }
+
+  bool get _hasSourceMarker =>
+      markers.any((marker) => marker.markerId.value == 'source');
+
   Marker _buildMarker(
     String id,
     String title,
     LatLng position,
-    BitmapDescriptor icon,
-  ) {
+    BitmapDescriptor icon, {
+    double zIndex = 0,
+  }) {
     return Marker(
       markerId: MarkerId(id),
       position: position,
       infoWindow: InfoWindow(title: title),
       icon: icon,
+      zIndex: zIndex,
     );
   }
 
@@ -336,5 +353,11 @@ class TrackingController extends GetxController {
     positionSubscription?.cancel();
     isTrackingLive.value = false;
     if (showMessage) _showInfo('Live tracking stopped.');
+
+    markers.removeWhere((marker) => marker.markerId.value == 'source');
+    final latest = currentLocation.value;
+    if (latest != null) {
+      _setCurrentMarker(latest);
+    }
   }
 }

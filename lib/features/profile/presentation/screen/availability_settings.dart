@@ -200,29 +200,47 @@ class _AvailabilitySettingsPageState extends State<AvailabilitySettingsPage> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          if (_profileController.isLoading.value) {
-                            Center(child: CircularProgressIndicator());
-                          }
-                          await _profileController.updateAvailabilitySettings();
+                      child: Obx(
+                        () {
+                          final isSaving = _profileController.isLoading.value;
+                          return ElevatedButton(
+                            onPressed: isSaving
+                                ? null
+                                : () async {
+                                    await _profileController
+                                        .updateAvailabilitySettings();
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              side: BorderSide.none,
+                              backgroundColor: AppColors.primarygreen,
+                              disabledBackgroundColor:
+                                  AppColors.primarygreen.withOpacity(0.6),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: isSaving
+                                ? const SizedBox(
+                                    height: 22,
+                                    width: 22,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.5,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : const Text(
+                                    'Save',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                          );
                         },
-                        style: ElevatedButton.styleFrom(
-                          side: BorderSide.none,
-                          backgroundColor: AppColors.primarygreen,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        child: const Text(
-                          'Save',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white,
-                          ),
-                        ),
                       ),
                     ),
                   ],
