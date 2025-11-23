@@ -1,6 +1,9 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/tracking_controller.dart';
@@ -35,7 +38,7 @@ class _LiveMapState extends State<LiveMap> {
       final currentLocation = controller.currentLocation.value;
 
       return Container(
-        height: 400,
+        height: 400.h,
         color: Colors.white,
         child: currentLocation == null
             ? const Center(
@@ -55,6 +58,17 @@ class _LiveMapState extends State<LiveMap> {
                     scrollGesturesEnabled: true,
                     zoomGesturesEnabled: true,
                     mapType: MapType.normal,
+                    circles: {
+                      Circle(
+                        circleId: const CircleId('current-location'),
+                        center: currentLocation,
+                        radius: 6437, // ~4 miles in meters
+                        fillColor: Colors.blue.withOpacity(0.1),
+                        strokeColor: Colors.blue.withOpacity(0.5),
+                        strokeWidth: 2,
+                      ),
+                    },
+
                     initialCameraPosition: CameraPosition(
                       target: currentLocation,
                       zoom: 14,

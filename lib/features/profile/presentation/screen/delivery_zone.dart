@@ -136,7 +136,7 @@ class DeliveryZonePage extends StatelessWidget {
                       Circle(
                         circleId: const CircleId('current-location'),
                         center: target,
-                        radius: 150,
+                        radius: 6437, // ~4 miles in meters
                         fillColor: Colors.blue.withOpacity(0.1),
                         strokeColor: Colors.blue.withOpacity(0.5),
                         strokeWidth: 2,

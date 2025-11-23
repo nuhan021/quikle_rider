@@ -1,8 +1,11 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/get_core.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 
 class AvailabilitySettingsPage extends StatefulWidget {
   const AvailabilitySettingsPage({super.key});
@@ -16,6 +19,7 @@ class _AvailabilitySettingsPageState extends State<AvailabilitySettingsPage> {
   bool availableForDelivery = true;
   TimeOfDay fromTime = const TimeOfDay(hour: 8, minute: 0);
   TimeOfDay toTime = const TimeOfDay(hour: 20, minute: 0);
+  ProfileController _profileController = Get.find<ProfileController>();
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +28,7 @@ class _AvailabilitySettingsPageState extends State<AvailabilitySettingsPage> {
       appBar: UnifiedProfileAppBar(
         showActionButton: true,
         title: "Availability Settings",
-      action: "Save",
-      onActionPressed: () {
-        
-      },),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Container(
@@ -70,7 +71,9 @@ class _AvailabilitySettingsPageState extends State<AvailabilitySettingsPage> {
                     ],
                   ),
                   Switch(
-                    trackOutlineColor: MaterialStateProperty.all(AppColors.primarygreen),
+                    trackOutlineColor: MaterialStateProperty.all(
+                      AppColors.primarygreen,
+                    ),
                     focusColor: AppColors.primarygreen,
                     hoverColor: AppColors.primarygreen,
                     inactiveTrackColor: AppColors.primaryBackground,
@@ -191,6 +194,39 @@ class _AvailabilitySettingsPageState extends State<AvailabilitySettingsPage> {
                     ),
                   ),
                 ],
+              ),
+
+              Expanded(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (_profileController.isLoading.value) {
+                            Center(child: CircularProgressIndicator());
+                          }
+                          await _profileController.updateAvailabilitySettings();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          side: BorderSide.none,
+                          backgroundColor: AppColors.primarygreen,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: const Text(
+                          'Save',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
