@@ -127,6 +127,51 @@ class ProfileServices {
     }
   }
 
+  Future<ResponseData> createHelpAndSupport({
+    required String accessToken,
+    required String subject,
+    required String description,
+    File? attachment,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/rider/help-and-support/me/');
+
+    try {
+      final request = http.MultipartRequest('POST', uri)
+        ..headers.addAll({
+          'accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        })
+        ..fields['subject'] = subject
+        ..fields['description'] = description;
+
+      if (attachment != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('attachments', attachment.path),
+        );
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+      final decodedBody = _decodeResponseBody(response.body);
+      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+
+      return ResponseData(
+        isSuccess: isSuccess,
+        statusCode: response.statusCode,
+        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage:
+            'Unable to submit help request. Please check your connection and try again.',
+        responseData: error.toString(),
+      );
+    }
+  }
+
   Future<ResponseData> getVehicle({
     required String accessToken,
     required int vehicleId,

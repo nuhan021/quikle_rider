@@ -2,6 +2,7 @@
 
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -31,6 +32,21 @@ class ProfileController extends GetxController {
   final RxBool isCreatingVehicle = false.obs;
   final RxnString vehicleCreationError = RxnString();
   final Rxn<VehicleModel> vehicleDetails = Rxn<VehicleModel>();
+  final RxBool isSubmittingHelpSupport = false.obs;
+  final RxnString helpSupportError = RxnString();
+  final List<String> helpIssueTypes = const [
+    'Select an issue type',
+    'Account Issues',
+    'Payment Problems',
+    'Order Issues',
+    'App Technical Problems',
+    'Vehicle Registration',
+    'Other',
+  ];
+  late final RxString selectedHelpIssueType = helpIssueTypes.first.obs;
+  final TextEditingController helpDescriptionController = TextEditingController();
+  final Rxn<File> helpAttachment = Rxn<File>();
+  final RxnString helpAttachmentName = RxnString();
 
   //availability settings
 
@@ -91,6 +107,14 @@ class ProfileController extends GetxController {
     super.onInit();
     fetchProfile();
   }
+
+  @override
+  void onClose() {
+    helpDescriptionController.dispose();
+    super.onClose();
+  }
+
+  
 
   /// Formats TimeOfDay to API expected string "HH:mm:ss.SSSZ"
   String _formatTimeForApi(TimeOfDay time) {
@@ -298,6 +322,120 @@ class ProfileController extends GetxController {
       }
     } finally {
       isCreatingVehicle.value = false;
+    }
+  }
+
+  void updateHelpIssueType(String issueType) {
+    selectedHelpIssueType.value = issueType;
+  }
+
+  Future<void> pickHelpAttachment() async {
+    try {
+      final result = await FilePicker.platform.pickFiles();
+      if (result == null || result.files.isEmpty) return;
+      final file = result.files.single;
+      final path = file.path;
+      if (path == null) return;
+      helpAttachment.value = File(path);
+      helpAttachmentName.value = file.name;
+    } catch (error) {
+      AppLoggerHelper.error('Help support attachment pick failed: $error');
+      Get.snackbar(
+        'Attachment Error',
+        'Unable to pick attachment. Please try again.',
+        backgroundColor: Colors.red.withOpacity(0.2),
+        colorText: Colors.red[900],
+      );
+    }
+  }
+
+  void removeHelpAttachment() {
+    helpAttachment.value = null;
+    helpAttachmentName.value = null;
+  }
+
+  void resetHelpSupportForm() {
+    selectedHelpIssueType.value = helpIssueTypes.first;
+    helpDescriptionController.clear();
+    removeHelpAttachment();
+  }
+
+  Future<bool> submitHelpSupportForm() async {
+    final subject = selectedHelpIssueType.value;
+    final description = helpDescriptionController.text.trim();
+
+    if (subject == helpIssueTypes.first || description.isEmpty) {
+      helpSupportError.value = 'Please fill in all required fields';
+      Get.snackbar(
+        'Missing Information',
+        helpSupportError.value!,
+        backgroundColor: Colors.red.withOpacity(0.2),
+        colorText: Colors.red[900],
+      );
+      return false;
+    }
+
+    final success = await submitHelpAndSupport(
+      subject: subject,
+      description: description,
+      attachment: helpAttachment.value,
+    );
+
+    if (success) {
+      Get.snackbar(
+        'Success',
+        'Your issue has been submitted successfully.',
+        backgroundColor: Colors.green.withOpacity(0.2),
+        colorText: Colors.green[900],
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+      resetHelpSupportForm();
+      return true;
+    } else {
+      final error =
+          helpSupportError.value ?? 'Unable to submit issue. Please try again.';
+      Get.snackbar(
+        'Submission Failed',
+        error,
+        backgroundColor: Colors.red.withOpacity(0.2),
+        colorText: Colors.red[900],
+      );
+      return false;
+    }
+  }
+
+  Future<bool> submitHelpAndSupport({
+    required String subject,
+    required String description,
+    File? attachment,
+  }) async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null) {
+      helpSupportError.value = 'Missing credentials. Please login again.';
+      return false;
+    }
+
+    isSubmittingHelpSupport.value = true;
+    helpSupportError.value = null;
+    try {
+      final response = await _profileServices.createHelpAndSupport(
+        accessToken: accessToken,
+        subject: subject,
+        description: description,
+        attachment: attachment,
+      );
+
+      if (response.isSuccess) {
+        return true;
+      } else {
+        helpSupportError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to submit help request.';
+        return false;
+      }
+    } finally {
+      isSubmittingHelpSupport.value = false;
     }
   }
 

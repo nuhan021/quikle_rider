@@ -1,8 +1,8 @@
 // ignore_for_file: deprecated_member_use
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/get_core.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
@@ -195,56 +195,52 @@ class _AvailabilitySettingsPageState extends State<AvailabilitySettingsPage> {
                   ),
                 ],
               ),
-
-              Expanded(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Obx(
-                        () {
-                          final isSaving = _profileController.isLoading.value;
-                          return ElevatedButton(
-                            onPressed: isSaving
-                                ? null
-                                : () async {
-                                    await _profileController
-                                        .updateAvailabilitySettings();
-                                  },
-                            style: ElevatedButton.styleFrom(
-                              side: BorderSide.none,
-                              backgroundColor: AppColors.primarygreen,
-                              disabledBackgroundColor:
-                                  AppColors.primarygreen.withOpacity(0.6),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                            ),
-                            child: isSaving
-                                ? const SizedBox(
-                                    height: 22,
-                                    width: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2.5,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
-                                      ),
-                                    ),
-                                  )
-                                : const Text(
-                                    'Save',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                      color: Colors.white,
-                                    ),
+              SizedBox(height: 24.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: Obx(() {
+                      final isSaving = _profileController.isLoading.value;
+                      return ElevatedButton(
+                        onPressed: isSaving
+                            ? null
+                            : () async {
+                                await _profileController
+                                    .updateAvailabilitySettings();
+                              },
+                        style: ElevatedButton.styleFrom(
+                          side: BorderSide.none,
+                          backgroundColor: AppColors.primarygreen,
+                          disabledBackgroundColor: AppColors.primarygreen
+                              .withOpacity(0.6),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: isSaving
+                            ? const SizedBox(
+                                height: 22,
+                                width: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
                                   ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
+                                ),
+                              )
+                            : const Text(
+                                'Save',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white,
+                                ),
+                              ),
+                      );
+                    }),
+                  ),
+                ],
               ),
             ],
           ),
