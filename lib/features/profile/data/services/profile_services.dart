@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:quikle_rider/core/models/response_data.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
 
@@ -243,9 +244,33 @@ class ProfileServices {
         'Authorization': 'Bearer $accessToken',
       });
 
+      /// Helper to add a file to the multipart request.
+      /// If the file is null or does not exist, it adds an empty part
+      /// to ensure the backend receives all expected fields, which might
+      /// be a requirement to avoid a 422 Unprocessable Entity error.
       Future<void> addFile(String field, File? file) async {
-        if (file == null) return;
-        request.files.add(await http.MultipartFile.fromPath(field, file.path));
+        if (file != null && await file.exists()) {
+          final mediaType = _mediaTypeForFile(file);
+          request.files.add(
+            await http.MultipartFile.fromPath(
+              field,
+              file.path,
+              contentType: mediaType,
+            ),
+          );
+        } else {
+          // Send an empty file part if the file is null.
+          request.files.add(
+            http.MultipartFile(
+              field,
+              Stream.empty(),
+              0,
+              filename: '', // Empty filename.
+              contentType: MediaType(
+                  'application', 'octet-stream'), // Default content type.
+            ),
+          );
+        }
       }
 
       await addFile('pi', profileImage);
@@ -254,10 +279,25 @@ class ProfileServices {
       await addFile('vr', vehicleRegistration);
       await addFile('vi', vehicleInsurance);
 
+      // --- DEBUGGING START ---
+      print('--- Sending Document Upload Request ---');
+      print('URL: ${request.method} ${request.url}');
+      print('Headers: ${request.headers}');
+      print(
+          'Files: ${request.files.map((f) => 'field: ${f.field}, filename: ${f.filename}, length: ${f.length}, contentType: ${f.contentType}').toList()}');
+      // --- DEBUGGING END ---
+
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
       final decodedBody = _decodeResponseBody(response.body);
       final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+
+      // --- DEBUGGING START ---
+      print('--- Received Document Upload Response ---');
+      print('Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+      print('------------------------------------');
+      // --- DEBUGGING END ---
 
       return ResponseData(
         isSuccess: isSuccess,
@@ -265,7 +305,13 @@ class ProfileServices {
         errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
         responseData: decodedBody,
       );
-    } catch (error) {
+    } catch (error, stackTrace) {
+      // --- DEBUGGING START ---
+      print('--- Document Upload Request Failed ---');
+      print('Error: $error');
+      print('Stack Trace: $stackTrace');
+      print('--------------------------------------');
+      // --- DEBUGGING END ---
       return ResponseData(
         isSuccess: false,
         statusCode: 500,
@@ -273,6 +319,18 @@ class ProfileServices {
         responseData: error.toString(),
       );
     }
+  }
+
+  MediaType? _mediaTypeForFile(File file) {
+    final path = file.path.toLowerCase();
+    if (path.endsWith('.png')) return MediaType('image', 'png');
+    if (path.endsWith('.jpg') || path.endsWith('.jpeg')) {
+      return MediaType('image', 'jpeg');
+    }
+    if (path.endsWith('.webp')) return MediaType('image', 'webp');
+    if (path.endsWith('.gif')) return MediaType('image', 'gif');
+    if (path.endsWith('.pdf')) return MediaType('application', 'pdf');
+    return null;
   }
 
   Future<Map<String, dynamic>?> updateRiderAvailability({

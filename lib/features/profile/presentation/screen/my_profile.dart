@@ -234,7 +234,7 @@ class MyProfilePage extends StatelessWidget {
   Widget _buildUploadDocumentsRow(BuildContext context) {
     return InkWell(
       onTap: () {
-        Get.to(UploadDocumentsPage());
+        Get.to(const UploadDocumentsPage());
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
