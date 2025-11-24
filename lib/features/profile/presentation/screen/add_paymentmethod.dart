@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
@@ -12,20 +14,36 @@ class AddPaymentMethodPage extends StatefulWidget {
 }
 
 class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
-  final TextEditingController _nameController =
-      TextEditingController(text: 'Vikram Rajput');
-  final TextEditingController _accountController =
-      TextEditingController(text: 'XXXXXXXXXX3456');
-  final TextEditingController _ifscController =
-      TextEditingController(text: 'HDFC0001234');
-  final TextEditingController _upiController =
-      TextEditingController(text: 'ananya@paytm');
+  final TextEditingController _nameController = TextEditingController(
+    text: 'Vikram Rajput',
+  );
+  final TextEditingController _accountController = TextEditingController(
+    text: 'XXXXXXXXXX3456',
+  );
+  final TextEditingController _ifscController = TextEditingController(
+    text: 'HDFC0001234',
+  );
+  final TextEditingController _upiController = TextEditingController(
+    text: 'ananya@paytm',
+  );
   bool _autoWithdrawal = false;
 
   final List<_WithdrawalEntry> _history = const [
-    _WithdrawalEntry(amount: '₹2,500', date: '25 Oct 2024', status: 'Completed'),
-    _WithdrawalEntry(amount: '₹1,500', date: '18 Oct 2024', status: 'Completed'),
-    _WithdrawalEntry(amount: '₹3,000', date: '11 Oct 2024', status: 'Completed'),
+    _WithdrawalEntry(
+      amount: '₹2,500',
+      date: '25 Oct 2024',
+      status: 'Completed',
+    ),
+    _WithdrawalEntry(
+      amount: '₹1,500',
+      date: '18 Oct 2024',
+      status: 'Completed',
+    ),
+    _WithdrawalEntry(
+      amount: '₹3,000',
+      date: '11 Oct 2024',
+      status: 'Completed',
+    ),
     _WithdrawalEntry(amount: '₹800', date: '4 Oct 2024', status: 'Processing'),
   ];
 
@@ -120,10 +138,7 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
             ),
           ),
           SizedBox(height: 16.h),
-          _textField(
-            label: 'IFSC Code',
-            controller: _ifscController,
-          ),
+          _textField(label: 'IFSC Code', controller: _ifscController),
           SizedBox(height: 16.h),
           _textField(
             label: 'UPI ID (Optional)',
@@ -136,6 +151,7 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
             child: ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
+                side: BorderSide.none,
                 backgroundColor: Colors.black,
                 foregroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(vertical: 14.h),
@@ -192,7 +208,10 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
                       SizedBox(height: 4.h),
                       Text(
                         '24-48 hours',
-                        style: getTextStyle(fontSize: 12, color: Colors.grey[700]),
+                        style: getTextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[700],
+                        ),
                       ),
                     ],
                   ),
@@ -201,43 +220,60 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
             ),
           ),
           SizedBox(height: 16.h),
-          Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(12.w),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: const Icon(Icons.calendar_today_outlined),
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Auto-withdrawal',
-                      style: getTextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: Colors.grey[200]!),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(12.w),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      _autoWithdrawal ? 'Enabled' : 'Manual',
-                      style: getTextStyle(fontSize: 12, color: Colors.grey[600]),
+                    child: const Icon(Icons.calendar_today_outlined),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Auto-withdrawal',
+                          style: getTextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        SizedBox(height: 4.h),
+                        Text(
+                          _autoWithdrawal ? 'Enabled' : 'Manual',
+                          style: getTextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  Switch(
+                    activeThumbColor: AppColors.backgroundLight,
+                    activeTrackColor: AppColors.backgroundDark,
+                    inactiveThumbColor: AppColors.backgroundDark,
+                    inactiveTrackColor: AppColors.backgroundLight,
+                    materialTapTargetSize: MaterialTapTargetSize.padded,
+                    value: _autoWithdrawal,
+                    onChanged: (value) =>
+                        setState(() => _autoWithdrawal = value),
+                    activeColor: AppColors.primarygreen,
+                  ),
+                ],
               ),
-              Switch(
-                value: _autoWithdrawal,
-                onChanged: (value) =>
-                    setState(() => _autoWithdrawal = value),
-                activeColor: AppColors.primarygreen,
-              ),
-            ],
+            ),
           ),
         ],
       ),
@@ -268,29 +304,39 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
         ? AppColors.primarygreen
         : AppColors.primaryyellow;
     return Padding(
-      padding: EdgeInsets.only(bottom: 14.h),
-      child: Row(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      padding: EdgeInsets.only(bottom: 8.h),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+
+        child: Padding(
+          padding: EdgeInsets.all(8.h),
+          child: Row(
             children: [
-              Text(
-                entry.amount,
-                style: getTextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    entry.amount,
+                    style: getTextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    entry.date,
+                    style: getTextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
+                ],
               ),
-              SizedBox(height: 4.h),
-              Text(
-                entry.date,
-                style: getTextStyle(fontSize: 12, color: Colors.grey[600]),
-              ),
+              const Spacer(),
+              _pillBadge(label: entry.status, color: color),
             ],
           ),
-          const Spacer(),
-          _pillBadge(label: entry.status, color: color),
-        ],
+        ),
       ),
     );
   }
@@ -299,7 +345,7 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color,
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: Text(
@@ -307,7 +353,7 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
         style: getTextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-        ).copyWith(color: color),
+        ).copyWith(color: AppColors.background),
       ),
     );
   }
@@ -321,10 +367,7 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: getTextStyle(fontSize: 13, color: Colors.grey[700]),
-        ),
+        Text(label, style: getTextStyle(fontSize: 13, color: Colors.grey[700])),
         SizedBox(height: 6.h),
         TextField(
           controller: controller,

@@ -47,7 +47,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: UnifiedProfileAppBar( title: "Edit Profile"),
+      appBar: UnifiedProfileAppBar(title: "Edit Profile"),
       body: SingleChildScrollView(
         padding: EdgeInsets.only(bottom: 30.h),
         child: Form(
@@ -170,6 +170,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           _buildEditField(
             label: 'Phone Number',
             controller: _phoneController,
+
             readOnly: true,
           ),
           _buildEditField(
