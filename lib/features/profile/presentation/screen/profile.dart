@@ -15,6 +15,8 @@ import 'package:quikle_rider/features/profile/presentation/screen/notification_s
 import 'package:quikle_rider/features/profile/presentation/screen/payment_method.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/vehicle_information.dart';
 import 'package:quikle_rider/features/profile/widgets/profile_completion_card.dart';
+import 'package:quikle_rider/features/refferel/screens/refferel_program.dart';
+import 'package:quikle_rider/features/refferel/screens/training_center.dart';
 import 'package:quikle_rider/features/wallet/widgets/tier_badge.dart';
 import 'package:quikle_rider/routes/app_routes.dart';
 
@@ -161,6 +163,27 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     _buildDivider(),
+                    _buildMenuItem(
+                      imagepath: "assets/icons/help.png",
+                      title: 'Referral Program',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ReferralProgramPage(),
+                        ),
+                      ),
+                    ),
+                    _buildDivider(),
+                    _buildMenuItem(
+                      imagepath: "assets/icons/help.png",
+                      title: 'Training Center',
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TrainingCenterPage(),
+                        ),
+                      ),
+                    ),
                     _buildMenuItem(
                       imagepath: "assets/icons/signout.png",
                       title: 'Sign out',
