@@ -213,9 +213,9 @@ class TrainingCenterPage extends StatelessWidget {
               child: Text(
                 'Start Quiz',
                 style: getTextStyle(
-                  fontSize: 15,
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
-                ).copyWith(color: Colors.white),
+                ).copyWith(color: AppColors.primaryyellow),
               ),
             ),
           ),

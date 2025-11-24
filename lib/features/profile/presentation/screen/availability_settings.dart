@@ -200,7 +200,8 @@ class _AvailabilitySettingsPageState extends State<AvailabilitySettingsPage> {
                 children: [
                   Expanded(
                     child: Obx(() {
-                      final isSaving = _profileController.isLoading.value;
+                      final isSaving =
+                          _profileController.isavaiabilityProfile.value;
                       return ElevatedButton(
                         onPressed: isSaving
                             ? null
