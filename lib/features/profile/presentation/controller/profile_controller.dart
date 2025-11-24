@@ -44,8 +44,7 @@ class ProfileController extends GetxController {
     'Other',
   ];
   late final RxString selectedHelpIssueType = helpIssueTypes.first.obs;
-  final TextEditingController helpDescriptionController =
-      TextEditingController();
+  final TextEditingController helpDescriptionController = TextEditingController();
   final Rxn<File> helpAttachment = Rxn<File>();
   final RxnString helpAttachmentName = RxnString();
 
@@ -114,6 +113,8 @@ class ProfileController extends GetxController {
     helpDescriptionController.dispose();
     super.onClose();
   }
+
+  
 
   /// Formats TimeOfDay to API expected string "HH:mm:ss.SSSZ"
   String _formatTimeForApi(TimeOfDay time) {
@@ -503,7 +504,7 @@ class ProfileController extends GetxController {
         startAt: startAtStr,
         endAt: endAtStr,
       );
-
+     
       // Handle Response
       if (result != null) {
         Get.snackbar(
@@ -532,7 +533,7 @@ class ProfileController extends GetxController {
         colorText: Colors.red[900],
       );
     } finally {
-      isavaiabilityProfile.value = false;
+      isLoading.value = false;
     }
   }
 }

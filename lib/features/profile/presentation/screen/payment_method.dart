@@ -2,7 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/features/profile/presentation/screen/add_paymentmethod.dart';
 
 class PaymentMethodPage extends StatefulWidget {
   const PaymentMethodPage({super.key});
@@ -15,38 +18,38 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
   final List<PaymentMethod> paymentMethods = [
     PaymentMethod(
       name: 'Paytm',
-     imagepath: "assets/images/paytm.png",
-    
+      imagepath: "assets/images/paytm.png",
+
       isRemovable: true,
     ),
     PaymentMethod(
       name: 'Google Pay',
-     imagepath: "assets/images/googlepay.png",
-    
+      imagepath: "assets/images/googlepay.png",
+
       isRemovable: true,
     ),
     PaymentMethod(
       name: 'PhonePe',
-     imagepath: "assets/images/phonme.png",
-  
+      imagepath: "assets/images/phonme.png",
+
       isRemovable: true,
     ),
     PaymentMethod(
       name: 'Cashfree',
-    imagepath: "assets/images/cashfire.png",
+      imagepath: "assets/images/cashfire.png",
 
       isRemovable: true,
     ),
     PaymentMethod(
       name: 'Razorpay',
-    imagepath: "assets/images/razorpay.png",
+      imagepath: "assets/images/razorpay.png",
 
       isRemovable: true,
     ),
     PaymentMethod(
       name: 'Bank Transfer',
       imagepath: "assets/images/bank.png",
-    
+
       isRemovable: true,
     ),
   ];
@@ -58,7 +61,6 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
       appBar: UnifiedProfileAppBar(title: "Payment Method"),
       body: Column(
         children: [
-          
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
@@ -72,12 +74,13 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
           Container(
             margin: const EdgeInsets.all(20),
             width: double.infinity,
-            
+
             child: ElevatedButton(
               onPressed: () {
-                _showAddPaymentMethodDialog();
+                Get.to(AddPaymentMethodPage());
               },
               style: ElevatedButton.styleFrom(
+                side: BorderSide.none,
                 backgroundColor: Colors.black,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -127,7 +130,8 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
           SizedBox(
             width: 24.h,
             height: 24.h,
-            child: Image(image: AssetImage(method.imagepath!))),
+            child: Image(image: AssetImage(method.imagepath!)),
+          ),
           const SizedBox(width: 16),
           Expanded(
             child: Text(
@@ -141,7 +145,11 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
           ),
           if (method.isRemovable)
             IconButton(
-              icon: const Icon(Icons.close_outlined, color: Colors.red, size: 16),
+              icon: const Icon(
+                Icons.close_outlined,
+                color: Colors.red,
+                size: 16,
+              ),
               onPressed: () => _showRemoveDialog(method),
               color: Colors.red,
               splashColor: Colors.red.withOpacity(0.1),
@@ -184,48 +192,6 @@ class _PaymentMethodPageState extends State<PaymentMethodPage> {
       },
     );
   }
-
-  void _showAddPaymentMethodDialog() {
-    final List<String> availableMethods = [
-      'Credit Card',
-      'Debit Card',
-      'PayPal',
-      'Apple Pay',
-      'Samsung Pay',
-    ];
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add Payment Method'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: availableMethods.map((method) {
-              return ListTile(
-                title: Text(method),
-                onTap: () {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('$method will be added soon'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                },
-              );
-            }).toList(),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 }
 
 class PaymentMethod {
@@ -237,7 +203,7 @@ class PaymentMethod {
   PaymentMethod({
     required this.name,
     required this.imagepath,
-    
+
     required this.isRemovable,
   });
 }
