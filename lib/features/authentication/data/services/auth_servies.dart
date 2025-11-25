@@ -8,6 +8,9 @@ class AuthServies {
 
   final http.Client _client;
   static const String _baseUrl = 'https://caditya619-backend.onrender.com';
+  static final Uri _verifyTokenUri = Uri.parse(
+    'https://caditya619-backend.onrender.com/auth/verify-token/',
+  );
 
   Future<ResponseData> sendOtp({
     required String phone,
@@ -113,5 +116,31 @@ class AuthServies {
       }
     }
     return 'Something went wrong. Please try again.';
+  }
+
+  Future<Map<String, dynamic>?> fetchUserProfile({
+    required String accessToken,
+    required String refreshToken,
+    required String tokenType,
+  }) async {
+    try {
+      final response = await _client.get(
+        _verifyTokenUri,
+        headers: {
+          'accept': 'application/json',
+          'Authorization':
+              '${tokenType.trim().isEmpty ? 'Bearer' : tokenType.trim()} $accessToken',
+          'refresh-token': refreshToken,
+        },
+      );
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        final decoded = _decodeResponseBody(response.body);
+        if (decoded is Map<String, dynamic>) {
+          return decoded;
+        }
+      }
+    } catch (_) {}
+    return null;
   }
 }

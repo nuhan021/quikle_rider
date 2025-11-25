@@ -1,14 +1,21 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:quikle_rider/app.dart';
+import 'package:quikle_rider/core/services/firebase/firebase_service.dart';
+import 'package:quikle_rider/core/services/firebase/notification_service.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
+  await FirebaseService.instance.init();
   await StorageService.init();
+  await NotificationService.instance.init();
+  await NotificationService.instance.requestPermission();
 
   runApp(const MyApp());
 }

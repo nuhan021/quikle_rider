@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:quikle_rider/core/services/firebase/firebase_service.dart';
+import 'package:quikle_rider/core/services/firebase/notification_service.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
 import 'package:quikle_rider/features/authentication/data/services/auth_servies.dart';
@@ -240,6 +243,14 @@ class AuthController extends GetxController {
           refreshToken: refreshToken,
           tokenType: tokenType,
         );
+        unawaited(
+          _postLoginSetup(
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            tokenType: tokenType,
+            initialData: data,
+          ),
+        );
         AppLoggerHelper.debug(
           'Logged in successfully. Access token: $accessToken',
         );
@@ -248,7 +259,27 @@ class AuthController extends GetxController {
         );
         AppLoggerHelper.debug('Logged in successfully. Token type: $tokenType');
 
+
+        
+
         Get.offAllNamed(AppRoute.getWelcomeScreen());
+        final resolvedUserId = StorageService.userId ?? _extractUserId(data);
+        if (resolvedUserId != null) {
+          unawaited(
+            NotificationService.instance.sendInstantNotification(
+              userId: resolvedUserId,
+              title: 'Hello ${phoneNumberForOtp.isNotEmpty ? phoneNumberForOtp : 'Rider'}',
+              body: 'You are logged in.',
+            ),
+          );
+        }
+        Get.snackbar(
+          'Login Successful',
+          'You have logged in successfully.',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
       } else {
         Get.snackbar(
           'Login Error',
@@ -376,5 +407,124 @@ class AuthController extends GetxController {
         Get.back();
       }
     }
+  }
+
+  Future<void> _syncFcmToken({
+    required int userId,
+    required String accessToken,
+    required String tokenType,
+  }) async {
+    try {
+      final existing = StorageService.cachedFcmToken;
+      final token = existing?.isNotEmpty == true
+          ? existing
+          : await FirebaseService.instance.waitForToken();
+      final finalToken =
+          token ??
+          await FirebaseService.instance.refreshToken() ??
+          StorageService.cachedFcmToken;
+
+      if (finalToken == null || finalToken.isEmpty) {
+        AppLoggerHelper.debug('FCM token unavailable.');
+        return;
+      }
+
+      await StorageService.cacheFcmToken(finalToken);
+      AppLoggerHelper.debug('FCM token saved locally: $finalToken');
+
+      final platform = Platform.isIOS
+          ? 'ios'
+          : Platform.isAndroid
+          ? 'android'
+          : Platform.operatingSystem;
+
+      final success = await NotificationService.instance.saveFcmToken(
+        userId: userId,
+        token: finalToken,
+        platform: platform,
+        authorization:
+            '${tokenType.trim().isEmpty ? 'Bearer' : tokenType.trim()} $accessToken',
+      );
+
+      if (!success) {
+        AppLoggerHelper.debug('Failed to persist FCM token to backend.');
+      }
+    } catch (error) {
+      AppLoggerHelper.debug('Error syncing FCM token: $error');
+    }
+  }
+
+  Future<void> _postLoginSetup({
+    required String accessToken,
+    required String refreshToken,
+    required String tokenType,
+    required Map<String, dynamic> initialData,
+  }) async {
+    try {
+      final cachedId = StorageService.userId;
+      final userId = cachedId ?? _extractUserId(initialData);
+      if (userId != null) {
+        await StorageService.saveUserId(userId);
+      }
+
+      final resolvedUserId =
+          userId ??
+          (await _fetchUserId(
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            tokenType: tokenType,
+          ));
+      if (resolvedUserId != null) {
+        await StorageService.saveUserId(resolvedUserId);
+        unawaited(
+          _syncFcmToken(
+            userId: resolvedUserId,
+            accessToken: accessToken,
+            tokenType: tokenType,
+          ),
+        );
+      } else {
+        AppLoggerHelper.debug('Unable to resolve user id post-login.');
+      }
+    } catch (error) {
+      AppLoggerHelper.debug('Post login setup failed: $error');
+    }
+  }
+
+  Future<int?> _fetchUserId({
+    required String accessToken,
+    required String refreshToken,
+    required String tokenType,
+  }) async {
+    final profile = await _authServices.fetchUserProfile(
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      tokenType: tokenType,
+    );
+    if (profile == null) return null;
+    final id = profile['id'];
+    if (id is int) return id;
+    if (id is String) return int.tryParse(id);
+    return null;
+  }
+
+  int? _extractUserId(Map<String, dynamic> data) {
+    final directId = _parseInt(data['user_id'] ?? data['id']);
+    if (directId != null) return directId;
+
+    final userData = data['user'];
+    if (userData is Map<String, dynamic>) {
+      return _parseInt(userData['id'] ?? userData['user_id']);
+    }
+    return null;
+  }
+
+  int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is String) {
+      return int.tryParse(value);
+    }
+    return null;
   }
 }
