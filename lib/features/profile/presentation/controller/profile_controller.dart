@@ -143,6 +143,7 @@ class ProfileController extends GetxController {
 
   Future<void> fetchProfile() async {
     final accessToken = StorageService.accessToken;
+    debugPrint('access token in practice file: $accessToken');
     final refreshToken = StorageService.refreshToken;
 
     if (accessToken == null || refreshToken == null) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/features/notifications/controller/notification_controller.dart';
 
 class NotificationsPage extends StatelessWidget {
@@ -11,36 +12,7 @@ class NotificationsPage extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text(
-          'Notifications',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1),
-          child: Container(
-            height: 3,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.amber, Colors.orange],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-            ),
-          ),
-        ),
-      ),
+      appBar: UnifiedProfileAppBar(title: "Notifications"),
       body: Obx(() {
         final notifications = controller.notifications;
         final hasUnread = controller.hasUnread;
@@ -118,7 +90,11 @@ class NotificationsPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.notifications_off_outlined, color: Colors.grey[400], size: 64),
+          Icon(
+            Icons.notifications_off_outlined,
+            color: Colors.grey[400],
+            size: 64,
+          ),
           const SizedBox(height: 16),
           Text(
             'You\'re all caught up',
@@ -131,10 +107,7 @@ class NotificationsPage extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'New updates will show up here',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
           ),
         ],
       ),
@@ -197,8 +170,9 @@ class NotificationsPage extends StatelessWidget {
                       fontSize: 18,
                       fontWeight: FontWeight.w500,
                       fontFamily: 'Inter',
-                      color:
-                          notification.isRead ? Colors.grey[600] : Colors.black87,
+                      color: notification.isRead
+                          ? Colors.grey[600]
+                          : Colors.black87,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -207,7 +181,9 @@ class NotificationsPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 15,
                       height: 1.4,
-                      color: notification.isRead ? Colors.grey[600] : Colors.black,
+                      color: notification.isRead
+                          ? Colors.grey[600]
+                          : Colors.black,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -241,10 +217,7 @@ class NotificationsPage extends StatelessWidget {
                   value: 'read',
                   child: Text('Mark as read'),
                 ),
-                PopupMenuItem<String>(
-                  value: 'delete',
-                  child: Text('Delete'),
-                ),
+                PopupMenuItem<String>(value: 'delete', child: Text('Delete')),
               ],
             ),
           ],
