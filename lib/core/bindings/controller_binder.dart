@@ -3,6 +3,7 @@ import 'package:quikle_rider/features/authentication/controllers/auth_controller
 import 'package:quikle_rider/features/bottom_nav_bar/controller/bottom_nav_bar_controller.dart';
 import 'package:quikle_rider/features/home/controllers/homepage_controller.dart';
 import 'package:quikle_rider/features/map/presentation/controller/map_controller.dart';
+import 'package:quikle_rider/features/notifications/controller/notification_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/splash_screen/controllers/splash_controller.dart';
 import 'package:quikle_rider/features/wallet/controllers/wallet_controller.dart';
@@ -14,6 +15,7 @@ class ControllerBinder extends Bindings {
     Get.put<AuthController>(AuthController(), permanent: true);
     Get.put<HomepageController>(HomepageController(), permanent: true);
     Get.put<WalletController>(WalletController(), permanent: true);
+    Get.put<NotificationController>(NotificationController(), permanent: true);
 
     Get.put<BottomNavbarController>(BottomNavbarController());
     Get.put(ProfileController(), permanent: true);

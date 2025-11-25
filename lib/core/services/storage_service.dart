@@ -5,6 +5,8 @@ class StorageService {
   static const String _accessTokenKey = 'access_token';
   static const String _refreshTokenKey = 'refresh_token';
   static const String _tokenTypeKey = 'token_type';
+  static const String _fcmTokenKey = 'fcm_token';
+  static const String _userIdKey = 'user_id';
 
   static SharedPreferences? _preferences;
 
@@ -13,6 +15,7 @@ class StorageService {
     AppLoggerHelper.debug('has token ${refreshToken}');
   }
 
+  
   static bool hasToken() {
     final token = _preferences?.getString(_accessTokenKey);
     return token != null && token.isNotEmpty;
@@ -32,9 +35,23 @@ class StorageService {
     await _preferences?.remove(_accessTokenKey);
     await _preferences?.remove(_refreshTokenKey);
     await _preferences?.remove(_tokenTypeKey);
+    await _preferences?.remove(_fcmTokenKey);
+    await _preferences?.remove(_userIdKey);
   }
 
   static String? get accessToken => _preferences?.getString(_accessTokenKey);
   static String? get refreshToken => _preferences?.getString(_refreshTokenKey);
   static String? get tokenType => _preferences?.getString(_tokenTypeKey);
+
+  static Future<void> cacheFcmToken(String token) async {
+    await _preferences?.setString(_fcmTokenKey, token);
+  }
+
+  static String? get cachedFcmToken => _preferences?.getString(_fcmTokenKey);
+
+  static Future<void> saveUserId(int id) async {
+    await _preferences?.setInt(_userIdKey, id);
+  }
+
+  static int? get userId => _preferences?.getInt(_userIdKey);
 }
