@@ -209,6 +209,7 @@ class UploadDocumentsPage extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () => _kycController.pickDocument(type),
                 style: ElevatedButton.styleFrom(
+                  side: BorderSide.none,
                   backgroundColor: Colors.black,
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(vertical: 14.h),
@@ -247,6 +248,7 @@ class UploadDocumentsPage extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () => _kycController.pickDocument(type),
                     style: ElevatedButton.styleFrom(
+                      side: BorderSide.none,
                       backgroundColor: Colors.black,
                       foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(vertical: 14.h),
@@ -335,6 +337,7 @@ class UploadDocumentsPage extends StatelessWidget {
         child: ElevatedButton(
           onPressed: isLoading ? null : _kycController.handleUpload,
           style: ElevatedButton.styleFrom(
+            side: BorderSide.none,
             backgroundColor: Colors.black,
             foregroundColor: Colors.white,
             padding: EdgeInsets.symmetric(vertical: 16.h),

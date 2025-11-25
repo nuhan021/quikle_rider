@@ -72,7 +72,9 @@ class FirebaseService {
 
   String? get token => _cachedToken;
 
-  Future<String?> waitForToken({Duration timeout = const Duration(seconds: 20)}) async {
+  Future<String?> waitForToken({
+    Duration timeout = const Duration(seconds: 20),
+  }) async {
     if (_cachedToken?.isNotEmpty ?? false) return _cachedToken;
     final completer = Completer<String?>();
     late StreamSubscription<String> subscription;
@@ -115,11 +117,11 @@ class FirebaseService {
 
   void _listenToTokenRefresh() {
     _tokenRefreshSubscription?.cancel();
-    _tokenRefreshSubscription =
-        FirebaseMessaging.instance.onTokenRefresh.listen((token) {
-      _cachedToken = token;
-      AppLoggerHelper.debug('[FCM] Token refreshed: $token');
-    });
+    _tokenRefreshSubscription = FirebaseMessaging.instance.onTokenRefresh
+        .listen((token) {
+          _cachedToken = token;
+          AppLoggerHelper.debug('[FCM] Token refreshed: $token');
+        });
   }
 }
 

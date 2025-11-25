@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:quikle_rider/features/home/data/home_service.dart';
 import 'package:quikle_rider/features/home/models/home_dashboard_models.dart';
 import 'package:quikle_rider/features/home/presentation/screen/goonline.dart';
 import 'package:quikle_rider/features/home/presentation/screen/gooffline.dart';
@@ -11,6 +13,9 @@ import 'package:quikle_rider/features/home/presentation/widgets/incoming_assignm
 import 'package:quikle_rider/custom_tab_bar/notifications.dart';
 
 class HomepageController extends GetxController {
+  HomepageController({HomeService? homeService})
+      : _homeService = homeService ?? HomeService();
+
   var isOnline = false.obs;
   var isLoading = false.obs;
   final hasConnection = true.obs;
@@ -19,6 +24,7 @@ class HomepageController extends GetxController {
   final assignments = <Assignment>[].obs;
   final _pendingActions = <String>{}.obs;
   final popupAssignment = Rxn<Assignment>();
+  final HomeService _homeService;
 
   Timer? _incomingAssignmentTimer;
   Timer? _dialogAutoCloseTimer;
@@ -34,8 +40,7 @@ class HomepageController extends GetxController {
         transition: Transition.fade,
       );
       if (result == true) {
-        isOnline.value = true;
-        _scheduleIncomingAssignment();
+        await _changeOnlineStatus(true);
       }
     } else {
       final result = await Get.to(
@@ -45,8 +50,7 @@ class HomepageController extends GetxController {
         transition: Transition.fade,
       );
       if (result == true) {
-        isOnline.value = false;
-        _cancelIncomingAssignment();
+        await _changeOnlineStatus(false);
       }
     }
   }
@@ -193,6 +197,69 @@ class HomepageController extends GetxController {
     } finally {
       _pendingActions.remove(assignmentId);
     }
+  }
+
+  Future<void> _changeOnlineStatus(bool goOnline) async {
+    try {
+      final response =
+          await _homeService.toggleOnlineStatus(isOnline: goOnline);
+      if (response.isSuccess) {
+        isOnline.value = goOnline;
+        if (goOnline) {
+          _scheduleIncomingAssignment();
+        } else {
+          _cancelIncomingAssignment();
+        }
+        final message = _extractStatusMessage(response.responseData, goOnline);
+        _showStatusSnack(
+          title: 'Status updated',
+          message: message,
+          success: true,
+        );
+      } else {
+        _showStatusSnack(
+          title: 'Update failed',
+          message: response.errorMessage.isNotEmpty
+              ? response.errorMessage
+              : 'Unable to update status. Please try again.',
+          success: false,
+        );
+      }
+    } catch (error) {
+      _showStatusSnack(
+        title: 'Update failed',
+        message: 'Unable to update status. Please try again.',
+        success: false,
+      );
+    }
+  }
+
+  String _extractStatusMessage(dynamic data, bool goOnline) {
+    if (data is Map<String, dynamic>) {
+      final message = data['message'] ?? data['hint'];
+      if (message is String && message.isNotEmpty) {
+        return message;
+      }
+    } else if (data is String && data.isNotEmpty) {
+      return data;
+    }
+    return goOnline ? 'Rider is now online' : 'Rider is now offline';
+  }
+
+  void _showStatusSnack({
+    required String title,
+    required String message,
+    required bool success,
+  }) {
+    Get.snackbar(
+      title,
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: success ? Colors.green : Colors.redAccent,
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(16),
+      duration: const Duration(seconds: 3),
+    );
   }
 
   void _scheduleIncomingAssignment() {
