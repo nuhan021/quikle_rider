@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
 import 'package:quikle_rider/features/profile/data/models/help_support_request.dart';
+import 'package:quikle_rider/features/profile/data/models/profile_completion_model.dart';
 import 'package:quikle_rider/features/profile/data/models/profile_model.dart';
 import 'package:quikle_rider/features/profile/data/models/rider_documents_model.dart';
 import 'package:quikle_rider/features/profile/data/models/vehicle_model.dart';
@@ -62,6 +63,10 @@ class ProfileController extends GetxController {
       TextEditingController();
   final Rxn<File> helpAttachment = Rxn<File>();
   final RxnString helpAttachmentName = RxnString();
+  final RxBool isProfileCompletionLoading = false.obs;
+  final RxnString profileCompletionError = RxnString();
+  final Rxn<ProfileCompletionModel> profileCompletion =
+      Rxn<ProfileCompletionModel>();
 
   //availability settings
 
@@ -116,12 +121,21 @@ class ProfileController extends GetxController {
       vehicleCreationError.value?.isNotEmpty == true
       ? vehicleCreationError.value!
       : 'Unable to save vehicle information.';
+  double get completionPercent =>
+      profileCompletion.value?.completionPercentage ?? 0;
+  List<String> get missingCompletionItems =>
+      profileCompletion.value?.missingFields ?? const <String>[];
+  String get completionMessage =>
+      profileCompletion.value?.message.isNotEmpty == true
+      ? profileCompletion.value!.message
+      : 'Complete your profile to unlock new tiers.';
 
   @override
   void onInit() {
     super.onInit();
     fetchProfile();
     fetchAvailabilitySettings();
+    fetchProfileCompletion();
   }
 
   @override
@@ -264,6 +278,36 @@ class ProfileController extends GetxController {
       }
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchProfileCompletion() async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null) {
+      profileCompletionError.value = 'Missing credentials. Please login again.';
+      profileCompletion.value = null;
+      return;
+    }
+
+    isProfileCompletionLoading.value = true;
+    profileCompletionError.value = null;
+    try {
+      final response = await _profileServices.getProfileCompletion(
+        accessToken: accessToken,
+      );
+
+      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+        profileCompletion.value = ProfileCompletionModel.fromJson(
+          response.responseData as Map<String, dynamic>,
+        );
+      } else {
+        profileCompletion.value = null;
+        profileCompletionError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to fetch profile completion.';
+      }
+    } finally {
+      isProfileCompletionLoading.value = false;
     }
   }
 

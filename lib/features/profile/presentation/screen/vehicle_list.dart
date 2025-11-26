@@ -5,6 +5,7 @@ import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/data/models/vehicle_model.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/vehicle_information.dart';
+import 'package:quikle_rider/features/profile/presentation/widgets/profile_list_shimmer_card.dart';
 
 class VehicleListPage extends StatelessWidget {
   VehicleListPage({super.key});
@@ -31,7 +32,16 @@ class VehicleListPage extends StatelessWidget {
         final error = _profileController.vehicleListError.value;
 
         if (isLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: 5,
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
+            itemBuilder: (_, __) => const ProfileListShimmerCard(
+              showAvatar: true,
+              margin: EdgeInsets.zero,
+              lineWidths: <double>[160, 120, 200],
+            ),
+          );
         }
 
         if (error != null && error.isNotEmpty) {

@@ -6,14 +6,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class ProfileCompletionCard extends StatefulWidget {
   final double completionPercent;
   final List<String> missingItems;
-  final String motivationMessage;
+
   final VoidCallback? onCompleteNow;
 
   const ProfileCompletionCard({
     super.key,
     required this.completionPercent,
     required this.missingItems,
-    required this.motivationMessage,
+
     this.onCompleteNow,
   });
 
@@ -83,7 +83,6 @@ class _ProfileCompletionCardState extends State<ProfileCompletionCard>
               SizedBox(height: 16.h),
               _buildMissingItems(),
               SizedBox(height: 14.h),
-              _buildMotivation(),
             ],
           ),
         ),
@@ -198,6 +197,10 @@ class _ProfileCompletionCardState extends State<ProfileCompletionCard>
   }
 
   Widget _buildMissingItems() {
+    if (widget.missingItems.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -258,36 +261,6 @@ class _ProfileCompletionCardState extends State<ProfileCompletionCard>
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildMotivation() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: const Color(0xFFECFDF5),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: const Color(0xFF10B981).withOpacity(0.2)),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.stars_rounded, color: const Color(0xFF059669), size: 20.w),
-          SizedBox(width: 10.w),
-          Expanded(
-            child: Text(
-              widget.motivationMessage,
-              style: TextStyle(
-                fontFamily: 'Inter',
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF047857),
-                height: 1.4,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

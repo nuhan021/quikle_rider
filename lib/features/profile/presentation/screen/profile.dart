@@ -15,7 +15,7 @@ import 'package:quikle_rider/features/profile/presentation/screen/notification_s
 import 'package:quikle_rider/features/profile/presentation/screen/payment_method.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/vehicle_information.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/vehicle_list.dart';
-import 'package:quikle_rider/features/profile/widgets/profile_completion_card.dart';
+import 'package:quikle_rider/features/profile/presentation/widgets/profile_completion_card.dart';
 import 'package:quikle_rider/features/refferel/screens/refferel_program.dart';
 import 'package:quikle_rider/features/refferel/screens/training_center.dart';
 import 'package:quikle_rider/features/wallet/widgets/tier_badge.dart';
@@ -49,16 +49,7 @@ class ProfileScreen extends StatelessWidget {
               /// Profile Header
               _buildProfileHeader(),
               SizedBox(height: 16.h),
-              const ProfileCompletionCard(
-                completionPercent: 85,
-                missingItems: [
-                  'Vehicle Insurance certificate',
-                  'Emergency contact',
-                ],
-                motivationMessage: 'Complete 100% to unlock Gold tier',
-                onCompleteNow: null,
-              ),
-              SizedBox(height: 30.h),
+              _buildCompletionSection(),
 
               // Menu Items Container
               Container(
@@ -196,6 +187,81 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildCompletionSection() {
+    return Obx(() {
+      final isLoading = _controller.isProfileCompletionLoading.value;
+      final completion = _controller.profileCompletion.value;
+      final error = _controller.profileCompletionError.value;
+      final shouldDisplay =
+          isLoading || completion != null || (error?.isNotEmpty ?? false);
+
+      if (!shouldDisplay) {
+        return const SizedBox.shrink();
+      }
+
+      Widget content;
+      if (isLoading) {
+        content = Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(vertical: 32.h),
+          decoration: _profileCardDecoration(),
+          child: const Center(child: CircularProgressIndicator()),
+        );
+      } else if (completion == null) {
+        content = _buildCompletionErrorCard(
+          error ?? 'Unable to load profile completion.',
+        );
+      } else {
+        content = ProfileCompletionCard(
+          completionPercent: completion.completionPercentage,
+          missingItems: completion.missingFields,
+          onCompleteNow: null,
+        );
+      }
+
+      return Column(
+        children: [
+          content,
+          SizedBox(height: 30.h),
+        ],
+      );
+    });
+  }
+
+  Widget _buildCompletionErrorCard(String message) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(20.w),
+      decoration: _profileCardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Profile completion unavailable',
+            style: getTextStyle2(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            message,
+            style: getTextStyle2(fontSize: 13, color: Colors.black54),
+          ),
+          SizedBox(height: 12.h),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: _controller.fetchProfileCompletion,
+              child: const Text('Retry'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildProfileHeader() {
     return Obx(() {
       if (_controller.shouldShowLoadingHeader) {
@@ -222,7 +288,7 @@ class ProfileScreen extends StatelessWidget {
         : 'Email not available';
     final ImageProvider avatarProvider = hasImage
         ? NetworkImage(imageUrl)
-        : const AssetImage("assets/images/avatar.png");
+        : const AssetImage("assets/images/empty_profile.jpg");
 
     return Container(
       width: double.infinity,
@@ -267,43 +333,6 @@ class ProfileScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 40),
       decoration: _profileCardDecoration(),
       child: const Center(child: CircularProgressIndicator()),
-    );
-  }
-
-  Widget _buildErrorHeader(String message) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      decoration: _profileCardDecoration(),
-      child: Column(
-        children: [
-          Icon(Icons.warning_amber_rounded, color: Colors.red[600], size: 40),
-          SizedBox(height: 12.h),
-          Text(
-            'Unable to load profile',
-            style: getTextStyle2(fontSize: 16, fontWeight: FontWeight.w600),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            message,
-            style: getTextStyle2(fontSize: 14, color: Colors.black54),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 16.h),
-          ElevatedButton(
-            onPressed: _controller.fetchProfile,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: const Text('Retry'),
-          ),
-        ],
-      ),
     );
   }
 
