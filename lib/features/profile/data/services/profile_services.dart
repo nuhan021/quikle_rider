@@ -128,6 +128,37 @@ class ProfileServices {
     }
   }
 
+  Future<ResponseData> listVehicles({required String accessToken}) async {
+    final uri = Uri.parse('$_baseUrl/rider/list/vehicles/');
+
+    try {
+      final response = await _client.get(
+        uri,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      final decodedBody = _decodeResponseBody(response.body);
+      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+
+      return ResponseData(
+        isSuccess: isSuccess,
+        statusCode: response.statusCode,
+        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to fetch vehicles. Please try again.',
+        responseData: error.toString(),
+      );
+    }
+  }
+
   Future<ResponseData> createHelpAndSupport({
     required String accessToken,
     required String subject,
@@ -267,7 +298,9 @@ class ProfileServices {
               0,
               filename: '', // Empty filename.
               contentType: MediaType(
-                  'application', 'octet-stream'), // Default content type.
+                'application',
+                'octet-stream',
+              ), // Default content type.
             ),
           );
         }
@@ -284,7 +317,8 @@ class ProfileServices {
       print('URL: ${request.method} ${request.url}');
       print('Headers: ${request.headers}');
       print(
-          'Files: ${request.files.map((f) => 'field: ${f.field}, filename: ${f.filename}, length: ${f.length}, contentType: ${f.contentType}').toList()}');
+        'Files: ${request.files.map((f) => 'field: ${f.field}, filename: ${f.filename}, length: ${f.length}, contentType: ${f.contentType}').toList()}',
+      );
       // --- DEBUGGING END ---
 
       final streamedResponse = await request.send();
@@ -353,16 +387,42 @@ class ProfileServices {
       'end_at': endAt,
     };
 
+    AppLoggerHelper.debug('Updating rider availability with body: $body');
+
     try {
       final response = await http.post(url, headers: headers, body: body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        AppLoggerHelper.debug("result: ${response.body}");
+        AppLoggerHelper.debug("result: ${response.statusCode}");
         return jsonDecode(response.body);
       } else {
         return null;
       }
     } catch (e) {
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> getRiderAvailability({
+    required String token,
+  }) async {
+    final url = Uri.parse('$_baseUrl/rider/rider-availability/me/');
+    final headers = {
+      'accept': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+
+    try {
+      final response = await http.get(url, headers: headers);
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as Map<String, dynamic>;
+      }
+      AppLoggerHelper.debug(
+        'Failed to fetch availability. Status: ${response.statusCode}',
+      );
+      return null;
+    } catch (e) {
+      AppLoggerHelper.error('Error fetching availability: $e');
       return null;
     }
   }

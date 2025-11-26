@@ -31,7 +31,16 @@ class ProfileController extends GetxController {
   final Rxn<RiderDocumentsModel> riderDocuments = Rxn<RiderDocumentsModel>();
   final RxBool isCreatingVehicle = false.obs;
   final RxnString vehicleCreationError = RxnString();
+  final RxList<VehicleModel> vehicleList = <VehicleModel>[].obs;
+  final RxBool isVehicleListLoading = false.obs;
+  final RxnString vehicleListError = RxnString();
   final Rxn<VehicleModel> vehicleDetails = Rxn<VehicleModel>();
+  final List<String> vehicleTypes = const ['Bike', 'Car', 'Truck', 'Van'];
+  late final RxString selectedVehicleType = vehicleTypes.first.obs;
+  final GlobalKey<FormState> vehicleFormKey = GlobalKey<FormState>();
+  final TextEditingController licensePlateController = TextEditingController();
+  final TextEditingController vehicleModelController = TextEditingController();
+  bool _hasRequestedVehicleList = false;
   final RxBool isSubmittingHelpSupport = false.obs;
   final RxnString helpSupportError = RxnString();
   final List<String> helpIssueTypes = const [
@@ -107,11 +116,14 @@ class ProfileController extends GetxController {
   void onInit() {
     super.onInit();
     fetchProfile();
+    fetchAvailabilitySettings();
   }
 
   @override
   void onClose() {
     helpDescriptionController.dispose();
+    licensePlateController.dispose();
+    vehicleModelController.dispose();
     super.onClose();
   }
 
@@ -128,6 +140,50 @@ class ProfileController extends GetxController {
     return "${formatter.format(dt)}Z";
   }
 
+  /// Formats a TimeOfDay for user-friendly display like 8:00 AM.
+  String _formatTimeForDisplay(TimeOfDay time) {
+    final hour = time.hourOfPeriod == 0 ? 12 : time.hourOfPeriod;
+    final minute = time.minute.toString().padLeft(2, '0');
+    final period = time.period == DayPeriod.am ? 'AM' : 'PM';
+    return '$hour:$minute $period';
+  }
+
+  TimeOfDay? _parseTimeOfDayFromApi(String? rawTime) {
+    if (rawTime == null || rawTime.isEmpty) return null;
+    final match = RegExp(r'(\d{2}):(\d{2})').firstMatch(rawTime);
+    if (match == null) return null;
+    final hour = int.tryParse(match.group(1)!);
+    final minute = int.tryParse(match.group(2)!);
+    if (hour == null || minute == null) return null;
+    if (hour < 0 || hour > 23 || minute < 0 || minute > 59) return null;
+    return TimeOfDay(hour: hour, minute: minute);
+  }
+
+  void _updateAvailabilityFromResponse(Map<String, dynamic> payload) {
+    final availability = payload['is_available'];
+    if (availability is bool) {
+      isAvailable.value = availability;
+    } else if (availability is String) {
+      isAvailable.value = availability.toLowerCase() == 'true';
+    }
+
+    final startAtRaw = payload['start_at'] ?? payload['strat_at'];
+    final parsedStart = _parseTimeOfDayFromApi(
+      startAtRaw == null ? null : startAtRaw.toString(),
+    );
+    if (parsedStart != null) {
+      startTime.value = parsedStart;
+    }
+
+    final endAtRaw = payload['end_at'];
+    final parsedEnd = _parseTimeOfDayFromApi(
+      endAtRaw == null ? null : endAtRaw.toString(),
+    );
+    if (parsedEnd != null) {
+      endTime.value = parsedEnd;
+    }
+  }
+
   // bool availability funtions
   void toggleAvailability(bool value) {
     isAvailable.value = value;
@@ -139,6 +195,34 @@ class ProfileController extends GetxController {
 
   void setEndTime(TimeOfDay time) {
     endTime.value = time;
+  }
+
+  void setVehicleType(String type) {
+    if (!vehicleTypes.contains(type)) return;
+    selectedVehicleType.value = type;
+  }
+
+  void resetVehicleForm() {
+    selectedVehicleType.value = vehicleTypes.first;
+    licensePlateController.clear();
+    vehicleModelController.clear();
+    vehicleFormKey.currentState?.reset();
+  }
+
+  Future<void> fetchAvailabilitySettings() async {
+    final token = StorageService.accessToken;
+    if (token == null || token.isEmpty) {
+      return;
+    }
+
+    try {
+      final response = await _profileServices.getRiderAvailability(token: token);
+      if (response != null) {
+        _updateAvailabilityFromResponse(response);
+      }
+    } catch (e) {
+      AppLoggerHelper.error('Failed to fetch availability: $e');
+    }
   }
 
   Future<void> fetchProfile() async {
@@ -313,6 +397,7 @@ class ProfileController extends GetxController {
         if (vehicleId != null) {
           await fetchVehicleDetails(vehicleId: vehicleId);
         }
+        await fetchVehiclesList();
         return true;
       } else {
         vehicleCreationError.value = response.errorMessage.isNotEmpty
@@ -322,6 +407,46 @@ class ProfileController extends GetxController {
       }
     } finally {
       isCreatingVehicle.value = false;
+    }
+  }
+
+  Future<void> submitVehicleInformation() async {
+    final formState = vehicleFormKey.currentState;
+    if (formState == null || !formState.validate()) {
+      return;
+    }
+
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    final licensePlate = licensePlateController.text.trim();
+    final modelText = vehicleModelController.text.trim();
+
+    final success = await createVehicle(
+      vehicleType: selectedVehicleType.value.toLowerCase(),
+      licensePlateNumber: licensePlate,
+      model: modelText.isEmpty ? null : modelText,
+    );
+
+    if (success) {
+      Get.snackbar(
+        'Vehicle Saved',
+        'Vehicle information saved successfully.',
+        backgroundColor: Colors.green.withOpacity(0.2),
+        colorText: Colors.green[900],
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
+      resetVehicleForm();
+      Get.back();
+    } else {
+      Get.snackbar(
+        'Unable to save vehicle',
+        vehicleCreationErrorText,
+        backgroundColor: Colors.red.withOpacity(0.2),
+        colorText: Colors.red[900],
+        snackPosition: SnackPosition.BOTTOM,
+        margin: const EdgeInsets.all(16),
+      );
     }
   }
 
@@ -454,6 +579,51 @@ class ProfileController extends GetxController {
     polylineQuality: PolylineQuality.highQuality,
   );
 
+  Future<void> fetchVehiclesList() async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null) {
+      vehicleList.clear();
+      vehicleListError.value = 'Missing credentials. Please login again.';
+      return;
+    }
+
+    _hasRequestedVehicleList = true;
+    isVehicleListLoading.value = true;
+    vehicleListError.value = null;
+    try {
+      final response = await _profileServices.listVehicles(
+        accessToken: accessToken,
+      );
+
+      if (response.isSuccess && response.responseData is List) {
+        final rawList = response.responseData as List<dynamic>;
+        final vehicles = rawList
+            .whereType<Map<String, dynamic>>()
+            .map(VehicleModel.fromJson)
+            .toList();
+        vehicleList.assignAll(vehicles);
+      } else {
+        vehicleList.clear();
+        vehicleListError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to fetch vehicles.';
+      }
+    } catch (error) {
+      vehicleList.clear();
+      vehicleListError.value = 'Unable to fetch vehicles.';
+      AppLoggerHelper.error('Vehicle list fetch failed: $error');
+    } finally {
+      isVehicleListLoading.value = false;
+    }
+  }
+
+  Future<void> ensureVehicleListLoaded() async {
+    if (_hasRequestedVehicleList && vehicleList.isNotEmpty) {
+      return;
+    }
+    await fetchVehiclesList();
+  }
+
   Future<VehicleModel?> fetchVehicleDetails({required int vehicleId}) async {
     final accessToken = StorageService.accessToken;
     if (accessToken == null) {
@@ -505,11 +675,16 @@ class ProfileController extends GetxController {
         endAt: endAtStr,
       );
 
+      AppLoggerHelper.debug('Availability update result: $result');
+
       // Handle Response
       if (result != null) {
+        _updateAvailabilityFromResponse(result);
+        final updatedFrom = _formatTimeForDisplay(startTime.value);
+        final updatedTo = _formatTimeForDisplay(endTime.value);
         Get.snackbar(
           "Success",
-          "Availability updated successfully!",
+          "Availability updated: $updatedFrom - $updatedTo",
           backgroundColor: Colors.green.withOpacity(0.2),
           colorText: Colors.green[900],
           snackPosition: SnackPosition.BOTTOM,
