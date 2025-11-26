@@ -4,42 +4,21 @@ import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/features/profile/data/models/profile_model.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 
-class VehicleInformationPage extends StatefulWidget {
-  const VehicleInformationPage({Key? key}) : super(key: key);
+class VehicleInformationPage extends StatelessWidget {
+  VehicleInformationPage({super.key});
 
-  @override
-  State<VehicleInformationPage> createState() => _VehicleInformationPageState();
-}
-
-class _VehicleInformationPageState extends State<VehicleInformationPage> {
-  ProfileController _profileController = Get.find();
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  String selectedVehicleType = 'Bike';
-  final TextEditingController _licensePlateController = TextEditingController();
-  final TextEditingController _vehicleModelController = TextEditingController();
-
-  final List<String> vehicleTypes = ['Bike', 'Car', 'Truck', 'Van'];
-
-  @override
-  void initState() {
-    super.initState();
-    _profileController = Get.isRegistered<ProfileController>()
-        ? Get.find<ProfileController>()
-        : Get.put(ProfileController());
-  }
+  final ProfileController _controller = Get.find<ProfileController>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: UnifiedProfileAppBar(title: "Vehicle Information"),
+      appBar: UnifiedProfileAppBar(title: 'Vehicle Information'),
       body: Obx(() {
-        final ProfileModel? profile = _profileController.profile.value;
-        final isLoadingProfile =
-            _profileController.isLoading.value && profile == null;
+        final ProfileModel? profile = _controller.profile.value;
+        final isLoading = _controller.isLoading.value && profile == null;
 
-        if (isLoadingProfile) {
+        if (isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
@@ -47,23 +26,23 @@ class _VehicleInformationPageState extends State<VehicleInformationPage> {
           children: [
             Expanded(
               child: SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 16),
                 child: Form(
-                  key: _formKey,
+                  key: _controller.vehicleFormKey,
                   child: Column(
                     children: [
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 24),
                       _buildProfileCard(profile),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 24),
                       _buildVehicleForm(),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
                       _buildVehicleSummary(),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 24),
                     ],
                   ),
                 ),
               ),
             ),
-            _buildErrorMessage(),
             _buildSaveButton(),
           ],
         );
@@ -156,7 +135,7 @@ class _VehicleInformationPageState extends State<VehicleInformationPage> {
           _buildVehicleTypeDropdown(),
           _buildTextField(
             label: 'License Plate Number',
-            controller: _licensePlateController,
+            controller: _controller.licensePlateController,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return 'Please enter your license plate number';
@@ -167,7 +146,7 @@ class _VehicleInformationPageState extends State<VehicleInformationPage> {
           ),
           _buildTextField(
             label: 'Vehicle Model (Optional)',
-            controller: _vehicleModelController,
+            controller: _controller.vehicleModelController,
           ),
           const SizedBox(height: 20),
         ],
@@ -177,10 +156,8 @@ class _VehicleInformationPageState extends State<VehicleInformationPage> {
 
   Widget _buildVehicleSummary() {
     return Obx(() {
-      final vehicle = _profileController.vehicleDetails.value;
-      if (vehicle == null) {
-        return const SizedBox.shrink();
-      }
+      final vehicle = _controller.vehicleDetails.value;
+      if (vehicle == null) return const SizedBox.shrink();
 
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -240,33 +217,17 @@ class _VehicleInformationPageState extends State<VehicleInformationPage> {
     );
   }
 
-  Widget _buildErrorMessage() {
-    return Obx(() {
-      final error = _profileController.vehicleCreationError.value;
-      if (error == null || error.isEmpty) {
-        return const SizedBox.shrink();
-      }
-
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Text(
-          error,
-          style: const TextStyle(color: Colors.red, fontSize: 13),
-        ),
-      );
-    });
-  }
-
   Widget _buildSaveButton() {
     return Obx(() {
-      final isSaving = _profileController.isCreatingVehicle.value;
+      final isSaving = _controller.isCreatingVehicle.value;
       return Container(
         margin: const EdgeInsets.all(20),
         width: double.infinity,
-        height: 50,
+
         child: ElevatedButton(
-          onPressed: isSaving ? null : _saveVehicleInformation,
+          onPressed: isSaving ? null : _controller.submitVehicleInformation,
           style: ElevatedButton.styleFrom(
+            side: BorderSide.none,
             backgroundColor: Colors.black,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -310,36 +271,37 @@ class _VehicleInformationPageState extends State<VehicleInformationPage> {
             ),
           ),
           const SizedBox(height: 8),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[300]!),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: selectedVehicleType,
-                isExpanded: true,
-                icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey[600]),
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                onChanged: (String? newValue) {
-                  if (newValue == null) return;
-                  setState(() {
-                    selectedVehicleType = newValue;
-                  });
-                },
-                items: vehicleTypes.map<DropdownMenuItem<String>>((
-                  String value,
-                ) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
+          Obx(() {
+            final value = _controller.selectedVehicleType.value;
+            return Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey[300]!),
+                borderRadius: BorderRadius.circular(8),
               ),
-            ),
-          ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: value,
+                  isExpanded: true,
+                  icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  onChanged: (String? newValue) {
+                    if (newValue == null) return;
+                    _controller.setVehicleType(newValue);
+                  },
+                  items: _controller.vehicleTypes
+                      .map(
+                        (type) => DropdownMenuItem<String>(
+                          value: type,
+                          child: Text(type),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ),
+            );
+          }),
         ],
       ),
     );
@@ -394,49 +356,6 @@ class _VehicleInformationPageState extends State<VehicleInformationPage> {
         ],
       ),
     );
-  }
-
-  Future<void> _saveVehicleInformation() async {
-    final formState = _formKey.currentState;
-    if (formState == null || !formState.validate()) {
-      return;
-    }
-
-    FocusScope.of(context).unfocus();
-
-    final licensePlate = _licensePlateController.text.trim();
-    final modelText = _vehicleModelController.text.trim();
-
-    final success = await _profileController.createVehicle(
-      vehicleType: selectedVehicleType.toLowerCase(),
-      licensePlateNumber: licensePlate,
-      model: modelText.isEmpty ? null : modelText,
-    );
-
-    if (!mounted) return;
-
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Vehicle information saved successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(_profileController.vehicleCreationErrorText),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    _licensePlateController.dispose();
-    _vehicleModelController.dispose();
-    super.dispose();
   }
 
   String _formatVehicleType(String type) {

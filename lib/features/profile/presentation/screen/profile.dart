@@ -14,6 +14,7 @@ import 'package:quikle_rider/features/profile/presentation/screen/my_profile.dar
 import 'package:quikle_rider/features/profile/presentation/screen/notification_settings.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/payment_method.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/vehicle_information.dart';
+import 'package:quikle_rider/features/profile/presentation/screen/vehicle_list.dart';
 import 'package:quikle_rider/features/profile/widgets/profile_completion_card.dart';
 import 'package:quikle_rider/features/refferel/screens/refferel_program.dart';
 import 'package:quikle_rider/features/refferel/screens/training_center.dart';
@@ -90,12 +91,7 @@ class ProfileScreen extends StatelessWidget {
                     _buildMenuItem(
                       imagepath: "assets/icons/vehicle.png",
                       title: 'Vehicle Information',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const VehicleInformationPage(),
-                        ),
-                      ),
+                      onTap: () => Get.to(() => VehicleListPage()),
                     ),
                     _buildDivider(),
                     _buildMenuItem(
@@ -206,10 +202,6 @@ class ProfileScreen extends StatelessWidget {
         return _buildLoadingHeader();
       }
 
-      if (_controller.shouldShowErrorHeader) {
-        return _buildErrorHeader(_controller.headerErrorText);
-      }
-
       return _buildProfileDetailsCard(
         name: _controller.displayName,
         email: _controller.displayEmail,
@@ -229,7 +221,7 @@ class ProfileScreen extends StatelessWidget {
         ? email
         : 'Email not available';
     final ImageProvider avatarProvider = hasImage
-        ? NetworkImage(imageUrl!)
+        ? NetworkImage(imageUrl)
         : const AssetImage("assets/images/avatar.png");
 
     return Container(
@@ -474,6 +466,7 @@ class ProfileScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.r),
           ),
@@ -508,6 +501,7 @@ class ProfileScreen extends StatelessWidget {
                 Get.offAllNamed(AppRoute.loginScreen);
               },
               style: ElevatedButton.styleFrom(
+                side: BorderSide.none,
                 backgroundColor: Colors.red[600],
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.r),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 
 class ImageSelectPage extends StatefulWidget {
   const ImageSelectPage({Key? key}) : super(key: key);
@@ -12,6 +14,13 @@ class ImageSelectPage extends StatefulWidget {
 class _ImageSelectPageState extends State<ImageSelectPage> {
   File? selectedImage;
   final ImagePicker _picker = ImagePicker();
+  final ProfileController _profileController = Get.find<ProfileController>();
+
+  @override
+  void initState() {
+    super.initState();
+    _profileController.fetchVehiclesList();
+  }
 
   @override
   Widget build(BuildContext context) {

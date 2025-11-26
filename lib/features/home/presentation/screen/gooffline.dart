@@ -7,7 +7,6 @@ class GoOfflinePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-  
     return Scaffold(
       backgroundColor: Colors.black.withOpacity(0.5),
       body: Center(
@@ -71,7 +70,12 @@ class GoOfflinePage extends StatelessWidget {
                     child: OutlinedButton(
                       onPressed: () => _handleNoPressed(context),
                       style: OutlinedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                        backgroundColor: const Color.fromARGB(
+                          255,
+                          255,
+                          255,
+                          255,
+                        ),
                         //foregroundColor: const Color(0xFF333333),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         side: const BorderSide(color: Colors.black, width: 1.5),
@@ -104,9 +108,7 @@ class GoOfflinePage extends StatelessWidget {
       SnackBar(
         content: Text(
           'You are now offline and will not receive new orders.',
-          style: const TextStyle(
-            fontFamily: 'Manrope',
-          ),
+          style: const TextStyle(fontFamily: 'Manrope'),
         ),
         backgroundColor: Colors.orange,
         duration: const Duration(seconds: 2),
