@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
+import 'package:quikle_rider/features/profile/data/models/help_support_request.dart';
 import 'package:quikle_rider/features/profile/data/models/profile_model.dart';
 import 'package:quikle_rider/features/profile/data/models/rider_documents_model.dart';
 import 'package:quikle_rider/features/profile/data/models/vehicle_model.dart';
@@ -43,6 +44,10 @@ class ProfileController extends GetxController {
   bool _hasRequestedVehicleList = false;
   final RxBool isSubmittingHelpSupport = false.obs;
   final RxnString helpSupportError = RxnString();
+  final RxList<HelpSupportRequest> supportHistory = <HelpSupportRequest>[].obs;
+  final RxBool isSupportHistoryLoading = false.obs;
+  final RxnString supportHistoryError = RxnString();
+  bool _hasLoadedSupportHistory = false;
   final List<String> helpIssueTypes = const [
     'Select an issue type',
     'Account Issues',
@@ -216,7 +221,9 @@ class ProfileController extends GetxController {
     }
 
     try {
-      final response = await _profileServices.getRiderAvailability(token: token);
+      final response = await _profileServices.getRiderAvailability(
+        token: token,
+      );
       if (response != null) {
         _updateAvailabilityFromResponse(response);
       }
@@ -426,7 +433,8 @@ class ProfileController extends GetxController {
       licensePlateNumber: licensePlate,
       model: modelText.isEmpty ? null : modelText,
     );
-
+    resetVehicleForm();
+    Get.back();
     if (success) {
       Get.snackbar(
         'Vehicle Saved',
@@ -436,8 +444,6 @@ class ProfileController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
       );
-      resetVehicleForm();
-      Get.back();
     } else {
       Get.snackbar(
         'Unable to save vehicle',
@@ -516,6 +522,7 @@ class ProfileController extends GetxController {
         margin: const EdgeInsets.all(16),
       );
       resetHelpSupportForm();
+      fetchSupportHistory();
       return true;
     } else {
       final error =
@@ -528,6 +535,49 @@ class ProfileController extends GetxController {
       );
       return false;
     }
+  }
+
+  Future<void> fetchSupportHistory() async {
+    final token = StorageService.accessToken;
+    if (token == null) {
+      supportHistory.clear();
+      supportHistoryError.value = 'Missing credentials. Please login again.';
+      return;
+    }
+
+    isSupportHistoryLoading.value = true;
+    supportHistoryError.value = null;
+    try {
+      final response = await _profileServices.listHelpSupportRequests(
+        accessToken: token,
+      );
+
+      if (response.isSuccess && response.responseData is List) {
+        final raw = response.responseData as List<dynamic>;
+        final entries = raw
+            .whereType<Map<String, dynamic>>()
+            .map(HelpSupportRequest.fromJson)
+            .toList();
+        supportHistory.assignAll(entries);
+        _hasLoadedSupportHistory = true;
+      } else {
+        supportHistory.clear();
+        supportHistoryError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to load support history.';
+      }
+    } catch (error) {
+      supportHistory.clear();
+      supportHistoryError.value = 'Unable to load support history.';
+      AppLoggerHelper.error('Failed to fetch support history: $error');
+    } finally {
+      isSupportHistoryLoading.value = false;
+    }
+  }
+
+  Future<void> ensureSupportHistoryLoaded() async {
+    if (_hasLoadedSupportHistory) return;
+    await fetchSupportHistory();
   }
 
   Future<bool> submitHelpAndSupport({

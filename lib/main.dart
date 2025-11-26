@@ -5,6 +5,7 @@ import 'package:quikle_rider/app.dart';
 import 'package:quikle_rider/core/services/firebase/firebase_service.dart';
 import 'package:quikle_rider/core/services/firebase/notification_service.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/firebase_options.dart';
 
 Future<void> main() async {
@@ -13,6 +14,7 @@ Future<void> main() async {
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await FirebaseService.instance.init();
   await StorageService.init();
+
   await NotificationService.instance.init();
   await NotificationService.instance.requestPermission();
 

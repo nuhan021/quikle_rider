@@ -4,19 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/features/profile/data/models/help_support_request.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
-
-// Sample history data moved outside of the widget class as it's constant.
-const List<SupportHistoryItem> _supportHistory = [
-  SupportHistoryItem(
-    title: 'Order #12345 Issueeeeeeeeeeeeeeeee',
-    date: 'Submitted on May 15, 2023',
-  ),
-  SupportHistoryItem(
-    title: 'Payment Method Update',
-    date: 'Submitted on June 2, 2023',
-  ),
-];
 
 class HelpSupportPage extends StatelessWidget {
   const HelpSupportPage({Key? key}) : super(key: key);
@@ -25,6 +14,7 @@ class HelpSupportPage extends StatelessWidget {
   Widget build(BuildContext context) {
     // Controller is initialized here. Get.put() ensures a single instance.
     final controller = Get.put(ProfileController());
+    controller.ensureSupportHistoryLoaded();
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -56,7 +46,7 @@ class HelpSupportPage extends StatelessWidget {
               ),
               child: Divider(height: 1.h, thickness: 0.5),
             ),
-            _buildSupportHistorySection(),
+            _buildSupportHistorySection(controller),
             const SizedBox(height: 30),
           ],
         ),
@@ -319,28 +309,65 @@ class HelpSupportPage extends StatelessWidget {
 
   /// CHANGE APPLIED HERE:
   /// Build **one item per card**, keeping the exact visual style.
-  Widget _buildSupportHistorySection() {
-    return Column(
-      children: _supportHistory
-          .map(
-            (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: SizedBox(
-                width: double.infinity, // full width
-                child: _card(child: _buildSupportHistoryItem(item)),
-              ),
+  Widget _buildSupportHistorySection(ProfileController controller) {
+    return Obx(() {
+      final isLoading = controller.isSupportHistoryLoading.value;
+      final error = controller.supportHistoryError.value;
+      final history = controller.supportHistory;
+
+      if (isLoading) {
+        return const Center(child: CircularProgressIndicator());
+      }
+
+      if (error != null && error.isNotEmpty) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: _card(
+            child: Text(
+              error,
+              style: const TextStyle(color: Colors.red, fontSize: 14),
             ),
-          )
-          .toList(),
-    );
+          ),
+        );
+      }
+
+      if (history.isEmpty) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: _card(
+            child: Text(
+              'No support requests yet.',
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+          ),
+        );
+      }
+
+      return Column(
+        children: history
+            .map(
+              (item) => Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: _card(child: _buildSupportHistoryItem(item)),
+                ),
+              ),
+            )
+            .toList(),
+      );
+    });
   }
 
-  Widget _buildSupportHistoryItem(SupportHistoryItem item) {
+  Widget _buildSupportHistoryItem(HelpSupportRequest item) {
+    final createdAt = _formatDate(item.createdAt);
+    final status = item.resolvedAt == null ? 'Pending' : 'Resolved';
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          item.title,
+          item.subject,
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -349,16 +376,50 @@ class HelpSupportPage extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         Text(
-          item.date,
+          createdAt,
           style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          item.description,
+          style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+        ),
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color:
+                  status == 'Resolved' ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              status,
+              style: TextStyle(
+                color: status == 'Resolved' ? Colors.green[800] : Colors.orange[800],
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         ),
       ],
     );
   }
-}
 
-class SupportHistoryItem {
-  final String title;
-  final String date;
-  const SupportHistoryItem({required this.title, required this.date});
+  String _formatDate(String raw) {
+    final parsed = DateTime.tryParse(raw);
+    if (parsed == null) return raw;
+    return 'Submitted on ${parsed.day.toString().padLeft(2, '0')} '
+        '${_monthName(parsed.month)} ${parsed.year}';
+  }
+
+  String _monthName(int month) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    return months[(month - 1).clamp(0, months.length - 1)];
+  }
 }

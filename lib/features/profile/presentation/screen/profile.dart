@@ -466,6 +466,7 @@ class ProfileScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15.r),
           ),
@@ -500,6 +501,7 @@ class ProfileScreen extends StatelessWidget {
                 Get.offAllNamed(AppRoute.loginScreen);
               },
               style: ElevatedButton.styleFrom(
+                side: BorderSide.none,
                 backgroundColor: Colors.red[600],
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.r),

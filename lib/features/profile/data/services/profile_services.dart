@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:quikle_rider/core/models/response_data.dart';
+import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
 
 class ProfileServices {
@@ -199,6 +200,39 @@ class ProfileServices {
         statusCode: 500,
         errorMessage:
             'Unable to submit help request. Please check your connection and try again.',
+        responseData: error.toString(),
+      );
+    }
+  }
+
+  Future<ResponseData> listHelpSupportRequests({
+    required String accessToken,
+  }) async {
+    final uri = Uri.parse('$_baseUrl/rider/help-and-support-requests/me/');
+
+    try {
+      final response = await _client.get(
+        uri,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      final decodedBody = _decodeResponseBody(response.body);
+      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+
+      return ResponseData(
+        isSuccess: isSuccess,
+        statusCode: response.statusCode,
+        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to load support history. Please try again.',
         responseData: error.toString(),
       );
     }
