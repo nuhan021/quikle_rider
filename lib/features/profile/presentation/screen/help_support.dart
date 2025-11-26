@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/features/profile/data/models/help_support_request.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
+import 'package:quikle_rider/features/profile/presentation/widgets/profile_list_shimmer_card.dart';
 
 class HelpSupportPage extends StatelessWidget {
   const HelpSupportPage({Key? key}) : super(key: key);
@@ -306,9 +307,6 @@ class HelpSupportPage extends StatelessWidget {
       ),
     );
   }
-
-  /// CHANGE APPLIED HERE:
-  /// Build **one item per card**, keeping the exact visual style.
   Widget _buildSupportHistorySection(ProfileController controller) {
     return Obx(() {
       final isLoading = controller.isSupportHistoryLoading.value;
@@ -316,7 +314,19 @@ class HelpSupportPage extends StatelessWidget {
       final history = controller.supportHistory;
 
       if (isLoading) {
-        return const Center(child: CircularProgressIndicator());
+        return Column(
+          children: List.generate(
+            3,
+            (index) => const Padding(
+              padding: EdgeInsets.only(bottom: 16),
+              child: ProfileListShimmerCard(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                lineWidths: <double>[180, 120, 220, 200],
+                showStatusBadge: true,
+              ),
+            ),
+          ),
+        );
       }
 
       if (error != null && error.isNotEmpty) {
