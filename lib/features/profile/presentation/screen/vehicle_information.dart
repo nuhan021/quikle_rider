@@ -284,7 +284,10 @@ class VehicleInformationPage extends StatelessWidget {
                 child: DropdownButton<String>(
                   value: value,
                   isExpanded: true,
-                  icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey[600]),
+                  icon: Icon(
+                    Icons.keyboard_arrow_down,
+                    color: Colors.grey[600],
+                  ),
                   style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   onChanged: (String? newValue) {
                     if (newValue == null) return;

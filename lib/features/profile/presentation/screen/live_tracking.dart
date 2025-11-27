@@ -17,17 +17,26 @@ class LiveMap extends StatefulWidget {
 
 class _LiveMapState extends State<LiveMap> {
   late final TrackingController controller;
+  late final bool _ownsController;
 
   @override
   void initState() {
     super.initState();
-    controller = Get.put(TrackingController());
+    if (Get.isRegistered<TrackingController>()) {
+      controller = Get.find<TrackingController>();
+      _ownsController = false;
+    } else {
+      controller = Get.put(TrackingController());
+      _ownsController = true;
+    }
   }
 
   @override
   void dispose() {
-    controller.cleanUp();
-    Get.delete<TrackingController>();
+    if (_ownsController) {
+      controller.cleanUp();
+      Get.delete<TrackingController>();
+    }
     super.dispose();
   }
 
@@ -36,6 +45,8 @@ class _LiveMapState extends State<LiveMap> {
     return Obx(() {
       final isTrackingLive = controller.isTrackingLive.value;
       final currentLocation = controller.currentLocation.value;
+      final showRecenter = controller.showRecenterButton.value;
+      final isSimulating = controller.isSimulating.value;
 
       return Container(
         height: 400.h,
@@ -93,35 +104,84 @@ class _LiveMapState extends State<LiveMap> {
                     left: 20,
                     right: 20,
                     child: AbsorbPointer(
-                      absorbing: false, // allow map gestures under empty area
-                      child: ElevatedButton.icon(
-                        onPressed: controller.toggleLiveTracking,
-                        icon: Icon(
-                          isTrackingLive
-                              ? Icons.pause_circle_outline
-                              : Icons.near_me,
-                          size: 20,
-                        ),
-                        label: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          child: Text(
-                            isTrackingLive
-                                ? 'STOP LIVE TRACKING'
-                                : 'START LIVE TRACKING',
-                            style: const TextStyle(fontSize: 14),
+                      absorbing: false,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: showRecenter
+                                ? controller.recenterCamera
+                                : controller.toggleLiveTracking,
+                            icon: Icon(
+                              showRecenter
+                                  ? Icons.my_location
+                                  : isTrackingLive
+                                      ? Icons.pause_circle_outline
+                                      : Icons.near_me,
+                              size: 20,
+                            ),
+                            label: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Text(
+                                showRecenter
+                                    ? 'RECENTER'
+                                    : isTrackingLive
+                                        ? 'STOP LIVE TRACKING'
+                                        : 'START LIVE TRACKING',
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: showRecenter
+                                  ? Colors.blueGrey.shade800
+                                  : isTrackingLive
+                                      ? Colors.red.shade700
+                                      : Colors.blue.shade700,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              elevation: 3,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12),
+                            ),
                           ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: isTrackingLive
-                              ? Colors.red.shade700
-                              : Colors.blue.shade700,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                          const SizedBox(height: 10),
+                          OutlinedButton.icon(
+                            onPressed: isTrackingLive
+                                ? null
+                                : controller.startSimulation,
+                            icon: Icon(
+                              Icons.play_circle_fill,
+                              color: isTrackingLive
+                                  ? Colors.grey
+                                  : Colors.blue.shade700,
+                            ),
+                            label: Text(
+                              isSimulating
+                                  ? 'SIMULATION RUNNING...'
+                                  : 'RUN MOVEMENT SIMULATION',
+                              style: TextStyle(
+                                color: isTrackingLive
+                                    ? Colors.grey
+                                    : Colors.blue.shade700,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: isTrackingLive
+                                    ? Colors.grey
+                                    : Colors.blue.shade700,
+                              ),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
                           ),
-                          elevation: 3,
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                        ),
+                        ],
                       ),
                     ),
                   ),

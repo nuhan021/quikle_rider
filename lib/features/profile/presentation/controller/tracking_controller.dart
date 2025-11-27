@@ -5,10 +5,14 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:quikle_rider/core/services/network/webscoket_services.dart'
+    as rider_socket;
 
 // --- IMPORTANT: REPLACE WITH YOUR GOOGLE MAPS API KEY ---
 // WARNING: Using a key publicly is unsafe. This key is used for PolylinePoints only.
 const String googleMapsApiKey = 'AIzaSyD65cza7lynnmbhCN44gs7HupKMnuoU-bo';
+const double _socketUpdateThresholdMeters = 10.0;
+const int _defaultRiderId = 3;
 
 class TrackingController extends GetxController {
   BitmapDescriptor sourceIcon = BitmapDescriptor.defaultMarkerWithHue(
@@ -25,8 +29,19 @@ class TrackingController extends GetxController {
   int polylineIdCounter = 1;
   StreamSubscription<Position>? positionSubscription;
   final RxBool isTrackingLive = false.obs;
+  final RxBool showRecenterButton = false.obs;
+  final RxBool isSimulating = false.obs;
   bool _mapActive = true;
+  final rider_socket.WebSocketService _socketService =
+      rider_socket.WebSocketService();
+  LatLng? _lastSocketUpdateLocation;
+  final int _riderId;
+  Timer? _simulationTimer;
+  final List<LatLng> _simulationPath = [];
+  int _simulationIndex = 0;
   static const double destinationThresholdMeters = 50.0;
+
+  TrackingController({int? riderId}) : _riderId = riderId ?? _defaultRiderId;
 
   void onChangeIcon() async {
     // Load custom marker for source
@@ -57,12 +72,15 @@ class TrackingController extends GetxController {
   void onClose() {
     _mapActive = false;
     positionSubscription?.cancel();
+    _simulationTimer?.cancel();
+    _socketService.dispose();
     super.onClose();
   }
 
   Future<void> cleanUp() async {
     _stopLiveTracking(showMessage: false);
     _mapActive = false;
+    _simulationTimer?.cancel();
     if (mapController.isCompleted) {
       final controller = await mapController.future;
       controller.dispose();
@@ -196,6 +214,10 @@ class TrackingController extends GetxController {
   }
 
   void toggleLiveTracking() {
+    if (currentLocation.value == null) {
+      _showError('Current location unavailable. Please wait and try again.');
+      return;
+    }
     if (destination.value == null) {
       _showError('Please tap on the map to select a destination first.');
       return;
@@ -207,6 +229,10 @@ class TrackingController extends GetxController {
     }
 
     isTrackingLive.value = true;
+    isSimulating.value = false;
+    showRecenterButton.value = false;
+    _lastSocketUpdateLocation = currentLocation.value;
+    _connectSocket();
 
     _showInfo(
       'Live tracking started. Move your device to update your position.',
@@ -226,6 +252,7 @@ class TrackingController extends GetxController {
           (Position position) {
             final newLocation = LatLng(position.latitude, position.longitude);
             currentLocation.value = newLocation;
+            _maybeSendLocationUpdate(newLocation);
 
             if (_hasSourceMarker) {
               _setSourceMarker(newLocation);
@@ -243,6 +270,60 @@ class TrackingController extends GetxController {
         );
   }
 
+  void startSimulation() {
+    if (isTrackingLive.value) {
+      _showInfo('Already tracking. Stop current session to simulate again.');
+      return;
+    }
+    if (currentLocation.value == null) {
+      _showError('Current location unavailable. Please wait and try again.');
+      return;
+    }
+    if (destination.value == null) {
+      _showError('Please tap on the map to select a destination first.');
+      return;
+    }
+
+    final path = _buildSimulationPath();
+    if (path.isEmpty) {
+      _showError('Unable to simulate without a valid route.');
+      return;
+    }
+
+    _simulationPath
+      ..clear()
+      ..addAll(path);
+    _simulationIndex = 0;
+    isSimulating.value = true;
+    isTrackingLive.value = true;
+    showRecenterButton.value = false;
+    _lastSocketUpdateLocation = currentLocation.value;
+    _connectSocket();
+
+    _simulationTimer?.cancel();
+    _simulationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_simulationIndex >= _simulationPath.length) {
+        timer.cancel();
+        isSimulating.value = false;
+        _stopLiveTracking(showMessage: false);
+        return;
+      }
+
+      final location = _simulationPath[_simulationIndex++];
+      currentLocation.value = location;
+      _maybeSendLocationUpdate(location);
+
+      if (_hasSourceMarker) {
+        _setSourceMarker(location);
+      } else {
+        _setCurrentMarker(location);
+      }
+
+      _moveCameraToPosition(location, 18);
+      _checkDestinationReached(location);
+    });
+  }
+
   void _checkDestinationReached(LatLng current) {
     if (destination.value == null) return;
 
@@ -256,6 +337,7 @@ class TrackingController extends GetxController {
     if (distance < destinationThresholdMeters) {
       _stopLiveTracking(showMessage: false);
       _showCongratulations();
+      _disconnectSocket();
     }
   }
 
@@ -331,10 +413,10 @@ class TrackingController extends GetxController {
 
   void _showCongratulations() {
     Get.showSnackbar(
-      const GetSnackBar(
-        messageText: Text('Destination Reached! Tracking stopped.'),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 5),
+      GetSnackBar(
+        messageText: const Text('Destination reached.'),
+        backgroundColor: Colors.green.shade600,
+        duration: const Duration(seconds: 4),
       ),
     );
   }
@@ -351,7 +433,12 @@ class TrackingController extends GetxController {
 
   void _stopLiveTracking({required bool showMessage}) {
     positionSubscription?.cancel();
+    _simulationTimer?.cancel();
+    isSimulating.value = false;
     isTrackingLive.value = false;
+    showRecenterButton.value = false;
+    _lastSocketUpdateLocation = null;
+    _disconnectSocket();
     if (showMessage) _showInfo('Live tracking stopped.');
 
     markers.removeWhere((marker) => marker.markerId.value == 'source');
@@ -359,5 +446,70 @@ class TrackingController extends GetxController {
     if (latest != null) {
       _setCurrentMarker(latest);
     }
+  }
+
+  void _maybeSendLocationUpdate(LatLng newLocation) {
+    if (!_socketService.isConnected) {
+      return;
+    }
+
+    final previous = _lastSocketUpdateLocation;
+    if (previous == null) {
+      _lastSocketUpdateLocation = newLocation;
+      return;
+    }
+
+    final distance = Geolocator.distanceBetween(
+      previous.latitude,
+      previous.longitude,
+      newLocation.latitude,
+      newLocation.longitude,
+    );
+
+    if (distance >= _socketUpdateThresholdMeters) {
+      _socketService.sendLocation(newLocation.latitude, newLocation.longitude);
+      _lastSocketUpdateLocation = newLocation;
+      if (!showRecenterButton.value) {
+        showRecenterButton.value = true;
+      }
+    }
+  }
+
+  List<LatLng> _buildSimulationPath() {
+    if (currentLocation.value == null) return [];
+    if (polylineCoordinates.isNotEmpty) {
+      return polylineCoordinates.toList();
+    }
+    final start = currentLocation.value!;
+    final end =
+        destination.value ??
+        LatLng(start.latitude + 0.002, start.longitude + 0.002);
+
+    const int steps = 25;
+    final double latStep = (end.latitude - start.latitude) / steps;
+    final double lngStep = (end.longitude - start.longitude) / steps;
+
+    return List<LatLng>.generate(
+      steps,
+      (index) => LatLng(
+        start.latitude + latStep * (index + 1),
+        start.longitude + lngStep * (index + 1),
+      ),
+    );
+  }
+
+  void _connectSocket() {
+    if (_socketService.isConnected) return;
+    _socketService.connect(_riderId);
+  }
+
+  void _disconnectSocket() {
+    _socketService.disconnect();
+  }
+
+  Future<void> recenterCamera() async {
+    final target = currentLocation.value;
+    if (target == null) return;
+    await _moveCameraToPosition(target, 18);
   }
 }
