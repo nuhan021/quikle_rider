@@ -116,8 +116,8 @@ class _LiveMapState extends State<LiveMap> {
                               showRecenter
                                   ? Icons.my_location
                                   : isTrackingLive
-                                      ? Icons.pause_circle_outline
-                                      : Icons.near_me,
+                                  ? Icons.pause_circle_outline
+                                  : Icons.near_me,
                               size: 20,
                             ),
                             label: Padding(
@@ -126,8 +126,8 @@ class _LiveMapState extends State<LiveMap> {
                                 showRecenter
                                     ? 'RECENTER'
                                     : isTrackingLive
-                                        ? 'STOP LIVE TRACKING'
-                                        : 'START LIVE TRACKING',
+                                    ? 'STOP LIVE TRACKING'
+                                    : 'START LIVE TRACKING',
                                 style: const TextStyle(fontSize: 14),
                               ),
                             ),
@@ -136,14 +136,15 @@ class _LiveMapState extends State<LiveMap> {
                               backgroundColor: showRecenter
                                   ? Colors.blueGrey.shade800
                                   : isTrackingLive
-                                      ? Colors.red.shade700
-                                      : Colors.blue.shade700,
+                                  ? Colors.red.shade700
+                                  : Colors.blue.shade700,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               elevation: 3,
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -174,8 +175,7 @@ class _LiveMapState extends State<LiveMap> {
                                     ? Colors.grey
                                     : Colors.blue.shade700,
                               ),
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 10),
+                              padding: const EdgeInsets.symmetric(vertical: 10),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
