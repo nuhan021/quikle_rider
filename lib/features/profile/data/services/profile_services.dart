@@ -75,8 +75,7 @@ class ProfileServices {
       return ResponseData(
         isSuccess: false,
         statusCode: 500,
-        errorMessage:
-            'Unable to fetch profile completion. Please try again.',
+        errorMessage: 'Unable to fetch profile completion. Please try again.',
         responseData: error.toString(),
       );
     }
