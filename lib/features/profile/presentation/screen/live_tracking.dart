@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:quikle_rider/features/map/presentation/widgets/map_shimmer.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/tracking_controller.dart';
 
 class LiveMap extends StatefulWidget {
@@ -52,16 +53,7 @@ class _LiveMapState extends State<LiveMap> {
         height: 400.h,
         color: Colors.white,
         child: currentLocation == null
-            ? const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(color: Colors.blueAccent),
-                    SizedBox(height: 16),
-                    Text('Fetching initial location and permissions...'),
-                  ],
-                ),
-              )
+            ? MapShimmer()
             : Stack(
                 children: [
                   /// --- GOOGLE MAP ---
