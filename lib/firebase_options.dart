@@ -50,19 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyC-6w9TFkbTRzefAyR7uUidqVLG_AODC_w',
-    appId: '1:948140389448:android:9e624ce4b7408dfc89d47d',
-    messagingSenderId: '948140389448',
-    projectId: 'quiklerider-22552',
-    storageBucket: 'quiklerider-22552.firebasestorage.app',
+    apiKey: 'AIzaSyCGSyidx08fCIMLYjXgxLWS5HmtTJov9Qw',
+    appId: '1:901205065176:android:5681104c35ba17441106ad',
+    messagingSenderId: '901205065176',
+    projectId: 'quiklerider',
+    storageBucket: 'quiklerider.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCBHh8pgXHxwcr6uUmNbiVNvNNbyzg97b8',
-    appId: '1:948140389448:ios:48d9f9377328d53d89d47d',
-    messagingSenderId: '948140389448',
-    projectId: 'quiklerider-22552',
-    storageBucket: 'quiklerider-22552.firebasestorage.app',
+    apiKey: 'AIzaSyA0g-qnjOlfnX4qpYwGVqtjElgDFc5VkS4',
+    appId: '1:901205065176:ios:377d26e40b8225d11106ad',
+    messagingSenderId: '901205065176',
+    projectId: 'quiklerider',
+    storageBucket: 'quiklerider.firebasestorage.app',
     iosBundleId: 'com.example.quikleRider',
   );
+
 }
