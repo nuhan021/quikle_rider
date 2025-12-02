@@ -5,19 +5,20 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:quikle_rider/core/models/response_data.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
+import 'package:quikle_rider/core/utils/constants/api_constants.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
 
 class ProfileServices {
   ProfileServices({http.Client? client}) : _client = client ?? http.Client();
 
   final http.Client _client;
-  static const String _baseUrl = 'https://caditya619-backend.onrender.com';
+
 
   Future<ResponseData> getProfile({
     required String accessToken,
     required String refreshToken,
   }) async {
-    final uri = Uri.parse('$_baseUrl/rider/rider-profile/me/');
+    final uri = Uri.parse('$baseurl/rider/rider-profile/me/');
 
     try {
       final response = await _client.get(
@@ -51,7 +52,7 @@ class ProfileServices {
   Future<ResponseData> getProfileCompletion({
     required String accessToken,
   }) async {
-    final uri = Uri.parse('$_baseUrl/rider/profile/completion');
+    final uri = Uri.parse('$baseurl/rider/profile/completion');
 
     try {
       final response = await _client.get(
@@ -85,7 +86,7 @@ class ProfileServices {
     required String accessToken,
     required Map<String, dynamic> payload,
   }) async {
-    final uri = Uri.parse('$_baseUrl/rider/rider-profile/me/');
+    final uri = Uri.parse('$baseurl/rider/rider-profile/me/');
 
     try {
       final response = await _client.put(
@@ -123,7 +124,7 @@ class ProfileServices {
     required String licensePlateNumber,
     String? model,
   }) async {
-    final uri = Uri.parse('$_baseUrl/rider/vehicles/me/');
+    final uri = Uri.parse('$baseurl/rider/vehicles/me/');
     final Map<String, dynamic> payload = {
       'vehicle_type': vehicleType,
       'license_plate_number': licensePlateNumber,
@@ -163,7 +164,7 @@ class ProfileServices {
   }
 
   Future<ResponseData> listVehicles({required String accessToken}) async {
-    final uri = Uri.parse('$_baseUrl/rider/list/vehicles/');
+    final uri = Uri.parse('$baseurl/rider/list/vehicles/');
 
     try {
       final response = await _client.get(
@@ -199,7 +200,7 @@ class ProfileServices {
     required String description,
     File? attachment,
   }) async {
-    final uri = Uri.parse('$_baseUrl/rider/help-and-support/me/');
+    final uri = Uri.parse('$baseurl/rider/help-and-support/me/');
 
     try {
       final request = http.MultipartRequest('POST', uri)
@@ -241,7 +242,7 @@ class ProfileServices {
   Future<ResponseData> listHelpSupportRequests({
     required String accessToken,
   }) async {
-    final uri = Uri.parse('$_baseUrl/rider/help-and-support-requests/me/');
+    final uri = Uri.parse('$baseurl/rider/help-and-support-requests/me/');
 
     try {
       final response = await _client.get(
@@ -275,7 +276,7 @@ class ProfileServices {
     required String accessToken,
     required int vehicleId,
   }) async {
-    final uri = Uri.parse('$_baseUrl/rider/vehicles/$vehicleId/');
+    final uri = Uri.parse('$baseurl/rider/vehicles/$vehicleId/');
 
     try {
       final response = await _client.get(
@@ -333,7 +334,7 @@ class ProfileServices {
     File? vehicleRegistration,
     File? vehicleInsurance,
   }) async {
-    final uri = Uri.parse('$_baseUrl/rider/rider-documents/me/');
+    final uri = Uri.parse('$baseurl/rider/rider-documents/me/');
 
     try {
       final request = http.MultipartRequest('PUT', uri);
@@ -440,7 +441,7 @@ class ProfileServices {
     required String startAt,
     required String endAt,
   }) async {
-    final url = Uri.parse('$_baseUrl/rider/rider-availability/me/');
+    final url = Uri.parse('$baseurl/rider/rider-availability/me/');
 
     final headers = {
       'accept': 'application/json',
@@ -473,7 +474,7 @@ class ProfileServices {
   Future<Map<String, dynamic>?> getRiderAvailability({
     required String token,
   }) async {
-    final url = Uri.parse('$_baseUrl/rider/rider-availability/me/');
+    final url = Uri.parse('$baseurl/rider/rider-availability/me/');
     final headers = {
       'accept': 'application/json',
       'Authorization': 'Bearer $token',

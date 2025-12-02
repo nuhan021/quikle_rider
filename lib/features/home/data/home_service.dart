@@ -3,12 +3,14 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:quikle_rider/core/models/response_data.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
+import 'package:quikle_rider/core/utils/constants/api_constants.dart';
+import 'package:quikle_rider/core/utils/logging/logger.dart';
 
 class HomeService {
   HomeService({http.Client? client}) : _client = client ?? http.Client();
 
   final http.Client _client;
-  static const String _baseUrl = 'https://caditya619-backend.onrender.com';
+
 
   Future<ResponseData> toggleOnlineStatus({required bool isOnline}) async {
     final accessToken = StorageService.accessToken;
@@ -24,7 +26,8 @@ class HomeService {
     }
 
     try {
-      final uri = Uri.parse('$_baseUrl/rider/go-online-offline');
+      final uri = Uri.parse('$baseurl/rider/go-online-offline');
+    
       final response = await _client.put(
         uri,
         headers: {

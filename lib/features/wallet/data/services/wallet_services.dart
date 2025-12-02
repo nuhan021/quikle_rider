@@ -2,20 +2,21 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:quikle_rider/core/models/response_data.dart';
+import 'package:quikle_rider/core/utils/constants/api_constants.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
 
 class WalletServices {
   WalletServices({http.Client? client}) : _client = client ?? http.Client();
 
   final http.Client _client;
-  static const String _baseUrl = 'https://caditya619-backend.onrender.com';
+
 
   Future<ResponseData> fetchWalletSummary({
     required String accessToken,
     required String period,
   }) async {
     final uri = Uri.parse(
-      '$_baseUrl/rider/wallet/',
+      '$baseurl/rider/wallet/',
     ).replace(queryParameters: {'period': period});
 
     try {
@@ -49,7 +50,7 @@ class WalletServices {
   Future<ResponseData> fetchPerformance({
     required String accessToken,
   }) async {
-    final uri = Uri.parse('$_baseUrl/rider/performance/');
+    final uri = Uri.parse('$baseurl/rider/performance/');
     try {
       final response = await _client.get(
         uri,
@@ -79,7 +80,7 @@ class WalletServices {
   Future<ResponseData> fetchLeaderboard({
     required String accessToken,
   }) async {
-    final uri = Uri.parse('$_baseUrl/rider/leaderboard/');
+    final uri = Uri.parse('$baseurl/rider/leaderboard/');
     try {
       final response = await _client.get(
         uri,
@@ -109,7 +110,7 @@ class WalletServices {
   Future<ResponseData> getCurrentBalance({
     required String accessToken,
   }) async {
-    final uri = Uri.parse('$_baseUrl/rider/current_balance/');
+    final uri = Uri.parse('$baseurl/rider/current_balance/');
     try {
       final response = await _client.get(
         uri,

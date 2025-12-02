@@ -2,12 +2,13 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:quikle_rider/core/models/response_data.dart';
+import 'package:quikle_rider/core/utils/constants/api_constants.dart';
 
 class AuthServies {
   AuthServies({http.Client? client}) : _client = client ?? http.Client();
 
   final http.Client _client;
-  static const String _baseUrl = 'https://caditya619-backend.onrender.com';
+
   static final Uri _verifyTokenUri = Uri.parse(
     'https://caditya619-backend.onrender.com/auth/verify-token/',
   );
@@ -57,7 +58,7 @@ class AuthServies {
     required Map<String, String> body,
   }) async {
     try {
-      final uri = Uri.parse('$_baseUrl$path');
+      final uri = Uri.parse('$baseurl$path');
       final response = await _client.post(
         uri,
         headers: const {
