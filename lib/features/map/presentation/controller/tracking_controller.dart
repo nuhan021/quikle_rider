@@ -10,7 +10,10 @@ import 'package:quikle_rider/core/services/network/webscoket_services.dart'
 
 // --- IMPORTANT: REPLACE WITH YOUR GOOGLE MAPS API KEY ---
 // WARNING: Using a key publicly is unsafe. This key is used for PolylinePoints only.
-const String googleMapsApiKey = 'AIzaSyD65cza7lynnmbhCN44gs7HupKMnuoU-bo';
+// const String googleMapsApiKey = 'AIzaSyD65cza7lynnmbhCN44gs7HupKMnuoU-bo'; 
+
+//Load the key from .env
+const String googleMapsApiKey = String.fromEnvironment('GOOGLE_MAP_API_KEY');
 const double _socketUpdateThresholdMeters = 10.0;
 const int _defaultRiderId = 3;
 

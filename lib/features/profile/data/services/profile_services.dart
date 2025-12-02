@@ -495,4 +495,151 @@ class ProfileServices {
       return null;
     }
   }
+
+  Future<ResponseData> getReferralDashboard({
+    required String accessToken,
+  }) async {
+    final uri = Uri.parse('$baseurl/rider/referral/dashboard');
+
+    try {
+      final response = await _client.get(
+        uri,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      final decodedBody = _decodeResponseBody(response.body);
+      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+
+      return ResponseData(
+        isSuccess: isSuccess,
+        statusCode: response.statusCode,
+        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to load referral dashboard. Please try again.',
+        responseData: error.toString(),
+      );
+    }
+  }
+
+  Future<ResponseData> getReferralQrImage({
+    required String accessToken,
+  }) async {
+    final uri = Uri.parse('$baseurl/rider/referral/qr');
+
+    try {
+      final response = await _client.get(
+        uri,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+      dynamic responseData;
+      var errorMessage = '';
+
+      if (isSuccess) {
+        responseData = response.bodyBytes;
+      } else {
+        final decodedBody = _decodeResponseBody(response.body);
+        responseData = decodedBody;
+        errorMessage = _extractErrorMessage(decodedBody);
+      }
+
+      return ResponseData(
+        isSuccess: isSuccess,
+        statusCode: response.statusCode,
+        errorMessage: errorMessage,
+        responseData: responseData,
+      );
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to load referral QR code. Please try again.',
+        responseData: error.toString(),
+      );
+    }
+  }
+
+  Future<ResponseData> startQuiz({
+    required String accessToken,
+  }) async {
+    final uri = Uri.parse('$baseurl/rider/start');
+
+    try {
+      final response = await _client.get(
+        uri,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      final decodedBody = _decodeResponseBody(response.body);
+      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+
+      AppLoggerHelper.debug("response quiz $decodedBody");
+
+      return ResponseData(
+        isSuccess: isSuccess,
+        statusCode: response.statusCode,
+        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to start quiz. Please try again.',
+        responseData: error.toString(),
+      );
+    }
+  }
+
+  Future<ResponseData> submitQuiz({
+    required String accessToken,
+    required Map<String, dynamic> payload,
+  }) async {
+    final uri = Uri.parse('$baseurl/rider/submit');
+
+    try {
+      final response = await _client.post(
+        uri,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(payload),
+      );
+
+      final decodedBody = _decodeResponseBody(response.body);
+      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+      AppLoggerHelper.debug("response quiz $decodedBody");
+
+      return ResponseData(
+        isSuccess: isSuccess,
+        statusCode: response.statusCode,
+        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to submit quiz. Please try again.',
+        responseData: error.toString(),
+      );
+    }
+  }
 }

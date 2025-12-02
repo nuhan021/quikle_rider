@@ -39,6 +39,7 @@ dependencies:
   intl: ^0.18.1
   logger: ^2.0.1
   url_launcher: ^6.1.12
+  webview_flutter: ^4.4.2
   flutter_screenutil: ^5.9.3
   flutter_easyloading: ^3.0.5
   shared_preferences: ^2.3.2
@@ -89,6 +90,8 @@ dependencies:
   firebase_auth: ^6.1.2
   flutter_local_notifications: ^17.2.2
   firebase_messaging: ^16.0.4
+  dotenv: ^4.2.0
+  flutter_dotenv: ^6.0.0
 
 dev_dependencies:
   flutter_test:

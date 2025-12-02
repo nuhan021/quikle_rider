@@ -2,10 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
+import 'package:quikle_rider/features/refferel/screens/quiz_selection_page.dart';
 
 class TrainingCenterPage extends StatelessWidget {
   TrainingCenterPage({super.key});
@@ -209,7 +211,7 @@ class TrainingCenterPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12.r),
                 ),
               ),
-              onPressed: () {},
+              onPressed: () => Get.to(() => const QuizSelectionPage()),
               child: Text(
                 'Start Quiz',
                 style: getTextStyle(

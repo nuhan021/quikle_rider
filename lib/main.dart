@@ -1,6 +1,8 @@
+import 'package:dotenv/dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:quikle_rider/app.dart';
 import 'package:quikle_rider/core/services/firebase/firebase_service.dart';
 import 'package:quikle_rider/core/services/firebase/notification_service.dart';
@@ -14,6 +16,11 @@ Future<void> main() async {
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await FirebaseService.instance.init();
   await StorageService.init();
+
+  //Initialize dot env
+  await dotenv.load(fileName: ".env");
+
+  //Initialize notification
 
   await NotificationService.instance.init();
   await NotificationService.instance.requestPermission();
