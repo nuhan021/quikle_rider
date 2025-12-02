@@ -1,7 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:io';
-
+import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -13,6 +13,7 @@ import 'package:quikle_rider/core/utils/logging/logger.dart';
 import 'package:quikle_rider/features/profile/data/models/help_support_request.dart';
 import 'package:quikle_rider/features/profile/data/models/profile_completion_model.dart';
 import 'package:quikle_rider/features/profile/data/models/profile_model.dart';
+import 'package:quikle_rider/features/profile/data/models/referral_dashboard.dart';
 import 'package:quikle_rider/features/profile/data/models/rider_documents_model.dart';
 import 'package:quikle_rider/features/profile/data/models/vehicle_model.dart';
 import 'package:quikle_rider/features/profile/data/services/profile_services.dart';
@@ -22,6 +23,8 @@ class ProfileController extends GetxController {
     : _profileServices = profileServices ?? ProfileServices();
 
   final ProfileServices _profileServices;
+
+  // 📊 State: profile & documents
   final RxBool isavaiabilityProfile = false.obs;
   final RxBool isLoading = false.obs;
   final RxnString errorMessage = RxnString();
@@ -31,6 +34,8 @@ class ProfileController extends GetxController {
   final RxBool isUploadingDocuments = false.obs;
   final RxnString documentUploadError = RxnString();
   final Rxn<RiderDocumentsModel> riderDocuments = Rxn<RiderDocumentsModel>();
+
+  // 🚗 State: vehicles
   final RxBool isCreatingVehicle = false.obs;
   final RxnString vehicleCreationError = RxnString();
   final RxList<VehicleModel> vehicleList = <VehicleModel>[].obs;
@@ -43,6 +48,8 @@ class ProfileController extends GetxController {
   final TextEditingController licensePlateController = TextEditingController();
   final TextEditingController vehicleModelController = TextEditingController();
   bool _hasRequestedVehicleList = false;
+
+  // 🆘 State: help & support
   final RxBool isSubmittingHelpSupport = false.obs;
   final RxnString helpSupportError = RxnString();
   final RxList<HelpSupportRequest> supportHistory = <HelpSupportRequest>[].obs;
@@ -63,14 +70,20 @@ class ProfileController extends GetxController {
       TextEditingController();
   final Rxn<File> helpAttachment = Rxn<File>();
   final RxnString helpAttachmentName = RxnString();
+
+  // ✅ State: completion & referral
   final RxBool isProfileCompletionLoading = false.obs;
   final RxnString profileCompletionError = RxnString();
   final Rxn<ProfileCompletionModel> profileCompletion =
       Rxn<ProfileCompletionModel>();
+  final Rxn<ReferralDashboard> referralDashboard = Rxn<ReferralDashboard>();
+  final RxBool isReferralDashboardLoading = false.obs;
+  final RxnString referralDashboardError = RxnString();
+  final Rxn<Uint8List> referralQrImage = Rxn<Uint8List>();
+  final RxBool isReferralQrLoading = false.obs;
+  final RxnString referralQrError = RxnString();
 
-  //availability settings
-
-  // Using TimeOfDay for UI selection
+  // ⏰ State: availability
   var startTime = TimeOfDay.now().obs;
   var endTime = TimeOfDay.now().obs;
   var isAvailable = false.obs;
@@ -130,6 +143,7 @@ class ProfileController extends GetxController {
       ? profileCompletion.value!.message
       : 'Complete your profile to unlock new tiers.';
 
+  // 🧭 Lifecycle hooks
   @override
   void onInit() {
     super.onInit();
@@ -146,6 +160,7 @@ class ProfileController extends GetxController {
     super.onClose();
   }
 
+  // 🛠️ Time helpers for availability
   /// Formats TimeOfDay to API expected string "HH:mm:ss.SSSZ"
   String _formatTimeForApi(TimeOfDay time) {
     final now = DateTime.now();
@@ -203,7 +218,7 @@ class ProfileController extends GetxController {
     }
   }
 
-  // bool availability funtions
+  // 🔄 Availability toggles/setters
   void toggleAvailability(bool value) {
     isAvailable.value = value;
   }
@@ -216,6 +231,7 @@ class ProfileController extends GetxController {
     endTime.value = time;
   }
 
+  // 🧾 Vehicle form helpers
   void setVehicleType(String type) {
     if (!vehicleTypes.contains(type)) return;
     selectedVehicleType.value = type;
@@ -228,6 +244,7 @@ class ProfileController extends GetxController {
     vehicleFormKey.currentState?.reset();
   }
 
+  // ☎️ Availability API calls
   Future<void> fetchAvailabilitySettings() async {
     final token = StorageService.accessToken;
     if (token == null || token.isEmpty) {
@@ -246,6 +263,7 @@ class ProfileController extends GetxController {
     }
   }
 
+  // 👤 Profile fetch & update
   Future<void> fetchProfile() async {
     final accessToken = StorageService.accessToken;
     debugPrint('access token in practice file: $accessToken');
@@ -281,6 +299,7 @@ class ProfileController extends GetxController {
     }
   }
 
+  // 🧩 Profile completion progress
   Future<void> fetchProfileCompletion() async {
     final accessToken = StorageService.accessToken;
     if (accessToken == null) {
@@ -311,6 +330,75 @@ class ProfileController extends GetxController {
     }
   }
 
+  // 🎁 Referral program data
+  Future<void> fetchReferralDashboard() async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null) {
+      referralDashboard.value = null;
+      referralDashboardError.value =
+          'Missing credentials. Please login again.';
+      return;
+    }
+
+    isReferralDashboardLoading.value = true;
+    referralDashboardError.value = null;
+    try {
+      final response = await _profileServices.getReferralDashboard(
+        accessToken: accessToken,
+      );
+
+      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+        referralDashboard.value = ReferralDashboard.fromJson(
+          response.responseData as Map<String, dynamic>,
+        );
+      } else {
+        referralDashboard.value = null;
+        referralDashboardError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to load referral details.';
+      }
+    } finally {
+      isReferralDashboardLoading.value = false;
+    }
+  }
+
+  Future<void> fetchReferralQrImage() async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null) {
+      referralQrImage.value = null;
+      referralQrError.value = 'Missing credentials. Please login again.';
+      return;
+    }
+
+    isReferralQrLoading.value = true;
+    referralQrError.value = null;
+    try {
+      final response = await _profileServices.getReferralQrImage(
+        accessToken: accessToken,
+      );
+
+      if (response.isSuccess) {
+        final data = response.responseData;
+        if (data is Uint8List) {
+          referralQrImage.value = data;
+        } else if (data is List<int>) {
+          referralQrImage.value = Uint8List.fromList(data);
+        } else {
+          referralQrImage.value = null;
+          referralQrError.value = 'QR code response invalid.';
+        }
+      } else {
+        referralQrImage.value = null;
+        referralQrError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to load referral QR.';
+      }
+    } finally {
+      isReferralQrLoading.value = false;
+    }
+  }
+
+  // ✏️ Profile updates
   Future<bool> updateProfileData({
     required String name,
     required String email,
@@ -354,6 +442,7 @@ class ProfileController extends GetxController {
     }
   }
 
+  // 📤 Document uploads
   Future<bool> uploadDocuments({
     File? profileImage,
     File? nationalId,
@@ -418,6 +507,7 @@ class ProfileController extends GetxController {
     }
   }
 
+  // 🚗 Vehicle create & list
   Future<bool> createVehicle({
     required String vehicleType,
     required String licensePlateNumber,
@@ -504,6 +594,7 @@ class ProfileController extends GetxController {
     selectedHelpIssueType.value = issueType;
   }
 
+  // 🆘 Help & support flows
   Future<void> pickHelpAttachment() async {
     try {
       final result = await FilePicker.platform.pickFiles();
@@ -658,6 +749,7 @@ class ProfileController extends GetxController {
     }
   }
 
+  // 🗺️ Demo route request placeholder for map features
   RoutesApiRequest request = RoutesApiRequest(
     origin: PointLatLng(37.7749, -122.4194),
     destination: PointLatLng(37.3382, -121.8863),
@@ -673,6 +765,7 @@ class ProfileController extends GetxController {
     polylineQuality: PolylineQuality.highQuality,
   );
 
+  // 🚛 Vehicle list fetch
   Future<void> fetchVehiclesList() async {
     final accessToken = StorageService.accessToken;
     if (accessToken == null) {
@@ -739,8 +832,7 @@ class ProfileController extends GetxController {
     return null;
   }
 
-  // Avaulability settings
-
+  // ⏱️ Availability save
   /// Calls the Service to update data
   Future<void> updateAvailabilitySettings() async {
     final token = StorageService.accessToken;

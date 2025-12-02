@@ -29,6 +29,7 @@ class MapController extends GetxController {
   Set<Marker> get mapMarkers {
     final markers = <Marker>{
       Marker(
+        
         markerId: const MarkerId('current-location'),
         position: currentPosition.value ?? fallbackLocation,
         infoWindow: const InfoWindow(title: 'You are here'),
@@ -42,6 +43,7 @@ class MapController extends GetxController {
           markerId: const MarkerId('selected-destination'),
           position: destination,
           icon: BitmapDescriptor.defaultMarkerWithHue(
+            
             BitmapDescriptor.hueAzure,
           ),
           infoWindow: InfoWindow(
