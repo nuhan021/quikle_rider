@@ -103,7 +103,7 @@ class QuizController extends GetxController {
   }
 
   void selectOption(String optionId) {
-    selectedOptions[currentIndex.value] = optionId;
+    selectedOptions[currentIndex.value] = optionId.toUpperCase();
   }
 
   bool get hasSelection => selectedOptions[currentIndex.value]?.isNotEmpty == true;
@@ -150,18 +150,17 @@ class QuizController extends GetxController {
       final answers = <String, dynamic>{};
       for (var i = 0; i < questions.length; i++) {
         final selected = selectedOptions[i];
-        if (selected != null) {
-          final qid = questions[i].id?.toString() ?? questions[i].question;
-          answers[qid] = selected;
+        final questionKey = questions[i].answerKey;
+        if (selected != null && questionKey != null) {
+          answers[questionKey] = selected.toUpperCase();
         }
       }
 
-      final payload = <String, dynamic>{
-        'answers': answers,
-      };
-      if (attemptId.value != null) {
-        payload['attempt_id'] = attemptId.value;
-      }
+      final payload = <String, dynamic>{}
+        ..addAll(answers)
+        ..addAll({
+          if (attemptId.value != null) 'attempt_id': attemptId.value,
+        });
 
       final response = await _profileServices.submitQuiz(
         accessToken: accessToken,

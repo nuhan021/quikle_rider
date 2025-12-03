@@ -47,10 +47,7 @@ class _QuizSelectionPageState extends State<QuizSelectionPage> {
 
         final error = _controller.error.value;
         if (error != null && error.isNotEmpty) {
-          return _ErrorState(
-            message: error,
-            onRetry: _controller.startQuiz,
-          );
+          return _ErrorState(message: error, onRetry: _controller.startQuiz);
         }
 
         final question = _controller.currentQuestion;
@@ -76,11 +73,17 @@ class _QuizSelectionPageState extends State<QuizSelectionPage> {
                     children: [
                       Text(
                         'Question ${currentIndex + 1} of $total',
-                        style: getTextStyle(fontSize: 13, color: Colors.grey[700]),
+                        style: getTextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[700],
+                        ),
                       ),
                       Text(
                         '${(_controller.progressPercent * 100).round()}%',
-                        style: getTextStyle(fontSize: 13, color: Colors.grey[700]),
+                        style: getTextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[700],
+                        ),
                       ),
                     ],
                   ),
@@ -91,8 +94,9 @@ class _QuizSelectionPageState extends State<QuizSelectionPage> {
                       value: _controller.progressPercent,
                       minHeight: 6.h,
                       backgroundColor: Colors.grey[300],
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(AppColors.primaryyellow),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColors.primaryyellow,
+                      ),
                     ),
                   ),
                 ],
@@ -143,16 +147,15 @@ class _QuizSelectionPageState extends State<QuizSelectionPage> {
             ),
           ),
           SizedBox(height: 18.h),
-          ...question.options.map(
-            (option) => _optionTile(option),
-          ),
+          ...question.options.map((option) => _optionTile(option)),
         ],
       ),
     );
   }
 
   Widget _optionTile(QuizOption option) {
-    final selected = _controller.selectedOptions[_controller.currentIndex.value];
+    final selected =
+        _controller.selectedOptions[_controller.currentIndex.value];
     final isSelected = selected != null && selected.toUpperCase() == option.id;
 
     return GestureDetector(
@@ -176,10 +179,14 @@ class _QuizSelectionPageState extends State<QuizSelectionPage> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isSelected ? AppColors.primaryyellow : Colors.grey[500]!,
+                  color: isSelected
+                      ? AppColors.primaryyellow
+                      : Colors.grey[500]!,
                   width: 2,
                 ),
-                color: isSelected ? AppColors.primaryyellow.withOpacity(0.12) : null,
+                color: isSelected
+                    ? AppColors.primaryyellow.withOpacity(0.12)
+                    : null,
               ),
               child: isSelected
                   ? Center(
@@ -221,6 +228,7 @@ class _QuizSelectionPageState extends State<QuizSelectionPage> {
           Expanded(
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
+                side: BorderSide.none,
                 backgroundColor: Colors.grey[200],
                 foregroundColor: Colors.grey[600],
                 padding: EdgeInsets.symmetric(vertical: 14.h),
@@ -244,6 +252,7 @@ class _QuizSelectionPageState extends State<QuizSelectionPage> {
           Expanded(
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
+                side: BorderSide.none,
                 backgroundColor: Colors.black,
                 foregroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(vertical: 14.h),
@@ -310,10 +319,13 @@ class _QuizSelectionPageState extends State<QuizSelectionPage> {
       Get.to(() => const QuizResultPage());
     } else {
       final err = _controller.error.value ?? 'Unable to submit quiz.';
-      Get.snackbar('Quiz', err,
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red.withOpacity(0.15),
-          colorText: Colors.red[800]);
+      Get.snackbar(
+        'Quiz',
+        err,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.15),
+        colorText: Colors.red[800],
+      );
     }
   }
 }
@@ -340,10 +352,7 @@ class _ErrorState extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: const Text('Retry'),
-            ),
+            ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
           ],
         ),
       ),

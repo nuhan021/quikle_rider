@@ -1,6 +1,7 @@
 class QuizQuestion {
   QuizQuestion({
     this.id,
+    this.key,
     required this.question,
     required this.optionA,
     required this.optionB,
@@ -18,6 +19,7 @@ class QuizQuestion {
           ];
 
   final int? id;
+  final String? key;
   final String question;
   final String optionA;
   final String optionB;
@@ -27,7 +29,20 @@ class QuizQuestion {
   final String explanation;
   final List<QuizOption> options;
 
+  String? get answerKey {
+    if (key != null && key!.isNotEmpty) return key;
+    if (id != null) return id.toString();
+    return null;
+  }
+
   factory QuizQuestion.fromJson(Map<String, dynamic> json) {
+    final rawKey = json['key']?.toString() ??
+        json['question_key']?.toString() ??
+        json['question_id']?.toString();
+    final parsedId = (json['id'] as num?)?.toInt() ??
+        (json['question_id'] as num?)?.toInt() ??
+        int.tryParse(rawKey ?? '');
+
     final rawOptions = json['options'];
     List<QuizOption>? parsedOptions;
     if (rawOptions is List) {
@@ -35,7 +50,7 @@ class QuizQuestion {
           .whereType<Map<String, dynamic>>()
           .map(
             (opt) => QuizOption(
-              id: opt['key']?.toString() ?? '',
+              id: opt['key']?.toString().toUpperCase() ?? '',
               text: opt['text']?.toString() ?? '',
             ),
           )
@@ -44,7 +59,8 @@ class QuizQuestion {
     }
 
     return QuizQuestion(
-      id: (json['id'] as num?)?.toInt(),
+      id: parsedId,
+      key: rawKey ?? json['id']?.toString(),
       question: json['question']?.toString() ?? '',
       optionA: json['option_a']?.toString() ?? '',
       optionB: json['option_b']?.toString() ?? '',
