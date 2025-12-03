@@ -48,6 +48,15 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app needs your location to show pickups and drop-offs on the map.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>phonepe</string>
+		<string>tez</string>
+		<string>paytmmp</string>
+		<string>bhim</string>
+		<string>amazonpay</string>
+		<string>credpay</string>
+	</array>
 	<string>We use your location to help you navigate to deliveries while the app is active.</string>
 </dict>
 </plist>
