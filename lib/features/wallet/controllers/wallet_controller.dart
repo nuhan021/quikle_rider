@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
+import 'package:quikle_rider/features/profile/data/services/profile_services.dart';
 import 'package:quikle_rider/features/wallet/data/services/wallet_services.dart';
 import 'package:quikle_rider/features/wallet/models/leaderboard_standing.dart';
 import 'package:quikle_rider/features/wallet/models/rider_performance.dart';
@@ -33,10 +34,12 @@ class DeliveryItem {
 class WalletController extends GetxController
     with GetSingleTickerProviderStateMixin {
   WalletController({WalletServices? walletServices})
-    : _walletServices = walletServices ?? WalletServices();
+    : _walletServices = walletServices ?? WalletServices(),
+      _profileServices = ProfileServices();
   static const List<String> _periodFilters = ['week', 'month', 'year'];
   late TabController tabController;
   final WalletServices _walletServices;
+  final ProfileServices _profileServices;
   final walletSummary = Rxn<WalletSummary>();
   final isWalletLoading = false.obs;
   final walletError = RxnString();
@@ -53,6 +56,10 @@ class WalletController extends GetxController
   var isOnline = true.obs;
   int _selectedPeriodIndex = 0;
   final Map<String, WalletSummary> _periodSummaries = {};
+  final RxnDouble riderRating = RxnDouble();
+  final RxnInt riderReviewCount = RxnInt();
+  final RxBool isRatingLoading = false.obs;
+  final RxnString ratingError = RxnString();
   // Data for different periods
   final _weekDeliveries = <DeliveryItem>[
     const DeliveryItem(
@@ -130,6 +137,7 @@ class WalletController extends GetxController
     fetchPerformanceData();
     fetchLeaderboardData();
     fetchCurrentBalance();
+    fetchRiderRating();
   }
 
   void updateDataForPeriod(int index) {
@@ -283,6 +291,50 @@ class WalletController extends GetxController
     } finally {
       isLeaderboardLoading.value = false;
     }
+  }
+
+  Future<void> fetchRiderRating() async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null || accessToken.isEmpty) {
+      ratingError.value = 'Missing access token.';
+      riderRating.value = null;
+      riderReviewCount.value = null;
+      return;
+    }
+
+    isRatingLoading.value = true;
+    ratingError.value = null;
+    try {
+      final response = await _profileServices.getRiderRatings(
+        accessToken: accessToken,
+      );
+
+      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+        final body = response.responseData as Map<String, dynamic>;
+        riderRating.value = (body['avg_rating'] as num?)?.toDouble() ?? 0.0;
+        riderReviewCount.value = (body['total_reviews'] as num?)?.toInt() ?? 0;
+      } else {
+        ratingError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Failed to load ratings.';
+        riderRating.value = null;
+        riderReviewCount.value = null;
+      }
+    } catch (_) {
+      ratingError.value = 'Failed to load ratings.';
+      riderRating.value = null;
+      riderReviewCount.value = null;
+    } finally {
+      isRatingLoading.value = false;
+    }
+  }
+
+  String get ratingDisplay =>
+      riderRating.value?.toStringAsFixed(1) ?? '0.0';
+
+  String get totalRatingsText {
+    final count = riderReviewCount.value ?? 0;
+    return count == 1 ? '1 Rating' : '$count Ratings';
   }
 
   Future<void> fetchCurrentBalance() async {

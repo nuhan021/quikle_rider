@@ -17,13 +17,13 @@ Future<void> main() async {
   await FirebaseService.instance.init();
   await StorageService.init();
 
-  //Initialize dot env
-  await dotenv.load(fileName: ".env");
+ 
 
   //Initialize notification
 
   await NotificationService.instance.init();
   await NotificationService.instance.requestPermission();
-
+// //  //Initialize dot env
+//   await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }

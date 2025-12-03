@@ -3,10 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:lottie/lottie.dart';
+
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
+import 'package:quikle_rider/features/profile/presentation/widgets/common_button.dart';
 import 'package:quikle_rider/features/refferel/presentation/controller/quiz_controller.dart';
 import 'package:quikle_rider/features/refferel/screens/quiz_selection_page.dart';
 
@@ -24,7 +26,7 @@ class QuizResultPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: const UnifiedProfileAppBar(title: 'Quiz Results'),
+      appBar: const UnifiedProfileAppBar(title: 'Quiz Results',isback: true),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.all(16.w),
@@ -46,18 +48,13 @@ class QuizResultPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 68.w,
-                    height: 68.w,
-                    decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.check_circle,
-                      color: Colors.green,
-                      size: 42,
-                    ),
+                  Lottie.asset(
+                     'assets/images/Success.json',
+                  
+                    width: 80.w,
+                    height: 80.h,
+                    fit: BoxFit.cover,
+                    repeat: false,
                   ),
                   SizedBox(height: 16.h),
                   Text(
@@ -87,48 +84,22 @@ class QuizResultPage extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(color: Colors.grey[300]!),
-                            padding: EdgeInsets.symmetric(vertical: 12.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                          ),
-                          onPressed: () {
-                            controller.resetQuiz();
-                            Get.off(() => const QuizSelectionPage());
-                          },
-                          child: Text(
-                            'Retake',
-                            style: getTextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.grey[700],
-                            ),
-                          ),
-                        ),
+                        child: CustomButton(
+                          textColor:AppColors.blackColor,
+                          backgroundColor: AppColors.borderColor,
+                          text: "Retake", onPressed: (){
+                       
+                            Get.to(QuizSelectionPage(),transition:Transition.fadeIn); 
+                          })
                       ),
                       SizedBox(width: 12.w),
                       Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: 12.h),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                          ),
-                          onPressed: () => Get.back(),
-                          child: Text(
-                            'Done',
-                            style: getTextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                            ).copyWith(color: Colors.white),
-                          ),
-                        ),
+                        child:CustomButton(
+                           textColor:AppColors.beakYellow,
+                          backgroundColor: AppColors.backgroundDark,
+                          text: "Cancel", onPressed: (){
+                            Get.back();
+                          })
                       ),
                     ],
                   ),
@@ -189,11 +160,12 @@ class QuizResultPage extends StatelessWidget {
   Widget _statusButton(bool passed) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
+        side: BorderSide.none,
         backgroundColor: passed ? AppColors.greenbutton2 : Colors.orange,
         foregroundColor: Colors.white,
         padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 12.w),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.r),
+          borderRadius: BorderRadius.circular(8.r),
         ),
         elevation: 0,
       ),
@@ -201,7 +173,7 @@ class QuizResultPage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Iconsax.verify5, color: Colors.white, size: 18),
+          const Icon(Icons.verified, color: Colors.white, size: 18),
           SizedBox(width: 8.w),
           Text(
             passed ? 'Certified Partner' : 'Review Needed',
