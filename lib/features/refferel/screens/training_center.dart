@@ -7,50 +7,59 @@ import 'package:iconsax/iconsax.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
+import 'package:quikle_rider/core/widgets/shimmer/shimmer_loading.dart';
+import 'package:quikle_rider/features/profile/data/models/training_resource.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/refferel/screens/quiz_selection_page.dart';
 
-class TrainingCenterPage extends StatelessWidget {
-  TrainingCenterPage({super.key});
+class TrainingCenterPage extends StatefulWidget {
+  const TrainingCenterPage({super.key});
 
-  final List<_TrainingItem> _videos = const [
-    _TrainingItem(title: 'Getting Started', subtitle: '5:30'),
-    _TrainingItem(title: 'Accepting Orders', subtitle: '5:30'),
-    _TrainingItem(title: 'Customer Service Tips', subtitle: '5:30'),
-    _TrainingItem(title: 'Safety Guidelines', subtitle: '5:30'),
-  ];
+  @override
+  State<TrainingCenterPage> createState() => _TrainingCenterPageState();
+}
 
-  final List<_TrainingItem> _guides = const [
-    _TrainingItem(title: 'Partner Handbook'),
-    _TrainingItem(title: 'Safety Protocols'),
-    _TrainingItem(title: 'Food Handling Guide'),
-    _TrainingItem(title: 'Medicine Delivery Rules'),
-  ];
+class _TrainingCenterPageState extends State<TrainingCenterPage> {
+  late final ProfileController _profileController;
+
+  @override
+  void initState() {
+    super.initState();
+    _profileController = Get.isRegistered<ProfileController>()
+        ? Get.find<ProfileController>()
+        : Get.put(ProfileController());
+    Future.microtask(_loadTrainingResources);
+  }
+
+  void _loadTrainingResources() {
+    _profileController.ensureTrainingResourcesLoaded();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: const UnifiedProfileAppBar(title: 'Training Center'),
+      appBar: const UnifiedProfileAppBar(title: 'Training Center',isback: true,),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.w),
         child: Column(
           children: [
             _sectionCard(
               title: 'Video Tutorials',
-              child: Column(
-                children: _videos
-                    .map((item) => _videoTile(item))
-                    .toList(growable: false),
-              ),
+              child: Obx(() => _buildVideoList(
+                isLoading: _profileController.isTrainingVideosLoading.value,
+                error: _profileController.trainingVideosError.value,
+                items: _profileController.trainingVideos,
+              )),
             ),
             SizedBox(height: 16.h),
             _sectionCard(
               title: 'PDF Guides',
-              child: Column(
-                children: _guides
-                    .map((item) => _guideTile(item))
-                    .toList(growable: false),
-              ),
+              child: Obx(() => _buildPdfList(
+                isLoading: _profileController.isTrainingPdfsLoading.value,
+                error: _profileController.trainingPdfsError.value,
+                items: _profileController.trainingPdfs,
+              )),
             ),
             SizedBox(height: 16.h),
             _quizCard(),
@@ -85,6 +94,37 @@ class TrainingCenterPage extends StatelessWidget {
           SizedBox(height: 16.h),
           child,
         ],
+      ),
+    );
+  }
+
+  Widget _emptyMessage(String message) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.h),
+      child: Text(
+        message,
+        style: getTextStyle(fontSize: 13, color: Colors.grey[600]),
+      ),
+    );
+  }
+
+  Widget _shimmerList() {
+    return Column(
+      children: List.generate(
+        3,
+        (_) => Padding(
+          padding: EdgeInsets.only(bottom: 12.h),
+          child: ShimmerLoading(
+            child: Container(
+              width: double.infinity,
+              height: 68.h,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -145,20 +185,61 @@ class TrainingCenterPage extends StatelessWidget {
     );
   }
 
-  Widget _videoTile(_TrainingItem item) => _listTileBase(
-    icon: Iconsax.play,
-    iconColor: AppColors.primaryblack,
-    background: AppColors.primaryyellow,
-    title: item.title,
-    subtitle: item.subtitle,
-  );
+  Widget _buildVideoList({
+    required bool isLoading,
+    required String? error,
+    required List<TrainingResource> items,
+  }) {
+    if (isLoading) {
+      return _shimmerList();
+    }
+    if (error != null && error.isNotEmpty) {
+      return _emptyMessage(error);
+    }
+    if (items.isEmpty) {
+      return _emptyMessage('No training videos available right now.');
+    }
+    return Column(
+      children: items
+          .map(
+            (item) => _listTileBase(
+              icon: Iconsax.play,
+              iconColor: AppColors.primaryblack,
+              background: AppColors.primaryyellow,
+              title: item.title,
+              subtitle: item.duration,
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
 
-  Widget _guideTile(_TrainingItem item) {
-    return _listTileBase(
-      icon: Icons.download,
-      iconColor: AppColors.primaryyellow,
-      background: AppColors.blackColor,
-      title: item.title,
+  Widget _buildPdfList({
+    required bool isLoading,
+    required String? error,
+    required List<TrainingResource> items,
+  }) {
+    if (isLoading) {
+      return _shimmerList();
+    }
+    if (error != null && error.isNotEmpty) {
+      return _emptyMessage(error);
+    }
+    if (items.isEmpty) {
+      return _emptyMessage('No PDF guides available right now.');
+    }
+    return Column(
+      children: items
+          .map(
+            (item) => _listTileBase(
+              icon: Icons.download,
+              iconColor: AppColors.primaryyellow,
+              background: AppColors.blackColor,
+              title: item.title,
+              subtitle: item.description,
+            ),
+          )
+          .toList(growable: false),
     );
   }
 
@@ -277,11 +358,4 @@ class TrainingCenterPage extends StatelessWidget {
       ],
     );
   }
-}
-
-class _TrainingItem {
-  final String title;
-  final String? subtitle;
-
-  const _TrainingItem({required this.title, this.subtitle});
 }

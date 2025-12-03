@@ -82,6 +82,75 @@ class ProfileServices {
     }
   }
 
+  Future<ResponseData> getTrainingVideos({
+    required String accessToken,
+  }) async {
+    final uri = Uri.parse('$baseurl/rider/videos');
+
+    try {
+      final response = await _client.get(
+        uri,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      final decodedBody = _decodeResponseBody(response.body);
+      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+       AppLoggerHelper.debug("response Videos :$decodedBody");
+
+      return ResponseData(
+        isSuccess: isSuccess,
+        statusCode: response.statusCode,
+        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to load training videos. Please try again.',
+        responseData: error.toString(),
+      );
+    }
+  }
+
+  Future<ResponseData> getTrainingPdfs({
+    required String accessToken,
+  }) async {
+    final uri = Uri.parse('$baseurl/rider/pdfs');
+
+    try {
+      final response = await _client.get(
+        uri,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      final decodedBody = _decodeResponseBody(response.body);
+      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+      AppLoggerHelper.debug("response pdf :$decodedBody");
+
+      return ResponseData(
+        isSuccess: isSuccess,
+        statusCode: response.statusCode,
+        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+      
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to load training PDFs. Please try again.',
+        responseData: error.toString(),
+      );
+    }
+  }
+
   Future<ResponseData> updateProfile({
     required String accessToken,
     required Map<String, dynamic> payload,

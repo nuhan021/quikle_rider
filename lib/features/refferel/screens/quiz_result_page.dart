@@ -26,7 +26,7 @@ class QuizResultPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: const UnifiedProfileAppBar(title: 'Quiz Results'),
+      appBar: const UnifiedProfileAppBar(title: 'Quiz Results',isback: true),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: EdgeInsets.all(16.w),

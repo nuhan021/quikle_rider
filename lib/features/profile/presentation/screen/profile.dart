@@ -13,7 +13,6 @@ import 'package:quikle_rider/features/profile/presentation/screen/help_support.d
 import 'package:quikle_rider/features/profile/presentation/screen/my_profile.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/notification_settings.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/payment_method.dart';
-import 'package:quikle_rider/features/profile/presentation/screen/vehicle_information.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/vehicle_list.dart';
 import 'package:quikle_rider/features/profile/presentation/widgets/profile_completion_card.dart';
 import 'package:quikle_rider/features/refferel/screens/refferel_program.dart';
@@ -296,13 +295,6 @@ class ProfileScreen extends StatelessWidget {
       decoration: _profileCardDecoration(),
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [TierBadge(tier: "Silver")],
-            ),
-          ),
           CircleAvatar(
             radius: 45,
             backgroundColor: Colors.grey.shade200,

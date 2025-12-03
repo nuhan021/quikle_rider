@@ -36,6 +36,7 @@ class _QuizSelectionPageState extends State<QuizSelectionPage> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: UnifiedProfileAppBar(
+        
         title: 'Certification Quiz',
         showActionButton: false,
         isback: true,

@@ -15,6 +15,7 @@ import 'package:quikle_rider/features/profile/data/models/profile_completion_mod
 import 'package:quikle_rider/features/profile/data/models/profile_model.dart';
 import 'package:quikle_rider/features/profile/data/models/referral_dashboard.dart';
 import 'package:quikle_rider/features/profile/data/models/rider_documents_model.dart';
+import 'package:quikle_rider/features/profile/data/models/training_resource.dart';
 import 'package:quikle_rider/features/profile/data/models/vehicle_model.dart';
 import 'package:quikle_rider/features/profile/data/services/profile_services.dart';
 
@@ -34,6 +35,14 @@ class ProfileController extends GetxController {
   final RxBool isUploadingDocuments = false.obs;
   final RxnString documentUploadError = RxnString();
   final Rxn<RiderDocumentsModel> riderDocuments = Rxn<RiderDocumentsModel>();
+  final RxList<TrainingResource> trainingVideos = <TrainingResource>[].obs;
+  final RxList<TrainingResource> trainingPdfs = <TrainingResource>[].obs;
+  final RxBool isTrainingVideosLoading = false.obs;
+  final RxBool isTrainingPdfsLoading = false.obs;
+  final RxnString trainingVideosError = RxnString();
+  final RxnString trainingPdfsError = RxnString();
+  bool _hasLoadedTrainingVideos = false;
+  bool _hasLoadedTrainingPdfs = false;
 
   // 🚗 State: vehicles
   final RxBool isCreatingVehicle = false.obs;
@@ -327,6 +336,126 @@ class ProfileController extends GetxController {
       }
     } finally {
       isProfileCompletionLoading.value = false;
+    }
+  }
+
+  Future<void> fetchTrainingVideos() async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null) {
+      trainingVideos.clear();
+      trainingVideosError.value = 'Missing credentials. Please login again.';
+      return;
+    }
+
+    isTrainingVideosLoading.value = true;
+    trainingVideosError.value = null;
+    try {
+      final response = await _profileServices.getTrainingVideos(
+        accessToken: accessToken,
+      );
+
+      final raw = _extractListFromResponse(
+        response.responseData,
+        primaryKey: 'videos',
+      );
+
+      if (response.isSuccess && raw != null) {
+        final parsed = raw
+            .whereType<Map<String, dynamic>>()
+            .map(
+              (item) => TrainingResource.fromJson(
+                item,
+                fallbackType: 'video',
+              ),
+            )
+            .where((item) => item.url.isNotEmpty)
+            .toList();
+        trainingVideos.assignAll(parsed);
+      } else {
+        trainingVideos.clear();
+        trainingVideosError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to load training videos.';
+      }
+    } catch (error) {
+      trainingVideos.clear();
+      trainingVideosError.value = 'Unable to load training videos.';
+      AppLoggerHelper.error('Training videos fetch failed: $error');
+    } finally {
+      _hasLoadedTrainingVideos = true;
+      isTrainingVideosLoading.value = false;
+    }
+  }
+
+  Future<void> fetchTrainingPdfs() async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null) {
+      trainingPdfs.clear();
+      trainingPdfsError.value = 'Missing credentials. Please login again.';
+      return;
+    }
+
+    isTrainingPdfsLoading.value = true;
+    trainingPdfsError.value = null;
+    try {
+      final response = await _profileServices.getTrainingPdfs(
+        accessToken: accessToken,
+      );
+
+      final raw = _extractListFromResponse(
+        response.responseData,
+        primaryKey: 'pdfs',
+      );
+
+      if (response.isSuccess && raw != null) {
+        final parsed = raw
+            .whereType<Map<String, dynamic>>()
+            .map(
+              (item) => TrainingResource.fromJson(
+                item,
+                fallbackType: 'pdf',
+              ),
+            )
+            .where((item) => item.url.isNotEmpty)
+            .toList();
+        trainingPdfs.assignAll(parsed);
+      } else {
+        trainingPdfs.clear();
+        trainingPdfsError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to load training PDFs.';
+      }
+    } catch (error) {
+      trainingPdfs.clear();
+      trainingPdfsError.value = 'Unable to load training PDFs.';
+      AppLoggerHelper.error('Training PDFs fetch failed: $error');
+    } finally {
+      _hasLoadedTrainingPdfs = true;
+      isTrainingPdfsLoading.value = false;
+    }
+  }
+
+  List<dynamic>? _extractListFromResponse(
+    dynamic data, {
+    String? primaryKey,
+  }) {
+    if (data is List) return data;
+    if (data is Map<String, dynamic>) {
+      final value = data[primaryKey] ??
+          data['results'] ??
+          data['data'] ??
+          data['items'];
+      if (value is List) return value;
+    }
+    return null;
+  }
+
+  Future<void> ensureTrainingResourcesLoaded() async {
+    if (!_hasLoadedTrainingVideos) {
+      await fetchTrainingVideos();
+    }
+    if (!_hasLoadedTrainingPdfs) {
+      await fetchTrainingPdfs();
     }
   }
 

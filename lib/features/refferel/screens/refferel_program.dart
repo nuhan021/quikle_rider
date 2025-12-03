@@ -1,7 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -11,6 +7,9 @@ import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
+import 'package:quikle_rider/features/refferel/widgets/reffer_shimmer.dart';
+import 'dart:typed_data';
+
 
 class ReferralProgramPage extends StatefulWidget {
   const ReferralProgramPage({super.key});
@@ -49,7 +48,7 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
         final error = _controller.referralDashboardError.value;
 
         if (isLoading && dashboard == null) {
-          return const Center(child: CircularProgressIndicator());
+          return const ReferralShimmer();
         }
 
         if (error != null && error.isNotEmpty && dashboard == null) {
