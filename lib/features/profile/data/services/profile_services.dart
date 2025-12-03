@@ -1,224 +1,106 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:quikle_rider/core/models/response_data.dart';
-import 'package:quikle_rider/core/services/storage_service.dart';
+import 'package:quikle_rider/core/services/network_caller.dart';
 import 'package:quikle_rider/core/utils/constants/api_constants.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
 
 class ProfileServices {
-  ProfileServices({http.Client? client}) : _client = client ?? http.Client();
+  ProfileServices({NetworkCaller? networkCaller})
+      : _networkCaller = networkCaller ?? NetworkCaller();
 
-  final http.Client _client;
+  final NetworkCaller _networkCaller;
 
 
   Future<ResponseData> getProfile({
     required String accessToken,
     required String refreshToken,
-  }) async {
-    final uri = Uri.parse('$baseurl/rider/rider-profile/me/');
-
-    try {
-      final response = await _client.get(
-        uri,
-        headers: {
-          'accept': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-          'refresh-token': refreshToken,
-        },
-      );
-
-      final decodedBody = _decodeResponseBody(response.body);
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-
-      return ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
-        responseData: decodedBody,
-      );
-    } catch (error) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage: 'Unable to fetch profile. Please try again.',
-        responseData: error.toString(),
-      );
-    }
+  }) {
+    return _networkCaller.getRequest(
+      '$baseurl/rider/rider-profile/me/',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+        'refresh-token': refreshToken,
+      },
+      defaultErrorMessage: 'Unable to fetch profile. Please try again.',
+    );
   }
 
   Future<ResponseData> getProfileCompletion({
     required String accessToken,
-  }) async {
-    final uri = Uri.parse('$baseurl/rider/profile/completion');
-
-    try {
-      final response = await _client.get(
-        uri,
-        headers: {
-          'accept': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      final decodedBody = _decodeResponseBody(response.body);
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-
-      return ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
-        responseData: decodedBody,
-      );
-    } catch (error) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage: 'Unable to fetch profile completion. Please try again.',
-        responseData: error.toString(),
-      );
-    }
+  }) {
+    return _networkCaller.getRequest(
+      '$baseurl/rider/profile/completion',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      defaultErrorMessage:
+          'Unable to fetch profile completion. Please try again.',
+    );
   }
 
   Future<ResponseData> getTrainingVideos({
     required String accessToken,
   }) async {
-    final uri = Uri.parse('$baseurl/rider/videos');
-
-    try {
-      final response = await _client.get(
-        uri,
-        headers: {
-          'accept': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      final decodedBody = _decodeResponseBody(response.body);
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-       AppLoggerHelper.debug("response Videos :$decodedBody");
-
-      return ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
-        responseData: decodedBody,
-      );
-    } catch (error) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage: 'Unable to load training videos. Please try again.',
-        responseData: error.toString(),
-      );
-    }
+    final response = await _networkCaller.getRequest(
+      '$baseurl/rider/videos',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      defaultErrorMessage: 'Unable to load training videos. Please try again.',
+    );
+    AppLoggerHelper.debug("response Videos :${response.responseData}");
+    return response;
   }
 
   Future<ResponseData> getTrainingPdfs({
     required String accessToken,
   }) async {
-    final uri = Uri.parse('$baseurl/rider/pdfs');
-
-    try {
-      final response = await _client.get(
-        uri,
-        headers: {
-          'accept': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      final decodedBody = _decodeResponseBody(response.body);
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-      AppLoggerHelper.debug("response pdf :$decodedBody");
-
-      return ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
-        responseData: decodedBody,
-      );
-      
-    } catch (error) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage: 'Unable to load training PDFs. Please try again.',
-        responseData: error.toString(),
-      );
-    }
+    final response = await _networkCaller.getRequest(
+      '$baseurl/rider/pdfs',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      defaultErrorMessage: 'Unable to load training PDFs. Please try again.',
+    );
+    AppLoggerHelper.debug("response pdf :${response.responseData}");
+    return response;
   }
 
   Future<ResponseData> getRiderRatings({
     required String accessToken,
     String language = 'eng',
-  }) async {
-    final uri = Uri.parse('$baseurl/rider/rider/rider-ratings/?lng=$language');
-
-    try {
-      final response = await _client.get(
-        uri,
-        headers: {
-          'accept': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      final decodedBody = _decodeResponseBody(response.body);
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-
-      return ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
-        responseData: decodedBody,
-      );
-    } catch (error) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage: 'Unable to load rider ratings. Please try again.',
-        responseData: error.toString(),
-      );
-    }
+  }) {
+    return _networkCaller.getRequest(
+      '$baseurl/rider/rider/rider-ratings/?lng=$language',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      defaultErrorMessage: 'Unable to load rider ratings. Please try again.',
+    );
   }
 
   Future<ResponseData> updateProfile({
     required String accessToken,
     required Map<String, dynamic> payload,
-  }) async {
-    final uri = Uri.parse('$baseurl/rider/rider-profile/me/');
-
-    try {
-      final response = await _client.put(
-        uri,
-        headers: {
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-        body: jsonEncode(payload),
-      );
-
-      final decodedBody = _decodeResponseBody(response.body);
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-
-      return ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
-        responseData: decodedBody,
-      );
-    } catch (error) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage: 'Unable to update profile. Please try again.',
-        responseData: error.toString(),
-      );
-    }
+  }) {
+    return _networkCaller.putRequest(
+      '$baseurl/rider/rider-profile/me/',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      body: payload,
+      defaultErrorMessage: 'Unable to update profile. Please try again.',
+    );
   }
 
   Future<ResponseData> createVehicle({
@@ -226,7 +108,7 @@ class ProfileServices {
     required String vehicleType,
     required String licensePlateNumber,
     String? model,
-  }) async {
+  }) {
     final uri = Uri.parse('$baseurl/rider/vehicles/me/');
     final Map<String, dynamic> payload = {
       'vehicle_type': vehicleType,
@@ -236,65 +118,28 @@ class ProfileServices {
       payload['model'] = model;
     }
 
-    try {
-      final response = await _client.post(
-        uri,
-        headers: {
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-        body: jsonEncode(payload),
-      );
-
-      final decodedBody = _decodeResponseBody(response.body);
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-
-      return ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
-        responseData: decodedBody,
-      );
-    } catch (error) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage: 'Unable to save vehicle information. Please try again.',
-        responseData: error.toString(),
-      );
-    }
+    return _networkCaller.postRequest(
+      uri.toString(),
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      body: payload,
+      defaultErrorMessage:
+          'Unable to save vehicle information. Please try again.',
+    );
   }
 
-  Future<ResponseData> listVehicles({required String accessToken}) async {
-    final uri = Uri.parse('$baseurl/rider/list/vehicles/');
-
-    try {
-      final response = await _client.get(
-        uri,
-        headers: {
-          'accept': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      final decodedBody = _decodeResponseBody(response.body);
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-
-      return ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
-        responseData: decodedBody,
-      );
-    } catch (error) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage: 'Unable to fetch vehicles. Please try again.',
-        responseData: error.toString(),
-      );
-    }
+  Future<ResponseData> listVehicles({required String accessToken}) {
+    return _networkCaller.getRequest(
+      '$baseurl/rider/list/vehicles/',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      defaultErrorMessage: 'Unable to fetch vehicles. Please try again.',
+    );
   }
 
   Future<ResponseData> createHelpAndSupport({
@@ -303,130 +148,56 @@ class ProfileServices {
     required String description,
     File? attachment,
   }) async {
-    final uri = Uri.parse('$baseurl/rider/help-and-support/me/');
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$baseurl/rider/help-and-support/me/'),
+    )
+      ..headers.addAll({
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      })
+      ..fields['subject'] = subject
+      ..fields['description'] = description;
 
-    try {
-      final request = http.MultipartRequest('POST', uri)
-        ..headers.addAll({
-          'accept': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        })
-        ..fields['subject'] = subject
-        ..fields['description'] = description;
-
-      if (attachment != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath('attachments', attachment.path),
-        );
-      }
-
-      final streamedResponse = await request.send();
-      final response = await http.Response.fromStream(streamedResponse);
-      final decodedBody = _decodeResponseBody(response.body);
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-
-      return ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
-        responseData: decodedBody,
-      );
-    } catch (error) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage:
-            'Unable to submit help request. Please check your connection and try again.',
-        responseData: error.toString(),
+    if (attachment != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath('attachments', attachment.path),
       );
     }
+
+    return _networkCaller.sendMultipart(
+      request,
+      defaultErrorMessage:
+          'Unable to submit help request. Please check your connection and try again.',
+    );
   }
 
   Future<ResponseData> listHelpSupportRequests({
     required String accessToken,
-  }) async {
-    final uri = Uri.parse('$baseurl/rider/help-and-support-requests/me/');
-
-    try {
-      final response = await _client.get(
-        uri,
-        headers: {
-          'accept': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      final decodedBody = _decodeResponseBody(response.body);
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-
-      return ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
-        responseData: decodedBody,
-      );
-    } catch (error) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage: 'Unable to load support history. Please try again.',
-        responseData: error.toString(),
-      );
-    }
+  }) {
+    return _networkCaller.getRequest(
+      '$baseurl/rider/help-and-support-requests/me/',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      defaultErrorMessage: 'Unable to load support history. Please try again.',
+    );
   }
 
   Future<ResponseData> getVehicle({
     required String accessToken,
     required int vehicleId,
-  }) async {
-    final uri = Uri.parse('$baseurl/rider/vehicles/$vehicleId/');
-
-    try {
-      final response = await _client.get(
-        uri,
-        headers: {
-          'accept': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      final decodedBody = _decodeResponseBody(response.body);
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-
-      return ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
-        responseData: decodedBody,
-      );
-    } catch (error) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage: 'Unable to load vehicle information. Please try again.',
-        responseData: error.toString(),
-      );
-    }
-  }
-
-  dynamic _decodeResponseBody(String body) {
-    try {
-      return jsonDecode(body);
-    } catch (_) {
-      return body;
-    }
-  }
-
-  String _extractErrorMessage(dynamic decodedBody) {
-    if (decodedBody is Map<String, dynamic>) {
-      if (decodedBody['detail'] is String) {
-        return decodedBody['detail'] as String;
-      }
-      if (decodedBody['message'] is String) {
-        return decodedBody['message'] as String;
-      }
-    }
-    return 'Something went wrong. Please try again.';
+  }) {
+    return _networkCaller.getRequest(
+      '$baseurl/rider/vehicles/$vehicleId/',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      defaultErrorMessage:
+          'Unable to load vehicle information. Please try again.',
+    );
   }
 
   Future<ResponseData> uploadDocuments({
@@ -437,93 +208,66 @@ class ProfileServices {
     File? vehicleRegistration,
     File? vehicleInsurance,
   }) async {
-    final uri = Uri.parse('$baseurl/rider/rider-documents/me/');
+    final request = http.MultipartRequest(
+      'PUT',
+      Uri.parse('$baseurl/rider/rider-documents/me/'),
+    );
+    request.headers.addAll({
+      'accept': 'application/json',
+      'Authorization': 'Bearer $accessToken',
+    });
 
-    try {
-      final request = http.MultipartRequest('PUT', uri);
-      request.headers.addAll({
-        'accept': 'application/json',
-        'Authorization': 'Bearer $accessToken',
-      });
-
-      /// Helper to add a file to the multipart request.
-      /// If the file is null or does not exist, it adds an empty part
-      /// to ensure the backend receives all expected fields, which might
-      /// be a requirement to avoid a 422 Unprocessable Entity error.
-      Future<void> addFile(String field, File? file) async {
-        if (file != null && await file.exists()) {
-          final mediaType = _mediaTypeForFile(file);
-          request.files.add(
-            await http.MultipartFile.fromPath(
-              field,
-              file.path,
-              contentType: mediaType,
-            ),
-          );
-        } else {
-          // Send an empty file part if the file is null.
-          request.files.add(
-            http.MultipartFile(
-              field,
-              Stream.empty(),
-              0,
-              filename: '', // Empty filename.
-              contentType: MediaType(
-                'application',
-                'octet-stream',
-              ), // Default content type.
-            ),
-          );
-        }
+    Future<void> addFile(String field, File? file) async {
+      if (file != null && await file.exists()) {
+        final mediaType = _mediaTypeForFile(file);
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            field,
+            file.path,
+            contentType: mediaType,
+          ),
+        );
+      } else {
+        request.files.add(
+          http.MultipartFile(
+            field,
+            Stream.empty(),
+            0,
+            filename: '',
+            contentType: MediaType('application', 'octet-stream'),
+          ),
+        );
       }
-
-      await addFile('pi', profileImage);
-      await addFile('nid', nationalId);
-      await addFile('dl', drivingLicense);
-      await addFile('vr', vehicleRegistration);
-      await addFile('vi', vehicleInsurance);
-
-      // --- DEBUGGING START ---
-      print('--- Sending Document Upload Request ---');
-      print('URL: ${request.method} ${request.url}');
-      print('Headers: ${request.headers}');
-      print(
-        'Files: ${request.files.map((f) => 'field: ${f.field}, filename: ${f.filename}, length: ${f.length}, contentType: ${f.contentType}').toList()}',
-      );
-      // --- DEBUGGING END ---
-
-      final streamedResponse = await request.send();
-      final response = await http.Response.fromStream(streamedResponse);
-      final decodedBody = _decodeResponseBody(response.body);
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-
-      // --- DEBUGGING START ---
-      print('--- Received Document Upload Response ---');
-      print('Status Code: ${response.statusCode}');
-      print('Response Body: ${response.body}');
-      print('------------------------------------');
-      // --- DEBUGGING END ---
-
-      return ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
-        responseData: decodedBody,
-      );
-    } catch (error, stackTrace) {
-      // --- DEBUGGING START ---
-      print('--- Document Upload Request Failed ---');
-      print('Error: $error');
-      print('Stack Trace: $stackTrace');
-      print('--------------------------------------');
-      // --- DEBUGGING END ---
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage: 'Unable to upload documents. Please try again.',
-        responseData: error.toString(),
-      );
     }
+
+    await addFile('pi', profileImage);
+    await addFile('nid', nationalId);
+    await addFile('dl', drivingLicense);
+    await addFile('vr', vehicleRegistration);
+    await addFile('vi', vehicleInsurance);
+
+    // --- DEBUGGING START ---
+    print('--- Sending Document Upload Request ---');
+    print('URL: ${request.method} ${request.url}');
+    print('Headers: ${request.headers}');
+    print(
+      'Files: ${request.files.map((f) => 'field: ${f.field}, filename: ${f.filename}, length: ${f.length}, contentType: ${f.contentType}').toList()}',
+    );
+    // --- DEBUGGING END ---
+
+    final response = await _networkCaller.sendMultipart(
+      request,
+      defaultErrorMessage: 'Unable to upload documents. Please try again.',
+    );
+
+    // --- DEBUGGING START ---
+    print('--- Received Document Upload Response ---');
+    print('Status Code: ${response.statusCode}');
+    print('Response Body: ${response.responseData}');
+    print('------------------------------------');
+    // --- DEBUGGING END ---
+
+    return response;
   }
 
   MediaType? _mediaTypeForFile(File file) {
@@ -544,14 +288,6 @@ class ProfileServices {
     required String startAt,
     required String endAt,
   }) async {
-    final url = Uri.parse('$baseurl/rider/rider-availability/me/');
-
-    final headers = {
-      'accept': 'application/json',
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/x-www-form-urlencoded',
-    };
-
     final body = {
       'is_available': isAvailable.toString(),
       'start_at': startAt,
@@ -560,188 +296,106 @@ class ProfileServices {
 
     AppLoggerHelper.debug('Updating rider availability with body: $body');
 
-    try {
-      final response = await http.post(url, headers: headers, body: body);
+    final response = await _networkCaller.postRequest(
+      '$baseurl/rider/rider-availability/me/',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body,
+      encodeJson: false,
+      defaultErrorMessage: 'Unable to update status.',
+    );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        AppLoggerHelper.debug("result: ${response.statusCode}");
-        return jsonDecode(response.body);
-      } else {
-        return null;
-      }
-    } catch (e) {
-      return null;
+    if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+      AppLoggerHelper.debug("result: ${response.statusCode}");
+      return response.responseData as Map<String, dynamic>;
     }
+
+    return null;
   }
 
   Future<Map<String, dynamic>?> getRiderAvailability({
     required String token,
   }) async {
-    final url = Uri.parse('$baseurl/rider/rider-availability/me/');
-    final headers = {
-      'accept': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
+    final response = await _networkCaller.getRequest(
+      '$baseurl/rider/rider-availability/me/',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      defaultErrorMessage: 'Unable to fetch availability.',
+    );
 
-    try {
-      final response = await http.get(url, headers: headers);
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body) as Map<String, dynamic>;
-      }
-      AppLoggerHelper.debug(
-        'Failed to fetch availability. Status: ${response.statusCode}',
-      );
-      return null;
-    } catch (e) {
-      AppLoggerHelper.error('Error fetching availability: $e');
-      return null;
+    if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+      return response.responseData as Map<String, dynamic>;
     }
+
+    AppLoggerHelper.debug(
+      'Failed to fetch availability. Status: ${response.statusCode}',
+    );
+    return null;
   }
 
   Future<ResponseData> getReferralDashboard({
     required String accessToken,
-  }) async {
-    final uri = Uri.parse('$baseurl/rider/referral/dashboard');
-
-    try {
-      final response = await _client.get(
-        uri,
-        headers: {
-          'accept': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      final decodedBody = _decodeResponseBody(response.body);
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-
-      return ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
-        responseData: decodedBody,
-      );
-    } catch (error) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage: 'Unable to load referral dashboard. Please try again.',
-        responseData: error.toString(),
-      );
-    }
+  }) {
+    return _networkCaller.getRequest(
+      '$baseurl/rider/referral/dashboard',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      defaultErrorMessage:
+          'Unable to load referral dashboard. Please try again.',
+    );
   }
 
   Future<ResponseData> getReferralQrImage({
     required String accessToken,
-  }) async {
-    final uri = Uri.parse('$baseurl/rider/referral/qr');
-
-    try {
-      final response = await _client.get(
-        uri,
-        headers: {
-          'accept': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-      dynamic responseData;
-      var errorMessage = '';
-
-      if (isSuccess) {
-        responseData = response.bodyBytes;
-      } else {
-        final decodedBody = _decodeResponseBody(response.body);
-        responseData = decodedBody;
-        errorMessage = _extractErrorMessage(decodedBody);
-      }
-
-      return ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: errorMessage,
-        responseData: responseData,
-      );
-    } catch (error) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage: 'Unable to load referral QR code. Please try again.',
-        responseData: error.toString(),
-      );
-    }
+  }) {
+    return _networkCaller.getRequest(
+      '$baseurl/rider/referral/qr',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      returnBytesOnSuccess: true,
+      defaultErrorMessage: 'Unable to load referral QR code. Please try again.',
+    );
   }
 
   Future<ResponseData> startQuiz({
     required String accessToken,
   }) async {
-    final uri = Uri.parse('$baseurl/rider/start');
-
-    try {
-      final response = await _client.get(
-        uri,
-        headers: {
-          'accept': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-        },
-      );
-
-      final decodedBody = _decodeResponseBody(response.body);
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-
-      AppLoggerHelper.debug("response quiz $decodedBody");
-
-      return ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
-        responseData: decodedBody,
-      );
-    } catch (error) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage: 'Unable to start quiz. Please try again.',
-        responseData: error.toString(),
-      );
-    }
+    final response = await _networkCaller.getRequest(
+      '$baseurl/rider/start',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      defaultErrorMessage: 'Unable to start quiz. Please try again.',
+    );
+    AppLoggerHelper.debug("response quiz ${response.responseData}");
+    return response;
   }
 
   Future<ResponseData> submitQuiz({
     required String accessToken,
     required Map<String, dynamic> payload,
   }) async {
-    final uri = Uri.parse('$baseurl/rider/submit');
-
-    try {
-      final response = await _client.post(
-        uri,
-        headers: {
-          'accept': 'application/json',
-          'Authorization': 'Bearer $accessToken',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode(payload),
-      );
-
-      final decodedBody = _decodeResponseBody(response.body);
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-      AppLoggerHelper.debug("response quiz $decodedBody");
-
-      return ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
-        responseData: decodedBody,
-      );
-    } catch (error) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage: 'Unable to submit quiz. Please try again.',
-        responseData: error.toString(),
-      );
-    }
+    final response = await _networkCaller.postRequest(
+      '$baseurl/rider/submit',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+        'Content-Type': 'application/json',
+      },
+      body: payload,
+      defaultErrorMessage: 'Unable to submit quiz. Please try again.',
+    );
+    AppLoggerHelper.debug("response quiz ${response.responseData}");
+    return response;
   }
 }

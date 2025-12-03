@@ -41,7 +41,7 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: const UnifiedProfileAppBar(title: 'Referral Program'),
+      appBar: const UnifiedProfileAppBar(title: 'Referral Program',isback: true,),
       body: Obx(() {
         final dashboard = _controller.referralDashboard.value;
         final isLoading = _controller.isReferralDashboardLoading.value;
