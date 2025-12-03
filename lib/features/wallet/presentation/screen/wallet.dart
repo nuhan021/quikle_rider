@@ -316,11 +316,31 @@ class WalletScreen extends GetView<WalletController> {
                         'Customer Ratings',
                         style: headingStyle2(color: Colors.black),
                       ),
-                      RatingCard(
-                        rating: 4.5,
-                        totalRatings: '5.2K Ratings',
-                        reviewCount: 18,
-                      ),
+                      if (controller.isRatingLoading.value) ...[
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.h),
+                          child: const LinearProgressIndicator(minHeight: 3),
+                        ),
+                      ] else if (controller.ratingError.value != null &&
+                          controller.riderRating.value == null) ...[
+                        Padding(
+                          padding: EdgeInsets.only(bottom: 8.h),
+                          child: Text(
+                            controller.ratingError.value!,
+                            style: TextStyle(
+                              color: Colors.red[700],
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ] else ...[
+                        RatingCard(
+                          rating: controller.riderRating.value ?? 0.0,
+                          totalRatings: controller.totalRatingsText,
+                          reviewCount: controller.riderReviewCount.value ?? 0,
+                        ),
+                      ],
                       TierCard(benefits: '₹16,000-18,500/month'),
                       Padding(
                         padding: EdgeInsets.only(

@@ -151,6 +151,40 @@ class ProfileServices {
     }
   }
 
+  Future<ResponseData> getRiderRatings({
+    required String accessToken,
+    String language = 'eng',
+  }) async {
+    final uri = Uri.parse('$baseurl/rider/rider/rider-ratings/?lng=$language');
+
+    try {
+      final response = await _client.get(
+        uri,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      final decodedBody = _decodeResponseBody(response.body);
+      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+
+      return ResponseData(
+        isSuccess: isSuccess,
+        statusCode: response.statusCode,
+        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to load rider ratings. Please try again.',
+        responseData: error.toString(),
+      );
+    }
+  }
+
   Future<ResponseData> updateProfile({
     required String accessToken,
     required Map<String, dynamic> payload,
