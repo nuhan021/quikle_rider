@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
@@ -13,7 +14,12 @@ import 'package:quikle_rider/core/services/network/webscoket_services.dart'
 // const String googleMapsApiKey = 'AIzaSyD65cza7lynnmbhCN44gs7HupKMnuoU-bo'; 
 
 //Load the key from .env
-const String googleMapsApiKey = String.fromEnvironment('GOOGLE_MAP_API_KEY');
+final String googleMapsApiKey =
+    dotenv.env['GOOGLE_MAP_API_KEY']?.trim() ??
+        const String.fromEnvironment(
+          'GOOGLE_MAP_API_KEY',
+          defaultValue: '',
+        );
 const double _socketUpdateThresholdMeters = 10.0;
 const int _defaultRiderId = 3;
 
@@ -50,7 +56,7 @@ class TrackingController extends GetxController {
     // Load custom marker for source
     final BitmapDescriptor customSource = await BitmapDescriptor.asset(
       const ImageConfiguration(size: Size(200, 100)),
-      'assets/images/riderpick.png',
+      'assets/images/rider_bike.png',
     );
 
     // Keep current location marker using default styling
@@ -170,9 +176,17 @@ class TrackingController extends GetxController {
   Future<void> _getPolylinePoints() async {
     if (currentLocation.value == null || destination.value == null) return;
 
+    final apiKey = googleMapsApiKey;
+    if (apiKey.isEmpty) {
+      _showError(
+        'Google Maps API key missing. Add GOOGLE_MAP_API_KEY to .env or pass it via --dart-define.',
+      );
+      return;
+    }
+
     _showInfo('Calculating optimal route...');
 
-    final polylinePoints = PolylinePoints(apiKey: googleMapsApiKey);
+    final polylinePoints = PolylinePoints(apiKey: apiKey);
 
     final result = await polylinePoints.getRouteBetweenCoordinates(
       // ignore: deprecated_member_use
@@ -210,8 +224,11 @@ class TrackingController extends GetxController {
         );
       _showInfo('Route calculated. Ready for tracking.');
     } else {
+      final errorDetails = (result.errorMessage ?? '').isNotEmpty
+          ? ' Details: ${result.errorMessage}.'
+          : '';
       _showError(
-        'Could not find a route. Check API key or if route is walkable.',
+        'Could not find a route. Check API key or if route is walkable.$errorDetails',
       );
     }
   }

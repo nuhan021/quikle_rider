@@ -22,7 +22,7 @@ class WebSocketService {
     if (_channel != null) {}
 
     final url =
-        "wss://caditya619-backend.onrender.com/rider/ws/rider/location/$riderId";
+        "wss://quikle-u4dv.onrender.com/rider/ws/location/riders/$riderId";
 
     print("🔌 Connecting WebSocket → $url");
 

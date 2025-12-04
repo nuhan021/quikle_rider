@@ -1,4 +1,3 @@
-import 'package:dotenv/dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +11,7 @@ import 'package:quikle_rider/firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await FirebaseService.instance.init();
@@ -23,7 +23,5 @@ Future<void> main() async {
 
   await NotificationService.instance.init();
   await NotificationService.instance.requestPermission();
-// //  //Initialize dot env
-//   await dotenv.load(fileName: ".env");
   runApp(const MyApp());
 }

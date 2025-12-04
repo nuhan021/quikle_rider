@@ -8,6 +8,7 @@ import 'package:quikle_rider/core/services/firebase/notification_service.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
 import 'package:quikle_rider/features/authentication/data/services/auth_servies.dart';
+import 'package:quikle_rider/features/notifications/controller/notification_controller.dart';
 import 'package:quikle_rider/routes/app_routes.dart';
 
 class AuthController extends GetxController {
@@ -324,6 +325,14 @@ class AuthController extends GetxController {
         colorText: Colors.black,
         duration: const Duration(seconds: 3),
       );
+        if (response.isSuccess) {
+        NotificationService.instance.sendInstantNotification(
+          userId: StorageService.userId ?? 0,
+          title: 'Hello there!',
+          body: 'You have a new notification.',
+        );
+        AppLoggerHelper.debug('notification sent');
+      }
       return true;
     } else {
       Get.snackbar(
@@ -446,9 +455,15 @@ class AuthController extends GetxController {
             '${tokenType.trim().isEmpty ? 'Bearer' : tokenType.trim()} $accessToken',
       );
 
-      if (!success) {
-        AppLoggerHelper.debug('Failed to persist FCM token to backend.');
+      if (success) {
+        NotificationService.instance.sendInstantNotification(
+          userId: userId,
+          title: 'Hello there!',
+          body: 'You have a new notification.',
+        );
+        AppLoggerHelper.debug('notification sent');
       }
+      
     } catch (error) {
       AppLoggerHelper.debug('Error syncing FCM token: $error');
     }

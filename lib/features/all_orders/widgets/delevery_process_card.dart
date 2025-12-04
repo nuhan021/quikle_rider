@@ -1,9 +1,12 @@
 // widgets/combined_order_widgets.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/route_manager.dart';
+import 'package:get/state_manager.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_combioned_controller.dart';
 import 'package:quikle_rider/features/all_orders/models/combine_ordermodel.dart';
+import 'package:quikle_rider/features/messages/presentation/massage_screen.dart';
 
 class DeliveryProgressCard extends StatelessWidget {
   final CombinedOrderModel order;
@@ -429,7 +432,11 @@ class _DeliveryInfoSection extends StatelessWidget {
               children: [
                 _ContactButton(
                   icon: 'assets/images/message.png',
-                  onTap: controller.sendMessage,
+                  onTap: (){
+                   Get.to(MassageScreen());
+
+
+                  },
                 ),
                 SizedBox(width: 16.w),
                 _ContactButton(

@@ -989,7 +989,7 @@ class ProfileController extends GetxController {
         endAt: endAtStr,
       );
 
-      AppLoggerHelper.debug('Availability update result: $result');
+    
 
       // Handle Response
       if (result != null) {
