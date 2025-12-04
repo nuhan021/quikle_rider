@@ -1,4 +1,3 @@
-import 'package:quikle_rider/features/messages/presentation/massage_screen.dart';
 import 'package:quikle_rider/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,10 +19,9 @@ class MyApp extends StatelessWidget {
       builder: (_, child) {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
-          home: MassageScreen(),
-          // initialRoute: AppRoute.getSplashScreen(), // Changed to splash screen
-          // getPages: AppRoute.routes,
-          // initialBinding: ControllerBinder(),
+          initialRoute: AppRoute.getSplashScreen(), // Changed to splash screen
+          getPages: AppRoute.routes,
+          initialBinding: ControllerBinder(),
           themeMode: ThemeMode.system,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.lightTheme,
