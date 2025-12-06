@@ -101,7 +101,7 @@ class BalanceCard extends StatelessWidget {
           GestureDetector(
             onTap: onWithdraw,
             child: Container(
-              height: 40,
+             
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
               decoration: ShapeDecoration(
                 color: Colors.black,

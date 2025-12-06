@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/features/profile/presentation/screen/add_paymentmethod.dart';
 import 'package:quikle_rider/features/wallet/models/wallet_summary.dart';
 import 'package:quikle_rider/features/wallet/controllers/wallet_controller.dart';
 import 'package:quikle_rider/features/wallet/widgets/balance_card.dart';
@@ -155,7 +156,10 @@ class WalletScreen extends GetView<WalletController> {
                       BalanceCard(
                         balance: controller.finalEarningsText,
                         lastUpdated: controller.balanceSubtitle,
-                        onWithdraw: () async {},
+                        onWithdraw: () async {
+
+                          Get.to(AddPaymentMethodPage());
+                        },
                       ),
                       SizedBox(height: 12.h),
                       const WalletDashboardCard(),

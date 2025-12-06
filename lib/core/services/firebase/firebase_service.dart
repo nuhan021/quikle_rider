@@ -21,6 +21,7 @@ class FirebaseService {
   Future<void> init() async {
     _listenToTokenRefresh();
     await _requestPermission();
+    await _configureForegroundPresentation();
     await syncToken();
   }
 
@@ -122,6 +123,16 @@ class FirebaseService {
           _cachedToken = token;
           AppLoggerHelper.debug('[FCM] Token refreshed: $token');
         });
+  }
+
+  Future<void> _configureForegroundPresentation() {
+    // Ensure notification banners/sounds appear while the app is in foreground (iOS/macOS).
+    return FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
   }
 }
 

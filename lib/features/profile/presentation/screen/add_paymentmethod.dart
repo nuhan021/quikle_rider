@@ -2,9 +2,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/withdraw_controller.dart';
+import 'package:quikle_rider/features/wallet/controllers/wallet_controller.dart';
 
 class AddPaymentMethodPage extends StatefulWidget {
   const AddPaymentMethodPage({super.key});
@@ -14,19 +17,9 @@ class AddPaymentMethodPage extends StatefulWidget {
 }
 
 class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
-  final TextEditingController _nameController = TextEditingController(
-    text: 'Vikram Rajput',
-  );
-  final TextEditingController _accountController = TextEditingController(
-    text: 'XXXXXXXXXX3456',
-  );
-  final TextEditingController _ifscController = TextEditingController(
-    text: 'HDFC0001234',
-  );
-  final TextEditingController _upiController = TextEditingController(
-    text: 'ananya@paytm',
-  );
+  late final WithdrawController _withdrawController;
   bool _autoWithdrawal = false;
+WalletController controller = Get.find<WalletController>();
 
   final List<_WithdrawalEntry> _history = const [
     _WithdrawalEntry(
@@ -46,6 +39,18 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
     ),
     _WithdrawalEntry(amount: '₹800', date: '4 Oct 2024', status: 'Processing'),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _withdrawController = Get.put(WithdrawController());
+  }
+
+  @override
+  void dispose() {
+    Get.delete<WithdrawController>();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,35 +76,37 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
   }
 
   Widget _balanceCard() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(20.w),
-      decoration: _cardDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Current Balance',
-                  style: getTextStyle(fontSize: 16, color: Colors.grey[700]),
+    return Obx(
+      ()=> Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(20.w),
+        decoration: _cardDecoration(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Current Balance',
+                    style: getTextStyle(fontSize: 16, color: Colors.grey[700]),
+                  ),
                 ),
-              ),
-              _pillBadge(label: 'Available', color: AppColors.primarygreen),
-            ],
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            '₹3,250',
-            style: getTextStyle(fontSize: 32, fontWeight: FontWeight.w700),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            'Minimum withdrawal: ₹500',
-            style: getTextStyle(fontSize: 13, color: Colors.grey[600]),
-          ),
-        ],
+                _pillBadge(label: 'Available', color: AppColors.primarygreen),
+              ],
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              controller.currentBalance.value.toString(),
+              style: getTextStyle(fontSize: 32, fontWeight: FontWeight.w700),
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              'Minimum withdrawal: ₹500',
+              style: getTextStyle(fontSize: 13, color: Colors.grey[600]),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -125,46 +132,59 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
           SizedBox(height: 20.h),
           _textField(
             label: 'Account Holder Name',
-            controller: _nameController,
+            controller: _withdrawController.holderNameController,
             helper: 'Must match KYC documents',
           ),
           SizedBox(height: 16.h),
           _textField(
             label: 'Bank Account Number',
-            controller: _accountController,
+            controller: _withdrawController.accountNumberController,
             suffix: IconButton(
               icon: const Icon(Icons.visibility_outlined, size: 18),
               onPressed: () {},
             ),
+            keyboardType: TextInputType.number,
           ),
-          SizedBox(height: 16.h),
-          _textField(label: 'IFSC Code', controller: _ifscController),
           SizedBox(height: 16.h),
           _textField(
-            label: 'UPI ID (Optional)',
-            controller: _upiController,
-            helper: 'For instant withdrawals',
+            label: 'IFSC Code',
+            controller: _withdrawController.ifscController,
+            textCapitalization: TextCapitalization.characters,
           ),
-          SizedBox(height: 20.h),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                side: BorderSide.none,
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(vertical: 14.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
+          SizedBox(height: 16.h),
+         
+
+          Obx(() {
+            final isSubmitting = _withdrawController.isSubmitting.value;
+            return SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: isSubmitting ? null : _submitBankDetails,
+                style: ElevatedButton.styleFrom(
+                  side: BorderSide.none,
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
                 ),
+                child: isSubmitting
+                    ? SizedBox(
+                        height: 20.h,
+                        width: 20.h,
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        'Save Changes',
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
               ),
-              child: const Text(
-                'Save Changes',
-                style: TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );
@@ -363,6 +383,8 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
     required TextEditingController controller,
     String? helper,
     Widget? suffix,
+    TextInputType? keyboardType,
+    TextCapitalization textCapitalization = TextCapitalization.none,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -371,13 +393,16 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
         SizedBox(height: 6.h),
         TextField(
           controller: controller,
+          keyboardType: keyboardType,
+          textCapitalization: textCapitalization,
           decoration: InputDecoration(
+        
             suffixIcon: suffix,
             filled: true,
             fillColor: Colors.grey[100],
             border: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.black),
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide.none,
             ),
             contentPadding: EdgeInsets.symmetric(
               horizontal: 14.w,
@@ -394,6 +419,11 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
         ],
       ],
     );
+  }
+
+  void _submitBankDetails() {
+    FocusScope.of(context).unfocus();
+    _withdrawController.submitBankDetails();
   }
 
   BoxDecoration _cardDecoration() {
