@@ -17,7 +17,6 @@ Future<void> main() async {
   await FirebaseService.instance.init();
   await StorageService.init();
 
- 
 
   //Initialize notification
 

@@ -331,7 +331,7 @@ class AuthController extends GetxController {
           title: 'Hello there!',
           body: 'You have a new notification.',
         );
-        AppLoggerHelper.debug('notification sent');
+        AppLoggerHelper.debug('notification code sent into  $phoneNumber');
       }
       return true;
     } else {
