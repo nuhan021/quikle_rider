@@ -62,12 +62,14 @@ class WithdrawController extends GetxController {
     lastError.value = null;
     successMessage.value = null;
 
-    final uri = Uri.parse('$baseurl/rider/withdrawal/bank/add/').replace(
+    final uri = Uri.parse('$baseurl/payment/beneficiary/add').replace(
       queryParameters: {
-        'account_number': accountNumber,
-        'ifsc': ifsc,
-        'holder_name': holderName,
+        'bank_account_number': accountNumber,
+        
+        'bank_ifsc': ifsc,
+        'bank_holder_name': holderName,
       },
+      
     );
 
     final response = await _networkCaller.postRequest(
@@ -86,6 +88,7 @@ class WithdrawController extends GetxController {
       final serverMessage = response.responseData is Map<String, dynamic>
           ? response.responseData['message']?.toString()
           : null;
+          AppLoggerHelper.debug("status code ${response.statusCode}");
       successMessage.value = serverMessage ?? 'Bank added successfully';
       AppLoggerHelper.debug("Added Payment method${response.responseData}");
       Get.snackbar(

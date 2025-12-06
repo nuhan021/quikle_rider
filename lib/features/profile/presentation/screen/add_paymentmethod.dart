@@ -7,6 +7,7 @@ import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/withdraw_controller.dart';
+import 'package:quikle_rider/features/wallet/controllers/wallet_controller.dart';
 
 class AddPaymentMethodPage extends StatefulWidget {
   const AddPaymentMethodPage({super.key});
@@ -18,6 +19,7 @@ class AddPaymentMethodPage extends StatefulWidget {
 class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
   late final WithdrawController _withdrawController;
   bool _autoWithdrawal = false;
+WalletController controller = Get.find<WalletController>();
 
   final List<_WithdrawalEntry> _history = const [
     _WithdrawalEntry(
@@ -74,35 +76,37 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
   }
 
   Widget _balanceCard() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(20.w),
-      decoration: _cardDecoration(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Current Balance',
-                  style: getTextStyle(fontSize: 16, color: Colors.grey[700]),
+    return Obx(
+      ()=> Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(20.w),
+        decoration: _cardDecoration(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Current Balance',
+                    style: getTextStyle(fontSize: 16, color: Colors.grey[700]),
+                  ),
                 ),
-              ),
-              _pillBadge(label: 'Available', color: AppColors.primarygreen),
-            ],
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            '₹3,250',
-            style: getTextStyle(fontSize: 32, fontWeight: FontWeight.w700),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            'Minimum withdrawal: ₹500',
-            style: getTextStyle(fontSize: 13, color: Colors.grey[600]),
-          ),
-        ],
+                _pillBadge(label: 'Available', color: AppColors.primarygreen),
+              ],
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              controller.currentBalance.value.toString(),
+              style: getTextStyle(fontSize: 32, fontWeight: FontWeight.w700),
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              'Minimum withdrawal: ₹500',
+              style: getTextStyle(fontSize: 13, color: Colors.grey[600]),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -148,12 +152,8 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
             textCapitalization: TextCapitalization.characters,
           ),
           SizedBox(height: 16.h),
-          _textField(
-            label: 'UPI ID (Optional)',
-            controller: _withdrawController.upiController,
-            helper: 'For instant withdrawals',
-          ),
-          SizedBox(height: 20.h),
+         
+
           Obx(() {
             final isSubmitting = _withdrawController.isSubmitting.value;
             return SizedBox(
@@ -396,12 +396,13 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
           keyboardType: keyboardType,
           textCapitalization: textCapitalization,
           decoration: InputDecoration(
+        
             suffixIcon: suffix,
             filled: true,
             fillColor: Colors.grey[100],
             border: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.black),
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide.none,
             ),
             contentPadding: EdgeInsets.symmetric(
               horizontal: 14.w,
