@@ -252,6 +252,7 @@ class AuthController extends GetxController {
             initialData: data,
           ),
         );
+
         AppLoggerHelper.debug(
           'Logged in successfully. Access token: $accessToken',
         );
@@ -260,16 +261,14 @@ class AuthController extends GetxController {
         );
         AppLoggerHelper.debug('Logged in successfully. Token type: $tokenType');
 
-
-        
-
         Get.offAllNamed(AppRoute.getWelcomeScreen());
         final resolvedUserId = StorageService.userId ?? _extractUserId(data);
         if (resolvedUserId != null) {
           unawaited(
             NotificationService.instance.sendInstantNotification(
               userId: resolvedUserId,
-              title: 'Hello ${phoneNumberForOtp.isNotEmpty ? phoneNumberForOtp : 'Rider'}',
+              title:
+                  'Hello ${phoneNumberForOtp.isNotEmpty ? phoneNumberForOtp : 'Rider'}',
               body: 'You are logged in.',
             ),
           );
@@ -317,21 +316,20 @@ class AuthController extends GetxController {
     if (response.isSuccess) {
       _resetOtpFields();
       _startResendTimer();
-      Get.snackbar(
-        'Code Sent',
-        'A verification code has been sent to $phoneNumber',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: const Color(0xFFFFB800),
-        colorText: Colors.black,
-        duration: const Duration(seconds: 3),
-      );
-        if (response.isSuccess) {
+      // Get.snackbar(
+      //   'Code Sent',
+      //   'A verification code has been sent to $phoneNumber',
+      //   snackPosition: SnackPosition.BOTTOM,
+      //   backgroundColor: const Color(0xFFFFB800),
+      //   colorText: Colors.black,
+      //   duration: const Duration(seconds: 3),
+      // );
+      if (response.isSuccess) {
         NotificationService.instance.sendInstantNotification(
           userId: StorageService.userId ?? 0,
           title: 'Hello there!',
           body: 'You have a new notification.',
         );
-        AppLoggerHelper.debug('notification code sent into  $phoneNumber');
       }
       return true;
     } else {
@@ -463,7 +461,6 @@ class AuthController extends GetxController {
         );
         AppLoggerHelper.debug('notification sent');
       }
-      
     } catch (error) {
       AppLoggerHelper.debug('Error syncing FCM token: $error');
     }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:quikle_rider/core/services/firebase/notification_service.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
 import 'package:quikle_rider/routes/app_routes.dart';
@@ -26,6 +27,12 @@ class SplashController extends GetxController {
   void onInit() {
     super.onInit();
     _initVideo();
+    NotificationService.instance.sendInstantNotification(
+          userId: StorageService.userId ?? 0,
+          title: 'Hello there!',
+          body: 'You have a new notification.',
+        );
+
   }
 
   Future<void> _initVideo() async {
