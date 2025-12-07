@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
+import 'package:quikle_rider/core/utils/constants/api_constants.dart';
+import 'package:quikle_rider/core/utils/logging/logger.dart';
 
 typedef NotificationTapCallback = void Function(String payload);
 
@@ -13,12 +15,8 @@ class NotificationService {
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
   final http.Client _httpClient = http.Client();
-  final Uri _saveTokenUri = Uri.parse(
-    'https://caditya619-backend.onrender.com/rider/save_token/',
-  );
-  final Uri _sendNotificationUri = Uri.parse(
-    'https://caditya619-backend.onrender.com/rider/send_notification/',
-  );
+  final Uri _saveTokenUri = Uri.parse('$baseurl/rider/save_token/');
+  final Uri _sendNotificationUri = Uri.parse('$baseurl/rider/send_notification/');
 
   final AndroidNotificationChannel _defaultChannel =
       const AndroidNotificationChannel(
@@ -169,6 +167,8 @@ class NotificationService {
           'body': body,
         }),
       );
+       AppLoggerHelper.debug("Notification sent $userId");
+       AppLoggerHelper.debug("Notification reponse ${response.body}");
       return response.statusCode >= 200 && response.statusCode < 300;
     } catch (_) {
       return false;

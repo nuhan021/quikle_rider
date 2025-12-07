@@ -14,9 +14,9 @@ class MassageScreen extends StatefulWidget {
 
 class _MassageScreenState extends State<MassageScreen> {
   late final MassageController _controller;
-  final TextEditingController _composerController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-  final DateFormat _timeFormatter = DateFormat('h:mm a');
+  final _composerController = TextEditingController();
+  final _scrollController = ScrollController();
+  final _timeFormatter = DateFormat('h:mm a');
 
   @override
   void initState() {
@@ -38,117 +38,243 @@ class _MassageScreenState extends State<MassageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).maybePop(),
-        ),
-        title: Row(
-          children: [
-            const Text(
-              'Rider chat',
-              style: TextStyle(
-                color: Colors.black87,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(width: 10),
-            ValueListenableBuilder<bool>(
-              valueListenable: _controller.connectionStatus,
-              builder: (_, connected, __) => _statusDot(connected),
-            ),
-          ],
-        ),
-      ),
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: _buildAppBar(),
       body: Column(
         children: [
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: ValueListenableBuilder<List<ChatMessage>>(
-                valueListenable: _controller.messages,
-                builder: (_, messages, __) {
-                  if (messages.isEmpty) {
-                    return _emptyState();
-                  }
-                  return ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.only(bottom: 12, top: 8),
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) =>
-                        _messageBubble(messages[index]),
-                  );
-                },
-              ),
-            ),
-          ),
-          _composer(),
+          Expanded(child: _buildMessageList()),
+          _buildComposer(),
         ],
       ),
     );
   }
 
-  Widget _messageBubble(ChatMessage message) {
-    final isRider = message.fromUser;
-    final bubbleColor =
-        isRider ? Colors.amber.shade500 : Colors.black.withOpacity(0.85);
-    final textColor = isRider ? Colors.black : Colors.white;
-
-    return Align(
-      alignment: isRider ? Alignment.centerLeft : Alignment.centerRight,
-      child: Container(
-        margin: EdgeInsets.fromLTRB(
-          isRider ? 12 : 64,
-          6,
-          isRider ? 64 : 12,
-          6,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: bubbleColor,
-          borderRadius: BorderRadius.circular(16).copyWith(
-            bottomLeft: Radius.circular(isRider ? 4 : 16),
-            bottomRight: Radius.circular(isRider ? 16 : 4),
+  PreferredSizeWidget _buildAppBar() {
+    return AppBar(
+      backgroundColor: Colors.white,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black87, size: 20),
+        onPressed: () => Navigator.of(context).maybePop(),
+      ),
+      title: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.amber.shade50,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.support_agent, color: Colors.amber.shade700, size: 20),
           ),
-          border: Border.all(
-            color: isRider ? Colors.amber.shade600 : Colors.black,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment:
-              isRider ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: [
-            if (!isRider && message.senderName != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 2),
-                child: Text(
-                  message.senderName!,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.8),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Customer Support',
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-            Text(
-              message.text,
-              style: TextStyle(
-                color: textColor,
-                fontSize: 14.5,
-                height: 1.35,
+              ValueListenableBuilder<bool>(
+                valueListenable: _controller.connectionStatus,
+                builder: (_, connected, __) => Row(
+                  children: [
+                    Container(
+                      width: 6,
+                      height: 6,
+                      margin: const EdgeInsets.only(right: 6),
+                      decoration: BoxDecoration(
+                        color: connected ? Colors.green : Colors.grey,
+                        shape: BoxShape.circle,
+                        boxShadow: connected
+                            ? [BoxShadow(color: Colors.green.withOpacity(0.4), blurRadius: 4, spreadRadius: 1)]
+                            : null,
+                      ),
+                    ),
+                    Text(
+                      connected ? 'Online' : 'Connecting...',
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMessageList() {
+    return ValueListenableBuilder<List<ChatMessage>>(
+      valueListenable: _controller.messages,
+      builder: (_, messages, __) {
+        if (messages.isEmpty) return _buildEmptyState();
+        
+        return ListView.builder(
+          controller: _scrollController,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          itemCount: messages.length,
+          itemBuilder: (_, i) => _buildMessageBubble(messages[i]),
+        );
+      },
+    );
+  }
+
+  Widget _buildMessageBubble(ChatMessage msg) {
+    final isMe = msg.fromUser;
+    
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        mainAxisAlignment: isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (!isMe) ...[
+            CircleAvatar(
+              radius: 16,
+              backgroundColor: Colors.grey.shade300,
+              child: Icon(Icons.person, size: 18, color: Colors.grey.shade600),
+            ),
+            const SizedBox(width: 8),
+          ],
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                gradient: isMe
+                    ? LinearGradient(
+                        colors: [Colors.amber.shade400, Colors.amber.shade600],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      )
+                    : null,
+                color: isMe ? null : Colors.white,
+                borderRadius: BorderRadius.circular(20).copyWith(
+                  bottomLeft: Radius.circular(isMe ? 20 : 4),
+                  bottomRight: Radius.circular(isMe ? 4 : 20),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (!isMe && msg.senderName != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Text(
+                        msg.senderName!,
+                        style: TextStyle(
+                          color: Colors.grey.shade700,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  Text(
+                    msg.text,
+                    style: TextStyle(
+                      color: isMe ? Colors.white : Colors.black87,
+                      fontSize: 15,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _timeFormatter.format(msg.time),
+                    style: TextStyle(
+                      color: isMe ? Colors.white.withOpacity(0.8) : Colors.grey.shade500,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 6),
-            Text(
-              _timeFormatter.format(message.time),
-              style: TextStyle(
-                color: isRider
-                    ? Colors.black.withOpacity(0.7)
-                    : Colors.white.withOpacity(0.75),
-                fontSize: 11,
+          ),
+          if (isMe) const SizedBox(width: 8),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildComposer() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      decoration: BoxDecoration(
+
+       
+      ),
+      child: SafeArea(
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F5F5),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+
+                    )
+                  ]
+                ),
+
+                child: TextField(
+                  controller: _composerController,
+                  style: const TextStyle(color: Colors.black87, fontSize: 15),
+                  maxLines: 4,
+                  minLines: 1,
+                  decoration: InputDecoration(
+                    focusedBorder: InputBorder.none,
+                    border: InputBorder.none,
+                    hintText: 'Type a message...',
+                    hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15),
+                  ),
+                  onSubmitted: (_) => _handleSend(),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: _handleSend,
+              child: Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.amber.shade400, Colors.amber.shade600],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.amber.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(Icons.send_rounded, color: Colors.white, size: 20),
               ),
             ),
           ],
@@ -157,93 +283,41 @@ class _MassageScreenState extends State<MassageScreen> {
     );
   }
 
-  Widget _composer() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: TextField(
-                controller: _composerController,
-                style: const TextStyle(color: Colors.black87),
-                maxLines: 3,
-                minLines: 1,
-                decoration: InputDecoration(
-                  focusedBorder: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  hintText: 'Message customer...',
-                  hintStyle: TextStyle(
-                    color: Colors.black.withOpacity(0.4),
-                  ),
-                  border: InputBorder.none,
-                ),
-                onSubmitted: (_) => _handleSend(),
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          GestureDetector(
-            onTap: _handleSend,
-            child: Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                color: Colors.amber.shade600,
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: const Icon(Icons.send_rounded, color: Colors.black),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _statusDot(bool connected) {
-    return Container(
-      width: 10,
-      height: 10,
-      decoration: BoxDecoration(
-        color: connected ? Colors.amber.shade600 : Colors.grey.shade400,
-        shape: BoxShape.circle,
-      ),
-    );
-  }
-
-  Widget _emptyState() {
+  Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.chat_bubble_outline,
-              size: 46, color: Colors.black.withOpacity(0.3)),
-          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.amber.shade50,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.chat_bubble_outline, size: 48, color: Colors.amber.shade600),
+          ),
+          const SizedBox(height: 16),
           ValueListenableBuilder<bool>(
             valueListenable: _controller.connectionStatus,
-            builder: (_, connected, __) => Text(
-              connected ? 'Say hello to your customer' : 'Connecting…',
-              style: TextStyle(
-                color: Colors.black.withOpacity(0.45),
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
+            builder: (_, connected, __) => Column(
+              children: [
+                Text(
+                  connected ? 'Start Conversation' : 'Connecting...',
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  connected ? 'Send a message to begin chatting' : 'Please wait a moment',
+                  style: TextStyle(
+                    color: Colors.grey.shade500,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -252,10 +326,10 @@ class _MassageScreenState extends State<MassageScreen> {
   }
 
   void _handleSend() {
-    final raw = _composerController.text.trim();
-    if (raw.isEmpty) return;
+    final text = _composerController.text.trim();
+    if (text.isEmpty) return;
     _composerController.clear();
-    _controller.sendMessage(raw);
+    _controller.sendMessage(text);
   }
 
   void _scrollToBottom() {
@@ -263,8 +337,8 @@ class _MassageScreenState extends State<MassageScreen> {
       if (!_scrollController.hasClients) return;
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent + 60,
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
       );
     });
   }
