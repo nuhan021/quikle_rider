@@ -6,7 +6,16 @@ import 'package:quikle_rider/features/messages/controllers/massage_controller.da
 import 'package:quikle_rider/features/messages/models/chat_model.dart';
 
 class MassageScreen extends StatefulWidget {
-  const MassageScreen({super.key});
+  const MassageScreen({
+    super.key,
+    this.customerId,
+    this.partnerLabel,
+    this.partnerType,
+  });
+
+  final int? customerId;
+  final String? partnerLabel;
+  final String? partnerType;
 
   @override
   State<MassageScreen> createState() => _MassageScreenState();
@@ -17,13 +26,16 @@ class _MassageScreenState extends State<MassageScreen> {
   final _composerController = TextEditingController();
   final _scrollController = ScrollController();
   final _timeFormatter = DateFormat('h:mm a');
+  bool _initialHistoryLoaded = false;
+
+  int get _customerId => widget.customerId ?? 1;
 
   @override
   void initState() {
     super.initState();
-    _controller = MassageController();
+    _controller = MassageController(customerId: _customerId);
     _controller.messages.addListener(_scrollToBottom);
-    _controller.connect();
+    _initChat();
   }
 
   @override
@@ -71,9 +83,9 @@ class _MassageScreenState extends State<MassageScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Customer Support',
-                style: TextStyle(
+              Text(
+                widget.partnerLabel ?? 'Chat with ${widget.partnerType ?? 'Customer'} $_customerId',
+                style: const TextStyle(
                   color: Colors.black87,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -81,29 +93,41 @@ class _MassageScreenState extends State<MassageScreen> {
               ),
               ValueListenableBuilder<bool>(
                 valueListenable: _controller.connectionStatus,
-                builder: (_, connected, __) => Row(
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      margin: const EdgeInsets.only(right: 6),
-                      decoration: BoxDecoration(
-                        color: connected ? Colors.green : Colors.grey,
-                        shape: BoxShape.circle,
-                        boxShadow: connected
-                            ? [BoxShadow(color: Colors.green.withOpacity(0.4), blurRadius: 4, spreadRadius: 1)]
-                            : null,
-                      ),
-                    ),
-                    Text(
-                      connected ? 'Online' : 'Connecting...',
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+                builder: (_, connected, __) =>
+                    ValueListenableBuilder<bool>(
+                  valueListenable: _controller.isActiveForMessaging,
+                  builder: (_, active, __) {
+                    final isOnline = connected || active;
+                    final label = connected
+                        ? 'Online'
+                        : active
+                            ? 'Active now'
+                            : 'Offline';
+                    return Row(
+                      children: [
+                        Container(
+                          width: 6,
+                          height: 6,
+                          margin: const EdgeInsets.only(right: 6),
+                          decoration: BoxDecoration(
+                            color: isOnline ? Colors.green : Colors.grey,
+                            shape: BoxShape.circle,
+                            boxShadow: isOnline
+                                ? [BoxShadow(color: Colors.green.withOpacity(0.4), blurRadius: 4, spreadRadius: 1)]
+                                : null,
+                          ),
+                        ),
+                        Text(
+                          label,
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
             ],
@@ -114,16 +138,24 @@ class _MassageScreenState extends State<MassageScreen> {
   }
 
   Widget _buildMessageList() {
-    return ValueListenableBuilder<List<ChatMessage>>(
-      valueListenable: _controller.messages,
-      builder: (_, messages, __) {
-        if (messages.isEmpty) return _buildEmptyState();
-        
-        return ListView.builder(
-          controller: _scrollController,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          itemCount: messages.length,
-          itemBuilder: (_, i) => _buildMessageBubble(messages[i]),
+    return ValueListenableBuilder<bool>(
+      valueListenable: _controller.historyLoading,
+      builder: (_, loading, __) {
+        return ValueListenableBuilder<List<ChatMessage>>(
+          valueListenable: _controller.messages,
+          builder: (_, messages, __) {
+            if (loading && !_initialHistoryLoaded) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (messages.isEmpty) return _buildEmptyState();
+
+            return ListView.builder(
+              controller: _scrollController,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              itemCount: messages.length,
+              itemBuilder: (_, i) => _buildMessageBubble(messages[i]),
+            );
+          },
         );
       },
     );
@@ -341,5 +373,12 @@ class _MassageScreenState extends State<MassageScreen> {
         curve: Curves.easeOutCubic,
       );
     });
+  }
+
+  Future<void> _initChat() async {
+    await _controller.fetchChatHistory();
+    _initialHistoryLoaded = true;
+    _controller.connect();
+    _controller.refreshActiveStatus();
   }
 }

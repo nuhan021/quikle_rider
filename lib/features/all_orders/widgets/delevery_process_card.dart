@@ -6,6 +6,7 @@ import 'package:get/state_manager.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_combioned_controller.dart';
 import 'package:quikle_rider/features/all_orders/models/combine_ordermodel.dart';
+import 'package:quikle_rider/features/messages/presentation/conversations_list.dart';
 import 'package:quikle_rider/features/messages/presentation/massage_screen.dart';
 
 class DeliveryProgressCard extends StatelessWidget {
@@ -433,7 +434,7 @@ class _DeliveryInfoSection extends StatelessWidget {
                 _ContactButton(
                   icon: 'assets/images/message.png',
                   onTap: (){
-                   Get.to(MassageScreen());
+                       Get.to(ConversationsListScreen());
 
 
                   },
