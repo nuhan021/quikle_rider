@@ -55,7 +55,7 @@ class UnifiedProfileAppBar extends StatelessWidget
               children: [
                 isback == true
                     ? GestureDetector(
-                        onTap: () => Get.back(),
+                        onTap: () => Navigator.pop(context),
                         child: Container(
                           padding: EdgeInsets.all(8.w),
                           child: Icon(

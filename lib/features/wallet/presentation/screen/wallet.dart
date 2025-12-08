@@ -147,27 +147,29 @@ class WalletScreen extends GetView<WalletController> {
                           'Maintain 4.5+ rating',
                         ],
                         currentBalanceText:
-                            controller.formatCurrency(controller.currentBalance.value),
+                            "${controller.formatCurrency(controller.currentBalance.value)}",
                         onViewDetails: null,
                         currentAmount: controller.forecastCurrentValue,
                         targetAmount: controller.forecastTargetValue,
                       ),
                       SizedBox(height: 12.h),
-                      BalanceCard(
-                        balance: controller.finalEarningsText,
-                        lastUpdated: controller.balanceSubtitle,
-                        onWithdraw: () async {
-
-                          Get.to(AddPaymentMethodPage());
-                        },
+                      Obx(
+                        ()=> BalanceCard(
+                          balance: "₹${controller.currentBalance.value.toString()}",
+                          lastUpdated: controller.balanceSubtitle,
+                          onWithdraw: () async {
+                        
+                            Get.to(AddPaymentMethodPage());
+                          },
+                        ),
                       ),
                       SizedBox(height: 12.h),
-                      const WalletDashboardCard(),
+                      // const WalletDashboardCard(),
                       SizedBox(height: 12.h),
-                      BonusTracking(
-                        performance: controller.performanceData,
-                        leaderboard: controller.leaderboardData,
-                      ),
+                      // BonusTracking(
+                      //   performance: controller.performanceData,
+                      //   leaderboard: controller.leaderboardData,
+                      // ),
                       SizedBox(height: 12.h),
                       Row(
                         children: [

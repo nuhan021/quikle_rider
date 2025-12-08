@@ -7,6 +7,7 @@ import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
+import 'package:quikle_rider/features/profile/presentation/screen/add_paymentmethod.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/availability_settings.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/delivery_zone.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/help_support.dart';
@@ -97,11 +98,11 @@ class ProfileScreen extends StatelessWidget {
                     _buildDivider(),
                     _buildMenuItem(
                       imagepath: "assets/icons/payment.png",
-                      title: 'Payment Method',
+                      title: 'Withdraw',
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const PaymentMethodPage(),
+                          builder: (context) => const AddPaymentMethodPage(),
                         ),
                       ),
                     ),

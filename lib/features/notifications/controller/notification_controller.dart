@@ -70,7 +70,7 @@ class NotificationController extends GetxController {
   void onInit() {
     super.onInit();
     _initializeService();
-    _seedInitialNotifications();
+
   }
 
   @override
@@ -85,33 +85,7 @@ class NotificationController extends GetxController {
     _listenToFirebaseMessages();
   }
 
-  void _seedInitialNotifications() {
-    if (_seeded) return;
-    final now = DateTime.now();
-    notifications.assignAll([
-      AppNotification(
-        id: 1001,
-        title: 'Urgent: Order #12345 needs attention',
-        body: 'Pickup is waiting longer than expected. Please confirm arrival.',
-        receivedAt: now.subtract(const Duration(minutes: 10)),
-        isUrgent: true,
-      ),
-      AppNotification(
-        id: 1002,
-        title: 'New order assigned to you',
-        body: 'Order #5678 has been assigned. Review the route and accept.',
-        receivedAt: now.subtract(const Duration(minutes: 25)),
-      ),
-      AppNotification(
-        id: 1003,
-        title: 'Customer requested a delay',
-        body: 'Order #1201 delivery window is extended by 15 minutes.',
-        receivedAt: now.subtract(const Duration(minutes: 45)),
-        isRead: true,
-      ),
-    ]);
-    _seeded = true;
-  }
+
 
   void _listenToFirebaseMessages() {
     _foregroundSubscription?.cancel();
