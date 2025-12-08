@@ -11,6 +11,7 @@ import 'package:quikle_rider/features/profile/presentation/screen/profile.dart';
 import 'package:quikle_rider/features/wallet/presentation/screen/wallet.dart';
 
 class BottomNavBar extends StatelessWidget {
+  
   const BottomNavBar({super.key});
   @override
   Widget build(BuildContext context) {

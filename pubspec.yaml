@@ -57,7 +57,7 @@ dependencies:
   # youtube_player_flutter: ^8.1.2
 
   # State Management
-  get: ^4.6.6
+  get: ^4.7.3
   provider: ^6.0.0
   web_socket_channel: ^3.0.1
   json_annotation: ^4.9.0
