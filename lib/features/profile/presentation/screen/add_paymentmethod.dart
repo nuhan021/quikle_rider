@@ -25,6 +25,7 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
   void initState() {
     super.initState();
     _withdrawController = Get.put(WithdrawController());
+    controller.fetchWithdrawalHistory();
   }
 
   @override
@@ -404,21 +405,10 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
 
   Widget _withdrawalHistoryCard() {
     return Obx(() {
-      final lastStatus = _withdrawController.lastWithdrawalStatus.value;
-      final lastDataId = _withdrawController.lastWithdrawalData.value?['id']
-          ?.toString();
-      _WithdrawalEntry? latestEntry;
-      if (lastStatus != null) {
-        latestEntry = _WithdrawalEntry(
-          amount: lastStatus['amount']?.toString() ?? '',
-          date:
-              lastStatus['updated_at']?.toString() ??
-              lastStatus['created_at']?.toString() ??
-              '',
-          status: lastStatus['status']?.toString() ?? '',
-          transactionId: lastStatus['id']?.toString() ?? '',
-        );
-      }
+      final history = controller.withdrawalHistory;
+      final isLoading = controller.isWithdrawalHistoryLoading.value;
+      final error = controller.withdrawalHistoryError.value;
+      final count = controller.withdrawalHistoryCount.value;
 
       return Container(
         width: double.infinity,
@@ -437,27 +427,49 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
                   ),
                 ),
                 const Spacer(),
-                if (lastDataId != null && lastDataId.isNotEmpty)
-                  IconButton(
-                    icon: const Icon(Icons.sync),
-                    tooltip: 'Check latest status',
-                    onPressed: () {
-                      _withdrawController.fetchWithdrawalStatus(lastDataId);
-                    },
-                  ),
+                IconButton(
+                  icon: const Icon(Icons.sync),
+                  tooltip: 'Refresh history',
+                  onPressed: isLoading
+                      ? null
+                      : () => controller.fetchWithdrawalHistory(),
+                ),
               ],
             ),
             SizedBox(height: 16.h),
-            if (latestEntry != null)
-              _historyTile(latestEntry)
-            else
-              Padding(
-                padding: EdgeInsets.only(bottom: 8.h),
-                child: Text(
-                  'No recent withdrawal status yet.',
-                  style: getTextStyle(fontSize: 12, color: Colors.grey[600]),
+            if (isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (error != null && error.isNotEmpty)
+              Text(
+                error,
+                style: getTextStyle(fontSize: 12, color: Colors.redAccent),
+              )
+            else if (history.isEmpty)
+              Text(
+                'No withdrawal history available.',
+                style: getTextStyle(fontSize: 12, color: Colors.grey[600]),
+              )
+            else ...[
+              if (count != null)
+                Padding(
+                  padding: EdgeInsets.only(bottom: 6.h),
+                  child: Text(
+                    'Total: $count',
+                    style:
+                        getTextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
                 ),
-              ),
+              ...history.map((item) {
+                return _historyTile(
+                  _WithdrawalEntry(
+                    amount: item['amount']?.toString() ?? '',
+                    date: item['created_at']?.toString() ?? '',
+                    status: item['status']?.toString() ?? '',
+                    transactionId: item['id']?.toString() ?? '',
+                  ),
+                );
+              }).toList(),
+            ],
           ],
         ),
       );

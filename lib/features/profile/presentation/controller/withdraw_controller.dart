@@ -4,12 +4,15 @@ import 'package:quikle_rider/core/services/network_caller.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/constants/api_constants.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
+import 'package:quikle_rider/features/wallet/controllers/wallet_controller.dart';
 
 class WithdrawController extends GetxController {
   WithdrawController({NetworkCaller? networkCaller})
-      : _networkCaller = networkCaller ?? NetworkCaller();
+    : _networkCaller = networkCaller ?? NetworkCaller();
 
   final NetworkCaller _networkCaller;
+  final WalletController? _walletController =
+      Get.isRegistered<WalletController>() ? Get.find<WalletController>() : null;
 
   final TextEditingController holderNameController = TextEditingController();
   final TextEditingController accountNumberController = TextEditingController();
@@ -40,7 +43,7 @@ class WithdrawController extends GetxController {
   @override
   void onClose() {
     holderNameController.dispose();
-    
+
     accountNumberController.dispose();
     ifscController.dispose();
     upiController.dispose();
@@ -103,13 +106,13 @@ class WithdrawController extends GetxController {
       final serverMessage = response.responseData is Map<String, dynamic>
           ? response.responseData['message']?.toString()
           : null;
-          AppLoggerHelper.debug("status code ${response.statusCode}");
+      AppLoggerHelper.debug("status code ${response.statusCode}");
       successMessage.value = serverMessage ?? 'Bank added successfully';
       AppLoggerHelper.debug("Added Payment method${response.responseData}");
       accountNumberController.clear();
       ifscController.clear();
       holderNameController.clear();
-      
+
       await fetchBeneficiaries();
       Get.snackbar(
         'Success',
@@ -142,10 +145,7 @@ class WithdrawController extends GetxController {
 
     final response = await _networkCaller.getRequest(
       '$baseurl/payment/beneficiary',
-      headers: {
-        'accept': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+      headers: {'accept': 'application/json', 'Authorization': 'Bearer $token'},
       defaultErrorMessage: 'Unable to load beneficiaries.',
     );
 
@@ -221,9 +221,9 @@ class WithdrawController extends GetxController {
     successMessage.value = null;
     lastWithdrawalData.value = null;
 
-    final uri = Uri.parse('$baseurl/payment/request').replace(
-      queryParameters: {'ben_id': selectedId.toString()},
-    );
+    final uri = Uri.parse(
+      '$baseurl/payment/request',
+    ).replace(queryParameters: {'ben_id': selectedId.toString()});
 
     final response = await _networkCaller.postRequest(
       uri.toString(),
@@ -246,8 +246,9 @@ class WithdrawController extends GetxController {
     if (response.isSuccess) {
       if (response.responseData is Map<String, dynamic>) {
         final data = response.responseData as Map<String, dynamic>;
-        lastWithdrawalData.value =
-            (data['data'] is Map<String, dynamic>) ? Map<String, dynamic>.from(data['data']) : null;
+        lastWithdrawalData.value = (data['data'] is Map<String, dynamic>)
+            ? Map<String, dynamic>.from(data['data'])
+            : null;
       }
       final newId = lastWithdrawalData.value?['id']?.toString();
       if (newId != null && newId.isNotEmpty) {
@@ -256,6 +257,7 @@ class WithdrawController extends GetxController {
       successMessage.value = (response.responseData is Map<String, dynamic>)
           ? response.responseData['message']?.toString()
           : 'Withdrawal request accepted.';
+     
       Get.snackbar(
         'Success',
         successMessage.value!,
@@ -263,6 +265,11 @@ class WithdrawController extends GetxController {
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
+      // keep wallet data in sync after a successful withdrawal
+      await Future.wait([
+        _walletController?.fetchCurrentBalance() ?? Future.value(),
+        _walletController?.fetchWithdrawalHistory() ?? Future.value(),
+      ]);
     } else {
       lastError.value = response.errorMessage;
       Get.snackbar(
@@ -286,16 +293,14 @@ class WithdrawController extends GetxController {
 
     final response = await _networkCaller.getRequest(
       uri,
-      headers: {
-        'accept': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
+      headers: {'accept': 'application/json', 'Authorization': 'Bearer $token'},
       defaultErrorMessage: 'Unable to fetch withdrawal status.',
     );
 
     if (response.isSuccess && response.responseData is Map<String, dynamic>) {
-      lastWithdrawalStatus.value =
-          Map<String, dynamic>.from(response.responseData as Map);
+      lastWithdrawalStatus.value = Map<String, dynamic>.from(
+        response.responseData as Map,
+      );
     } else {
       lastError.value = response.errorMessage;
     }

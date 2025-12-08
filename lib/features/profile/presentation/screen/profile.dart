@@ -97,14 +97,16 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     _buildDivider(),
                     _buildMenuItem(
-                      imagepath: "assets/icons/payment.png",
+                      imagepath: "assets/icons/withdraw.png",
                       title: 'Withdraw',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const AddPaymentMethodPage(),
-                        ),
-                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AddPaymentMethodPage(),
+                          ),
+                        );
+                      },
                     ),
                     _buildDivider(),
                     _buildMenuItem(
@@ -140,7 +142,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     _buildDivider(),
                     _buildMenuItem(
-                      imagepath: "assets/icons/help.png",
+                      imagepath: "assets/icons/customer-support.png",
                       title: 'Help & Support',
                       onTap: () => Navigator.push(
                         context,
@@ -151,7 +153,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     _buildDivider(),
                     _buildMenuItem(
-                      imagepath: "assets/icons/help.png",
+                      imagepath: "assets/icons/user-avatar.png",
                       title: 'Referral Program',
                       onTap: () => Navigator.push(
                         context,
@@ -162,7 +164,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     _buildDivider(),
                     _buildMenuItem(
-                      imagepath: "assets/icons/help.png",
+                      imagepath: "assets/icons/service.png",
                       title: 'Training Center',
                       onTap: () => Navigator.push(
                         context,

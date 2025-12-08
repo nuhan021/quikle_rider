@@ -4,6 +4,7 @@ import 'package:get/get.dart'; // Added for navigation
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_single.dart';
 import 'package:quikle_rider/features/all_orders/models/single_oder_model.dart';
+import 'package:quikle_rider/features/messages/presentation/conversations_list.dart';
 
 class OrderCard extends StatelessWidget {
   final OrderController controller;
@@ -366,12 +367,16 @@ class _DeliveryInformation extends StatelessWidget {
               children: [
                 _ContactButton(
                   icon: 'assets/images/message.png',
-                  onTap: controller.sendMessage,
+                  onTap: (){
+                    Get.to(ConversationsListScreen());
+                  },
                 ),
                 SizedBox(width: 16.w),
                 _ContactButton(
                   icon: 'assets/images/call.png',
-                  onTap: controller.makePhoneCall,
+                  onTap: (){
+                    
+                  },
                 ),
               ],
             ),

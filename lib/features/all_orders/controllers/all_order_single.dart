@@ -56,13 +56,8 @@ class OrderController extends GetxController {
     }
   }
 
-  void makePhoneCall() {
-    _showSnackbar('Calling ${order.value.customerName}');
-  }
 
-  void sendMessage() {
-    _showSnackbar('Opening chat with ${order.value.customerName}');
-  }
+ 
 
   Widget _buildActionDialog(
     String title,
