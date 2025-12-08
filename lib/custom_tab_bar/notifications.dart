@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/core/utils/logging/logger.dart';
 import 'package:quikle_rider/features/notifications/controller/notification_controller.dart';
 
 class NotificationsPage extends StatelessWidget {
@@ -29,6 +30,7 @@ class NotificationsPage extends StatelessWidget {
                       ),
                       itemCount: notifications.length,
                       itemBuilder: (context, index) {
+                        AppLoggerHelper.debug("Notification title: ${notifications[index].title}");
                         final notification = notifications[index];
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 12),
