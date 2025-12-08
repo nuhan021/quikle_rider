@@ -60,6 +60,11 @@ class WalletController extends GetxController
   final RxnInt riderReviewCount = RxnInt();
   final RxBool isRatingLoading = false.obs;
   final RxnString ratingError = RxnString();
+  final RxList<Map<String, dynamic>> withdrawalHistory =
+      <Map<String, dynamic>>[].obs;
+  final RxBool isWithdrawalHistoryLoading = false.obs;
+  final RxnString withdrawalHistoryError = RxnString();
+  final RxnInt withdrawalHistoryCount = RxnInt();
   // Data for different periods
   final _weekDeliveries = <DeliveryItem>[
     const DeliveryItem(
@@ -137,6 +142,7 @@ class WalletController extends GetxController
     fetchPerformanceData();
     fetchLeaderboardData();
     fetchCurrentBalance();
+    fetchWithdrawalHistory();
     fetchRiderRating();
   }
 
@@ -363,6 +369,52 @@ class WalletController extends GetxController
       }
     } catch (_) {
       currentBalance.value = 0;
+    }
+  }
+
+  Future<void> fetchWithdrawalHistory({int skip = 0, int limit = 20}) async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null || accessToken.isEmpty) {
+      withdrawalHistory.clear();
+      withdrawalHistoryError.value = 'Missing access token.';
+      withdrawalHistoryCount.value = 0;
+      return;
+    }
+
+    isWithdrawalHistoryLoading.value = true;
+    withdrawalHistoryError.value = null;
+
+    try {
+      final response = await _walletServices.fetchWithdrawalHistory(
+        accessToken: accessToken,
+        skip: skip,
+        limit: limit,
+      );
+
+      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+        final body = response.responseData as Map<String, dynamic>;
+        final items = body['data'];
+        if (items is List) {
+          withdrawalHistory.assignAll(
+            List<Map<String, dynamic>>.from(items),
+          );
+        } else {
+          withdrawalHistory.clear();
+        }
+        withdrawalHistoryCount.value = (body['count'] as num?)?.toInt();
+      } else {
+        withdrawalHistory.clear();
+        withdrawalHistoryCount.value = 0;
+        withdrawalHistoryError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to load withdrawal history.';
+      }
+    } catch (_) {
+      withdrawalHistory.clear();
+      withdrawalHistoryCount.value = 0;
+      withdrawalHistoryError.value = 'Unable to load withdrawal history.';
+    } finally {
+      isWithdrawalHistoryLoading.value = false;
     }
   }
 
