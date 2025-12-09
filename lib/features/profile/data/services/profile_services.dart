@@ -27,6 +27,19 @@ class ProfileServices {
     );
   }
 
+  Future<ResponseData> getVerificationStatus({
+    required String accessToken,
+  }) {
+    return _networkCaller.getRequest(
+      '$baseurl/rider/is-verified',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      defaultErrorMessage: 'Unable to check verification status. Please try again.',
+    );
+  }
+
   Future<ResponseData> getProfile({
     required String accessToken,
     required String refreshToken,
@@ -414,5 +427,4 @@ class ProfileServices {
 
 
 }
-
 

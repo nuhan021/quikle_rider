@@ -8,7 +8,6 @@ import 'package:quikle_rider/core/services/firebase/notification_service.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
 import 'package:quikle_rider/features/authentication/data/services/auth_servies.dart';
-import 'package:quikle_rider/features/notifications/controller/notification_controller.dart';
 import 'package:quikle_rider/routes/app_routes.dart';
 
 class AuthController extends GetxController {

@@ -33,8 +33,6 @@ class DeliveryCard extends StatelessWidget {
     this.decoration,
   });
 
-  Color get _statusColor =>
-      status == DeliveryStatus.delivered ? AppColors.greenbutton : AppColors.error;
 
   String get _statusText =>
       status == DeliveryStatus.delivered ? 'Delivered' : 'Cancelled';

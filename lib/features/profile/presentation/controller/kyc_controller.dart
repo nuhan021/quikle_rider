@@ -9,7 +9,6 @@ import 'package:quikle_rider/features/profile/data/models/rider_documents_model.
 import 'package:quikle_rider/features/profile/data/services/profile_services.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:quikle_rider/features/profile/presentation/screen/profile.dart';
 
 // New State Model to track file and progress
 class DocumentUploadState {

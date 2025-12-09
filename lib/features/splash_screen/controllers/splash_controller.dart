@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/services/firebase/notification_service.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
@@ -84,15 +83,22 @@ class SplashController extends GetxController {
 
   void _handleNavigation() {
     if (StorageService.accessToken != null &&
-        profileController.isDocumentUploaded.value == true ) {
+        profileController.isDocumentUploaded.value == true &&
+        profileController.isVerified.value == true) {
       Get.offAllNamed(AppRoute.getBottomNavBar());
-      AppLoggerHelper.debug("documnets uploaded ${profileController.isDocumentUploaded.value}");
+      AppLoggerHelper.debug(
+        "documnets uploaded ${profileController.isDocumentUploaded.value}",
+      );
+      AppLoggerHelper.debug(
+        "Profile verified ${profileController.isVerified.value}",
+      );
 
       AppLoggerHelper.debug(
         "Navigating to Home ${profileController.isDocumentUploaded.value}",
       );
     } else if (StorageService.accessToken != null &&
-        profileController.isDocumentUploaded.value == false) {
+        profileController.isDocumentUploaded.value == false &&
+        profileController.isVerified.value == false) {
       Get.offAllNamed(AppRoute.uploaddocuments);
     } else {
       Get.offAllNamed(AppRoute.getLoginScreen());

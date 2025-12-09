@@ -37,6 +37,9 @@ class ProfileController extends GetxController {
   final Rxn<bool> isDocumentUploaded = Rxn<bool>();
   final RxBool isDocumentStatusLoading = false.obs;
   final RxnString documentStatusError = RxnString();
+  final Rxn<bool> isVerified = Rxn<bool>();
+  final RxBool isVerificationLoading = false.obs;
+  final RxnString verificationError = RxnString();
   final Rxn<RiderDocumentsModel> riderDocuments = Rxn<RiderDocumentsModel>();
   final RxList<TrainingResource> trainingVideos = <TrainingResource>[].obs;
   final RxList<TrainingResource> trainingPdfs = <TrainingResource>[].obs;
@@ -163,6 +166,7 @@ class ProfileController extends GetxController {
     fetchAvailabilitySettings();
     fetchProfileCompletion();
     fetchDocumentUploadStatus();
+    fetchVerificationStatus();
   }
 
   @override
@@ -354,6 +358,50 @@ class ProfileController extends GetxController {
       isDocumentUploaded.value = null;
     } finally {
       isDocumentStatusLoading.value = false;
+    }
+  }
+
+  Future<void> fetchVerificationStatus() async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null) {
+      verificationError.value = 'Missing credentials. Please login again.';
+      isVerified.value = null;
+      return;
+    }
+
+    isVerificationLoading.value = true;
+    verificationError.value = null;
+    try {
+      final response = await _profileServices.getVerificationStatus(
+        accessToken: accessToken,
+      );
+
+      if (response.isSuccess) {
+        final data = response.responseData;
+        bool? verified;
+        if (data is Map<String, dynamic>) {
+          final value = data['is_verified'];
+          if (value is bool) {
+            verified = value;
+          } else if (value is String) {
+            verified = value.toLowerCase() == 'true';
+          }
+        } else if (data is bool) {
+          verified = data;
+        }
+        isVerified.value = verified;
+      } else {
+        verificationError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to check verification status.';
+        isVerified.value = null;
+      }
+    } catch (error) {
+      AppLoggerHelper.error('Failed to fetch verification status: $error');
+      verificationError.value = 'Unable to check verification status.';
+      isVerified.value = null;
+    } finally {
+      isVerificationLoading.value = false;
     }
   }
 

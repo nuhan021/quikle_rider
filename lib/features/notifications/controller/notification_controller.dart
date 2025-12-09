@@ -62,7 +62,6 @@ class NotificationController extends GetxController {
 
   final NotificationService _notificationService;
   final RxList<AppNotification> notifications = <AppNotification>[].obs;
-  bool _seeded = false;
   StreamSubscription<RemoteMessage>? _foregroundSubscription;
   StreamSubscription<RemoteMessage>? _openedAppSubscription;
 
