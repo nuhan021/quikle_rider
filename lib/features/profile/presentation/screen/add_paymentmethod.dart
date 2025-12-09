@@ -205,12 +205,7 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
             ],
           ),
           if (isLoading)
-            Center(
-              child: LoadingAnimationWidget.inkDrop(
-                color: AppColors.gradientColor,
-                size: 40.w,
-              ),
-            )
+            const Center(child: CircularProgressIndicator())
           else if (beneficiaries.isEmpty)
             Padding(
               padding: EdgeInsets.only(top: 8.h),
@@ -330,6 +325,7 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
             final success = _withdrawController.successMessage.value;
             final error = _withdrawController.lastError.value;
             final lastData = _withdrawController.lastWithdrawalData.value;
+            final status = _withdrawController.withdrawalHistory;
             if (success == null && error == null && lastData == null) {
               return const SizedBox.shrink();
             }
@@ -363,44 +359,58 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
                     ),
                   ),
                 if (lastData != null)
-                  Container(
-                    width: double.infinity,
-                    margin: EdgeInsets.only(top: 10.h),
-                    padding: EdgeInsets.all(14.w),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[50],
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(color: Colors.grey[200]!),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Latest Withdrawal',
-                          style: getTextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
+                  Stack(
+                    alignment: AlignmentGeometry.topRight,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.only(top: 10.h),
+                        padding: EdgeInsets.all(14.w),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(color: status?['color'] ?? Colors.green),
                         ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          'ID: ${lastData['id'] ?? ''}',
-                          style: getTextStyle(fontSize: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Latest Withdrawal',
+                              style: getTextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            Text(
+                              'ID: ${lastData['id'] ?? ''}',
+                              style: getTextStyle(fontSize: 12),
+                            ),
+                            Text(
+                              'Amount: ${lastData['amount'] ?? ''}',
+                              style: getTextStyle(fontSize: 12),
+                            ),
+                            Text(
+                              'Status: ${status?['status'] ?? 'N/A'}',
+                              style: getTextStyle(fontSize: 12),
+                            ),
+
+                            Text(
+                              'Created: ${lastData['created_at'] ?? ''}',
+                              style: getTextStyle(fontSize: 12),
+                            ),
+                          ],
                         ),
-                        Text(
-                          'Amount: ${lastData['amount'] ?? ''}',
-                          style: getTextStyle(fontSize: 12),
+                      ),
+
+                      Padding(
+                        padding: EdgeInsets.only(top: 16.0.h, right: 8.0.w),
+                        child: _pillBadge(
+                          label: status?['status'] ?? 'N/A',
+                          color: _statusColor(status?['status'] ?? 'N/A'),
                         ),
-                        Text(
-                          'Status: ${lastData['status'] ?? ''}',
-                          style: getTextStyle(fontSize: 12),
-                        ),
-                        Text(
-                          'Created: ${lastData['created_at'] ?? ''}',
-                          style: getTextStyle(fontSize: 12),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
               ],
             );

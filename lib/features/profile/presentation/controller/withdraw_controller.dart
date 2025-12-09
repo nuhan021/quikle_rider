@@ -34,6 +34,10 @@ class WithdrawController extends GetxController {
   final Rxn<Map<String, dynamic>> lastWithdrawalStatus =
       Rxn<Map<String, dynamic>>();
 
+  get withdrawalHistory => _walletController?.withdrawalHistory.isNotEmpty == true
+      ? _walletController!.withdrawalHistory.first
+      : null;
+
   @override
   void onInit() {
     super.onInit();

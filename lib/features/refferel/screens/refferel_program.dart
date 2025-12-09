@@ -12,6 +12,7 @@ import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/refferel/widgets/reffer_shimmer.dart';
 import 'dart:typed_data';
+import 'package:url_launcher/url_launcher.dart';
 
 class ReferralProgramPage extends StatefulWidget {
   const ReferralProgramPage({super.key});
@@ -212,7 +213,7 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
                   label: 'WhatsApp',
                   color: AppColors.primarygreen,
                   icon: Iconsax.message_2,
-                  onTap: () {},
+                  onTap: () => _shareToWhatsApp(referralCode),
                 ),
               ),
               SizedBox(width: 12.w),
@@ -221,7 +222,7 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
                   label: 'SMS',
                   color: Colors.black,
                   icon: Iconsax.message_2,
-                  onTap: () {},
+                  onTap: () => _shareToSms(referralCode),
                 ),
               ),
             ],
@@ -345,6 +346,7 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
   }
 
   Widget _referralListCard(List<Map<String, dynamic>> referrals) {
+       final dashboard = _controller.referralDashboard.value;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.w),
@@ -391,7 +393,7 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
                   label: 'WhatsApp',
                   color: AppColors.primarygreen,
                   icon: Iconsax.message,
-                  onTap: () {},
+                  onTap: () => _shareToWhatsApp(dashboard?.referralCode ?? ''),
                 ),
               ),
               SizedBox(width: 12.w),
@@ -400,7 +402,7 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
                   label: 'SMS',
                   color: Colors.black,
                   icon: Icons.sms_outlined,
-                  onTap: () {},
+                  onTap: () => _shareToSms(dashboard?.referralCode ?? ''),
                 ),
               ),
             ],
@@ -478,6 +480,63 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
         return AppColors.warning;
       default:
         return AppColors.secondarygrey;
+    }
+  }
+
+  Future<void> _shareToWhatsApp(String referralCode) async {
+    final code = referralCode.trim();
+    if (code.isEmpty || code == '-- -- --') {
+      Get.snackbar(
+        'Referral code missing',
+        'Please wait for your code to load.',
+        backgroundColor: Colors.orangeAccent.withOpacity(0.2),
+        colorText: Colors.black,
+      );
+      return;
+    }
+    final text = Uri.encodeComponent(
+      'Join Quikle using my referral code: $code',
+    );
+    final uri = Uri.parse('https://wa.me/?text=$text');
+    final canLaunch = await canLaunchUrl(uri);
+    if (canLaunch) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      Get.snackbar(
+        'WhatsApp not available',
+        'Could not open WhatsApp on this device.',
+        backgroundColor: Colors.red.withOpacity(0.15),
+        colorText: Colors.red[900],
+      );
+    }
+  }
+
+  Future<void> _shareToSms(String referralCode) async {
+    final code = referralCode.trim();
+    if (code.isEmpty || code == '-- -- --') {
+      Get.snackbar(
+        'Referral code missing',
+        'Please wait for your code to load.',
+        backgroundColor: Colors.orangeAccent.withOpacity(0.2),
+        colorText: Colors.black,
+      );
+      return;
+    }
+    final body = Uri.encodeComponent(
+      'Join Quikle using my referral code: $code',
+    );
+    // sms: scheme supports optional recipient; we leave blank to let user choose.
+    final uri = Uri.parse('sms:?body=$body');
+    final canLaunch = await canLaunchUrl(uri);
+    if (canLaunch) {
+      await launchUrl(uri);
+    } else {
+      Get.snackbar(
+        'SMS not available',
+        'Could not open messaging app on this device.',
+        backgroundColor: Colors.red.withOpacity(0.15),
+        colorText: Colors.red[900],
+      );
     }
   }
 }

@@ -11,6 +11,8 @@ import 'package:quikle_rider/core/widgets/shimmer/shimmer_loading.dart';
 import 'package:quikle_rider/features/profile/data/models/training_resource.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/refferel/screens/quiz_selection_page.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class TrainingCenterPage extends StatefulWidget {
   const TrainingCenterPage({super.key});
@@ -136,51 +138,56 @@ class _TrainingCenterPageState extends State<TrainingCenterPage> {
     required String title,
     String? subtitle,
     Widget? trailing,
+    VoidCallback? onTap,
   }) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Row(
-        children: [
-          Container(
-            alignment: Alignment.center,
-            width: 40.w,
-            height: 40.w,
-            decoration: BoxDecoration(
-              color: background,
-              shape: BoxShape.circle,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        margin: EdgeInsets.only(bottom: 12.h),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Row(
+          children: [
+            Container(
+              alignment: Alignment.center,
+              width: 40.w,
+              height: 40.w,
+              decoration: BoxDecoration(
+                color: background,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: iconColor, size: 18.sp),
             ),
-            child: Icon(icon, color: iconColor, size: 18.sp),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: getTextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  SizedBox(height: 4.h),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    subtitle,
-                    style: getTextStyle(fontSize: 12, color: Colors.grey[600]),
+                    title,
+                    style: getTextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
+                  if (subtitle != null) ...[
+                    SizedBox(height: 4.h),
+                    Text(
+                      subtitle,
+                      style: getTextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
-          ),
-          if (trailing != null) trailing,
-        ],
+            if (trailing != null) trailing,
+          ],
+        ),
       ),
     );
   }
@@ -208,6 +215,8 @@ class _TrainingCenterPageState extends State<TrainingCenterPage> {
               background: AppColors.primaryyellow,
               title: item.title,
               subtitle: item.duration,
+              trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+              onTap: () => _openVideo(item),
             ),
           )
           .toList(growable: false),
@@ -237,10 +246,51 @@ class _TrainingCenterPageState extends State<TrainingCenterPage> {
               background: AppColors.blackColor,
               title: item.title,
               subtitle: item.description,
+              trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+              onTap: () => _openPdf(item.url),
             ),
           )
           .toList(growable: false),
     );
+  }
+
+  Future<void> _openPdf(String url) async {
+    if (url.isEmpty) return;
+    final uri = Uri.tryParse(url);
+    if (uri == null) {
+      Get.snackbar(
+        'Invalid link',
+        'PDF link is not valid.',
+        backgroundColor: Colors.red.withOpacity(0.15),
+        colorText: Colors.red[900],
+      );
+      return;
+    }
+
+    final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!launched) {
+      Get.snackbar(
+        'Unable to open',
+        'Could not open the PDF.',
+        backgroundColor: Colors.red.withOpacity(0.15),
+        colorText: Colors.red[900],
+      );
+    }
+  }
+
+  void _openVideo(TrainingResource item) {
+    final url = item.url;
+    final uri = Uri.tryParse(url);
+    if (url.isEmpty || uri == null) {
+      Get.snackbar(
+        'Invalid link',
+        'Video link is not valid.',
+        backgroundColor: Colors.red.withOpacity(0.15),
+        colorText: Colors.red[900],
+      );
+      return;
+    }
+    Get.to(() => _VideoWebViewPage(title: item.title, uri: uri));
   }
 
   Widget _quizCard() {
@@ -356,6 +406,65 @@ class _TrainingCenterPageState extends State<TrainingCenterPage> {
           style: getTextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         ),
       ],
+    );
+  }
+}
+
+class _VideoWebViewPage extends StatefulWidget {
+  const _VideoWebViewPage({required this.title, required this.uri});
+
+  final String title;
+  final Uri uri;
+
+  @override
+  State<_VideoWebViewPage> createState() => _VideoWebViewPageState();
+}
+
+class _VideoWebViewPageState extends State<_VideoWebViewPage> {
+  late final WebViewController _controller;
+  final RxDouble _progress = 0.0.obs;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onProgress: (progress) => _progress.value = progress / 100,
+          onWebResourceError: (error) {
+            Get.snackbar(
+              'Load failed',
+              error.description,
+              backgroundColor: Colors.red.withOpacity(0.15),
+              colorText: Colors.red[900],
+            );
+          },
+        ),
+      )
+      ..loadRequest(widget.uri);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: UnifiedProfileAppBar(
+        title: widget.title.isEmpty ? 'Video' : widget.title,
+        isback: true,
+      ),
+      body: Column(
+        children: [
+          Obx(() {
+            final value = _progress.value;
+            if (value == 0 || value >= 1) return const SizedBox.shrink();
+            return LinearProgressIndicator(
+              value: value,
+              minHeight: 3,
+            );
+          }),
+          Expanded(child: WebViewWidget(controller: _controller)),
+        ],
+      ),
     );
   }
 }
