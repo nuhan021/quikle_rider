@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/data/models/profile_model.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 
@@ -19,7 +22,12 @@ class VehicleInformationPage extends StatelessWidget {
         final isLoading = _controller.isLoading.value && profile == null;
 
         if (isLoading) {
-          return const Center(child: CircularProgressIndicator());
+          return Center(
+            child: LoadingAnimationWidget.inkDrop(
+              color: AppColors.gradientColor,
+              size: 40.w,
+            ),
+          );
         }
 
         return Column(
@@ -235,12 +243,10 @@ class VehicleInformationPage extends StatelessWidget {
             elevation: 0,
           ),
           child: isSaving
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
+              ? Center(
+                  child: LoadingAnimationWidget.inkDrop(
+                    color: AppColors.blackColor,
+                    size: 30.w,
                   ),
                 )
               : const Text(

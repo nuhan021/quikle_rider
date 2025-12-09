@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
@@ -224,16 +225,12 @@ class _AvailabilitySettingsPageState extends State<AvailabilitySettingsPage> {
                             padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
                           child: isSaving
-                              ? const SizedBox(
-                                  height: 22,
-                                  width: 22,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.5,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
-                                    ),
-                                  ),
-                                )
+                              ?  Center(
+                            child: LoadingAnimationWidget.inkDrop(
+                              color: AppColors.greenbutton,
+                              size: 30.w,
+                            ),
+                          )
                               : const Text(
                                   'Save',
                                   style: TextStyle(

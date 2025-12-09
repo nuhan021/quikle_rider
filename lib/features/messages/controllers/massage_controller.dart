@@ -93,7 +93,7 @@ class MassageController {
     historyError.dispose();
   }
 
-  Future<void> _startChatSession() async {
+  Future<void> startChatSession() async {
     final riderId = _selfRiderId;
     final uri = Uri.parse(
       '$baseurl/rider/chat/start/riders/$riderId/customers/$customerId',

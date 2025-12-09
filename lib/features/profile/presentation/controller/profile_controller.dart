@@ -27,6 +27,7 @@ class ProfileController extends GetxController {
   // 📊 State: profile & documents
   final RxBool isavaiabilityProfile = false.obs;
   final RxBool isLoading = false.obs;
+  final RxBool isprofilecompleted = false.obs;
   final RxnString errorMessage = RxnString();
   final Rxn<ProfileModel> profile = Rxn<ProfileModel>();
   final RxBool isUpdatingProfile = false.obs;
@@ -375,7 +376,13 @@ class ProfileController extends GetxController {
       if (response.isSuccess && response.responseData is Map<String, dynamic>) {
         profileCompletion.value = ProfileCompletionModel.fromJson(
           response.responseData as Map<String, dynamic>,
+          
         );
+        final isprofilecompleted = response.responseData['is_complete'] as bool;
+        AppLoggerHelper.debug("profile update: ${isprofilecompleted}");
+
+
+
       } else {
         profileCompletion.value = null;
         profileCompletionError.value = response.errorMessage.isNotEmpty

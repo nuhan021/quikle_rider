@@ -3,6 +3,7 @@ import 'package:quikle_rider/features/all_orders/presentation/screen/all_orders.
 import 'package:quikle_rider/features/bottom_nav_bar/screen/bottom_nav_bar.dart';
 import 'package:quikle_rider/features/home/presentation/screen/homepage.dart';
 import 'package:quikle_rider/features/map/presentation/screen/parcel_done.dart';
+import 'package:quikle_rider/features/profile/presentation/screen/upload_documents.dart';
 import '../features/splash_screen/presentation/screens/splash_screen.dart';
 import '../features/authentication/presentation/screens/login_screen.dart';
 import '../features/authentication/presentation/screens/login_otp.dart';
@@ -26,6 +27,7 @@ class AppRoute {
   static String walletScreen = "/walletScreen";
   static String profileScreen = "/profileScreen";
   static String parcelDone = "/parcelDone";
+  static String uploaddocuments = "/uploaddocuments";
 
   // Route getters
   static String getSplashScreen() => splashScreen;
@@ -55,5 +57,6 @@ class AppRoute {
     GetPage(name: walletScreen, page: () => const WalletScreen()),
     GetPage(name: profileScreen, page: () => ProfileScreen()),
     GetPage(name: parcelDone, page: () => const ParcelDone()),
+    GetPage(name: uploaddocuments, page: () =>  UploadDocumentsPage()),
   ];
 }

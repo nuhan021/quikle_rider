@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:quikle_rider/core/services/firebase/notification_service.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/routes/app_routes.dart';
 import 'package:video_player/video_player.dart';
 
@@ -23,16 +24,21 @@ class SplashController extends GetxController {
   final Duration playDuration = const Duration(seconds: 3);
   bool _ellipseMoved = false;
 
+  //put controller
+  final ProfileController profileController = Get.put(
+    ProfileController(),
+    permanent: true,
+  );
+
   @override
   void onInit() {
     super.onInit();
     _initVideo();
     NotificationService.instance.sendInstantNotification(
-          userId: StorageService.userId ?? 0,
-          title: 'Hello there!',
-          body: 'You have a new notification.',
-        );
-
+      userId: StorageService.userId ?? 0,
+      title: 'Hello there!',
+      body: 'You have a new notification.',
+    );
   }
 
   Future<void> _initVideo() async {
@@ -77,8 +83,17 @@ class SplashController extends GetxController {
   }
 
   void _handleNavigation() {
-    if (StorageService.hasToken()) {
+    if (StorageService.accessToken != null &&
+        profileController.isDocumentUploaded.value == true ) {
       Get.offAllNamed(AppRoute.getBottomNavBar());
+      AppLoggerHelper.debug("documnets uploaded ${profileController.isDocumentUploaded.value}");
+
+      AppLoggerHelper.debug(
+        "Navigating to Home ${profileController.isDocumentUploaded.value}",
+      );
+    } else if (StorageService.accessToken != null &&
+        profileController.isDocumentUploaded.value == false) {
+      Get.offAllNamed(AppRoute.uploaddocuments);
     } else {
       Get.offAllNamed(AppRoute.getLoginScreen());
     }
