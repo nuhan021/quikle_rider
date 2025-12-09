@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -197,7 +199,7 @@ class MassageController {
                 }
                 if (e is Map) {
                   return ChatPartner.fromJson(
-                    Map<String, dynamic>.from(e as Map),
+                    Map<String, dynamic>.from(e),
                   );
                 }
                 return null;

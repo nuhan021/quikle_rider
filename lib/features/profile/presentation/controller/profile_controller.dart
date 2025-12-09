@@ -33,6 +33,9 @@ class ProfileController extends GetxController {
   final RxnString profileUpdateError = RxnString();
   final RxBool isUploadingDocuments = false.obs;
   final RxnString documentUploadError = RxnString();
+  final Rxn<bool> isDocumentUploaded = Rxn<bool>();
+  final RxBool isDocumentStatusLoading = false.obs;
+  final RxnString documentStatusError = RxnString();
   final Rxn<RiderDocumentsModel> riderDocuments = Rxn<RiderDocumentsModel>();
   final RxList<TrainingResource> trainingVideos = <TrainingResource>[].obs;
   final RxList<TrainingResource> trainingPdfs = <TrainingResource>[].obs;
@@ -158,6 +161,7 @@ class ProfileController extends GetxController {
     fetchProfile();
     fetchAvailabilitySettings();
     fetchProfileCompletion();
+    fetchDocumentUploadStatus();
   }
 
   @override
@@ -304,6 +308,51 @@ class ProfileController extends GetxController {
       }
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  // 📄 Document upload status
+  Future<void> fetchDocumentUploadStatus() async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null) {
+      documentStatusError.value = 'Missing credentials. Please login again.';
+      isDocumentUploaded.value = null;
+      return;
+    }
+
+    isDocumentStatusLoading.value = true;
+    documentStatusError.value = null;
+    try {
+      final response = await _profileServices.getDocumentUploadStatus(
+        accessToken: accessToken,
+      );
+
+      if (response.isSuccess) {
+        final data = response.responseData;
+        bool? uploaded;
+        if (data is Map<String, dynamic>) {
+          final value = data['is_document_uploaded'];
+          if (value is bool) {
+            uploaded = value;
+          } else if (value is String) {
+            uploaded = value.toLowerCase() == 'true';
+          }
+        } else if (data is bool) {
+          uploaded = data;
+        }
+        isDocumentUploaded.value = uploaded;
+      } else {
+        documentStatusError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to check document status.';
+        isDocumentUploaded.value = null;
+      }
+    } catch (error) {
+      AppLoggerHelper.error('Failed to fetch document status: $error');
+      documentStatusError.value = 'Unable to check document status.';
+      isDocumentUploaded.value = null;
+    } finally {
+      isDocumentStatusLoading.value = false;
     }
   }
 
