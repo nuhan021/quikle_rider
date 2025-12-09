@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
@@ -38,7 +39,10 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F7),
-      appBar: const UnifiedProfileAppBar(title: 'Add Payment Method',isback: true,),
+      appBar: const UnifiedProfileAppBar(
+        title: 'Add Payment Method',
+        isback: true,
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20.w),
         child: Column(
@@ -201,7 +205,12 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
             ],
           ),
           if (isLoading)
-            const Center(child: CircularProgressIndicator())
+            Center(
+              child: LoadingAnimationWidget.inkDrop(
+                color: AppColors.gradientColor,
+                size: 40.w,
+              ),
+            )
           else if (beneficiaries.isEmpty)
             Padding(
               padding: EdgeInsets.only(top: 8.h),
@@ -302,12 +311,10 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
                       ),
                     ),
                     child: isRequesting
-                        ? SizedBox(
-                            height: 20.h,
-                            width: 20.h,
-                            child: const CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
+                        ? Center(
+                            child: LoadingAnimationWidget.inkDrop(
+                              color: AppColors.gradientColor,
+                              size: 40.w,
                             ),
                           )
                         : const Text(
@@ -438,7 +445,12 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
             ),
             SizedBox(height: 16.h),
             if (isLoading)
-              const Center(child: CircularProgressIndicator())
+              Center(
+                child: LoadingAnimationWidget.inkDrop(
+                  color: AppColors.gradientColor,
+                  size: 40.w,
+                ),
+              )
             else if (error != null && error.isNotEmpty)
               Text(
                 error,
@@ -455,8 +467,7 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
                   padding: EdgeInsets.only(bottom: 6.h),
                   child: Text(
                     'Total: $count',
-                    style:
-                        getTextStyle(fontSize: 12, color: Colors.grey[600]),
+                    style: getTextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ),
               ...history.map((item) {

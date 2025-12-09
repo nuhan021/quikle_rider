@@ -27,12 +27,19 @@ class ProfileController extends GetxController {
   // 📊 State: profile & documents
   final RxBool isavaiabilityProfile = false.obs;
   final RxBool isLoading = false.obs;
+  final RxBool isprofilecompleted = false.obs;
   final RxnString errorMessage = RxnString();
   final Rxn<ProfileModel> profile = Rxn<ProfileModel>();
   final RxBool isUpdatingProfile = false.obs;
   final RxnString profileUpdateError = RxnString();
   final RxBool isUploadingDocuments = false.obs;
   final RxnString documentUploadError = RxnString();
+  final Rxn<bool> isDocumentUploaded = Rxn<bool>();
+  final RxBool isDocumentStatusLoading = false.obs;
+  final RxnString documentStatusError = RxnString();
+  final Rxn<bool> isVerified = Rxn<bool>();
+  final RxBool isVerificationLoading = false.obs;
+  final RxnString verificationError = RxnString();
   final Rxn<RiderDocumentsModel> riderDocuments = Rxn<RiderDocumentsModel>();
   final RxList<TrainingResource> trainingVideos = <TrainingResource>[].obs;
   final RxList<TrainingResource> trainingPdfs = <TrainingResource>[].obs;
@@ -158,6 +165,8 @@ class ProfileController extends GetxController {
     fetchProfile();
     fetchAvailabilitySettings();
     fetchProfileCompletion();
+    fetchDocumentUploadStatus();
+    fetchVerificationStatus();
   }
 
   @override
@@ -307,6 +316,95 @@ class ProfileController extends GetxController {
     }
   }
 
+  // 📄 Document upload status
+  Future<void> fetchDocumentUploadStatus() async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null) {
+      documentStatusError.value = 'Missing credentials. Please login again.';
+      isDocumentUploaded.value = null;
+      return;
+    }
+
+    isDocumentStatusLoading.value = true;
+    documentStatusError.value = null;
+    try {
+      final response = await _profileServices.getDocumentUploadStatus(
+        accessToken: accessToken,
+      );
+
+      if (response.isSuccess) {
+        final data = response.responseData;
+        bool? uploaded;
+        if (data is Map<String, dynamic>) {
+          final value = data['is_document_uploaded'];
+          if (value is bool) {
+            uploaded = value;
+          } else if (value is String) {
+            uploaded = value.toLowerCase() == 'true';
+          }
+        } else if (data is bool) {
+          uploaded = data;
+        }
+        isDocumentUploaded.value = uploaded;
+      } else {
+        documentStatusError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to check document status.';
+        isDocumentUploaded.value = null;
+      }
+    } catch (error) {
+      AppLoggerHelper.error('Failed to fetch document status: $error');
+      documentStatusError.value = 'Unable to check document status.';
+      isDocumentUploaded.value = null;
+    } finally {
+      isDocumentStatusLoading.value = false;
+    }
+  }
+
+  Future<void> fetchVerificationStatus() async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null) {
+      verificationError.value = 'Missing credentials. Please login again.';
+      isVerified.value = null;
+      return;
+    }
+
+    isVerificationLoading.value = true;
+    verificationError.value = null;
+    try {
+      final response = await _profileServices.getVerificationStatus(
+        accessToken: accessToken,
+      );
+
+      if (response.isSuccess) {
+        final data = response.responseData;
+        bool? verified;
+        if (data is Map<String, dynamic>) {
+          final value = data['is_verified'];
+          if (value is bool) {
+            verified = value;
+          } else if (value is String) {
+            verified = value.toLowerCase() == 'true';
+          }
+        } else if (data is bool) {
+          verified = data;
+        }
+        isVerified.value = verified;
+      } else {
+        verificationError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to check verification status.';
+        isVerified.value = null;
+      }
+    } catch (error) {
+      AppLoggerHelper.error('Failed to fetch verification status: $error');
+      verificationError.value = 'Unable to check verification status.';
+      isVerified.value = null;
+    } finally {
+      isVerificationLoading.value = false;
+    }
+  }
+
   // 🧩 Profile completion progress
   Future<void> fetchProfileCompletion() async {
     final accessToken = StorageService.accessToken;
@@ -326,7 +424,13 @@ class ProfileController extends GetxController {
       if (response.isSuccess && response.responseData is Map<String, dynamic>) {
         profileCompletion.value = ProfileCompletionModel.fromJson(
           response.responseData as Map<String, dynamic>,
+          
         );
+        final isprofilecompleted = response.responseData['is_complete'] as bool;
+        AppLoggerHelper.debug("profile update: ${isprofilecompleted}");
+
+
+
       } else {
         profileCompletion.value = null;
         profileCompletionError.value = response.errorMessage.isNotEmpty

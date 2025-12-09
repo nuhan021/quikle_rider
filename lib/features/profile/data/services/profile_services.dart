@@ -13,6 +13,32 @@ class ProfileServices {
 
   final NetworkCaller _networkCaller;
 
+  Future<ResponseData> getDocumentUploadStatus({
+    required String accessToken,
+  }) {
+    return _networkCaller.getRequest(
+      '$baseurl/rider/is-document-uploaded/',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      defaultErrorMessage:
+          'Unable to check document status. Please try again.',
+    );
+  }
+
+  Future<ResponseData> getVerificationStatus({
+    required String accessToken,
+  }) {
+    return _networkCaller.getRequest(
+      '$baseurl/rider/is-verified',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      defaultErrorMessage: 'Unable to check verification status. Please try again.',
+    );
+  }
 
   Future<ResponseData> getProfile({
     required String accessToken,
@@ -398,4 +424,7 @@ class ProfileServices {
     AppLoggerHelper.debug("response quiz ${response.responseData}");
     return response;
   }
+
+
 }
+

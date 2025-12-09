@@ -4,7 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:quikle_rider/core/models/response_data.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/constants/api_constants.dart';
-import 'package:quikle_rider/core/utils/logging/logger.dart';
 
 class HomeService {
   HomeService({http.Client? client}) : _client = client ?? http.Client();

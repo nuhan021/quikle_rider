@@ -21,6 +21,10 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
     _controller = MassageController();
     _controller.fetchChatPartners();
     _controller.refreshActiveStatus();
+    _controller.startChatSession();
+    _controller.fetchChatHistory();
+
+    
   }
 
   @override

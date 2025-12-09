@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -21,7 +23,6 @@ class MassageController {
   final StreamController<ChatMessage> _incomingController =
       StreamController<ChatMessage>.broadcast();
   StreamSubscription? _socketSubscription;
-  bool _chatStarted = false;
   final ValueNotifier<List<ChatMessage>> messages =
       ValueNotifier<List<ChatMessage>>([]);
   final ValueNotifier<bool> connectionStatus = ValueNotifier<bool>(false);
@@ -91,7 +92,7 @@ class MassageController {
     historyError.dispose();
   }
 
-  Future<void> _startChatSession() async {
+  Future<void> startChatSession() async {
     final riderId = _selfRiderId;
     final uri = Uri.parse(
       '$baseurl/rider/chat/start/riders/$riderId/customers/$customerId',
@@ -197,7 +198,7 @@ class MassageController {
                 }
                 if (e is Map) {
                   return ChatPartner.fromJson(
-                    Map<String, dynamic>.from(e as Map),
+                    Map<String, dynamic>.from(e),
                   );
                 }
                 return null;

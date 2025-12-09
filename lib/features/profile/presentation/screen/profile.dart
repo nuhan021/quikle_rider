@@ -13,12 +13,10 @@ import 'package:quikle_rider/features/profile/presentation/screen/delivery_zone.
 import 'package:quikle_rider/features/profile/presentation/screen/help_support.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/my_profile.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/notification_settings.dart';
-import 'package:quikle_rider/features/profile/presentation/screen/payment_method.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/vehicle_list.dart';
 import 'package:quikle_rider/features/profile/presentation/widgets/profile_completion_card.dart';
 import 'package:quikle_rider/features/refferel/screens/refferel_program.dart';
 import 'package:quikle_rider/features/refferel/screens/training_center.dart';
-import 'package:quikle_rider/features/wallet/widgets/tier_badge.dart';
 import 'package:quikle_rider/routes/app_routes.dart';
 
 class ProfileScreen extends StatelessWidget {

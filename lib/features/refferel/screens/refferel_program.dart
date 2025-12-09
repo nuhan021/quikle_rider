@@ -5,13 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/refferel/widgets/reffer_shimmer.dart';
 import 'dart:typed_data';
-
 
 class ReferralProgramPage extends StatefulWidget {
   const ReferralProgramPage({super.key});
@@ -43,7 +43,10 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
-      appBar: const UnifiedProfileAppBar(title: 'Referral Program',isback: true,),
+      appBar: const UnifiedProfileAppBar(
+        title: 'Referral Program',
+        isback: true,
+      ),
       body: Obx(() {
         final dashboard = _controller.referralDashboard.value;
         final isLoading = _controller.isReferralDashboardLoading.value;
@@ -54,10 +57,7 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
         }
 
         if (error != null && error.isNotEmpty && dashboard == null) {
-          return _ErrorState(
-            message: error,
-            onRetry: _loadReferralData,
-          );
+          return _ErrorState(message: error, onRetry: _loadReferralData);
         }
 
         return RefreshIndicator(
@@ -138,7 +138,8 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
     required bool isQrLoading,
     required String? qrError,
   }) {
-    final canCopy = referralCode.trim().isNotEmpty && referralCode != '-- -- --';
+    final canCopy =
+        referralCode.trim().isNotEmpty && referralCode != '-- -- --';
 
     return Container(
       width: double.infinity,
@@ -177,15 +178,13 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
                 icon: const Icon(Icons.copy_rounded, size: 20),
                 onPressed: canCopy
                     ? () async {
-                      await Clipboard.setData(
-                        ClipboardData(text: referralCode),
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Referral code copied'),
-                        ),
-                      );
-                    }
+                        await Clipboard.setData(
+                          ClipboardData(text: referralCode),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Referral code copied')),
+                        );
+                      }
                     : null,
               ),
             ],
@@ -238,20 +237,18 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
     required String? error,
   }) {
     if (isLoading) {
-      return const SizedBox(
-        width: 32,
-        height: 32,
-        child: CircularProgressIndicator(strokeWidth: 2.5,color: Colors.amber,),
+      return Center(
+        child: LoadingAnimationWidget.inkDrop(
+          color: AppColors.gradientColor,
+          size: 30.w,
+        ),
       );
     }
 
     if (qrImage != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(12.r),
-        child: Image.memory(
-          qrImage,
-          fit: BoxFit.cover,
-        ),
+        child: Image.memory(qrImage, fit: BoxFit.cover),
       );
     }
 
@@ -260,20 +257,13 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
         padding: EdgeInsets.all(12.w),
         child: Text(
           error,
-          style: getTextStyle(
-            fontSize: 12,
-            color: Colors.red[700],
-          ),
+          style: getTextStyle(fontSize: 12, color: Colors.red[700]),
           textAlign: TextAlign.center,
         ),
       );
     }
 
-    return Icon(
-      Icons.qr_code_rounded,
-      size: 90.sp,
-      color: Colors.black87,
-    );
+    return Icon(Icons.qr_code_rounded, size: 90.sp, color: Colors.black87);
   }
 
   Widget _shareButton({
@@ -421,11 +411,12 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
   }
 
   Widget _referralTile(Map<String, dynamic> data) {
-    final name = (data['name'] ??
-            data['full_name'] ??
-            data['referral_name'] ??
-            'Referral')
-        .toString();
+    final name =
+        (data['name'] ??
+                data['full_name'] ??
+                data['referral_name'] ??
+                'Referral')
+            .toString();
     final status = (data['status'] ?? data['state'] ?? 'Pending').toString();
     final amountValue = data['amount'] ?? data['reward'] ?? data['bonus'];
     final amount = amountValue == null ? '' : amountValue.toString();
@@ -525,10 +516,7 @@ class _ErrorState extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: onRetry,
-              child: const Text('Retry'),
-            ),
+            ElevatedButton(onPressed: onRetry, child: const Text('Retry')),
           ],
         ),
       ),

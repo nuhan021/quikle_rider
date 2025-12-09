@@ -63,6 +63,7 @@ class WalletController extends GetxController
   final RxList<Map<String, dynamic>> withdrawalHistory =
       <Map<String, dynamic>>[].obs;
   final RxBool isWithdrawalHistoryLoading = false.obs;
+  final RxBool isMoreWithdrawalHistoryLoading = false.obs;
   final RxnString withdrawalHistoryError = RxnString();
   final RxnInt withdrawalHistoryCount = RxnInt();
   // Data for different periods
@@ -372,7 +373,14 @@ class WalletController extends GetxController
     }
   }
 
-  Future<void> fetchWithdrawalHistory({int skip = 0, int limit = 20}) async {
+  bool get canLoadMoreWithdrawals =>
+      (withdrawalHistoryCount.value ?? 0) > withdrawalHistory.length;
+
+  Future<void> fetchWithdrawalHistory({
+    int skip = 0,
+    int limit = 20,
+    bool append = false,
+  }) async {
     final accessToken = StorageService.accessToken;
     if (accessToken == null || accessToken.isEmpty) {
       withdrawalHistory.clear();
@@ -381,7 +389,11 @@ class WalletController extends GetxController
       return;
     }
 
-    isWithdrawalHistoryLoading.value = true;
+    if (append) {
+      isMoreWithdrawalHistoryLoading.value = true;
+    } else {
+      isWithdrawalHistoryLoading.value = true;
+    }
     withdrawalHistoryError.value = null;
 
     try {
@@ -395,9 +407,17 @@ class WalletController extends GetxController
         final body = response.responseData as Map<String, dynamic>;
         final items = body['data'];
         if (items is List) {
-          withdrawalHistory.assignAll(
-            List<Map<String, dynamic>>.from(items),
-          );
+          final fetchedItems = List<Map<String, dynamic>>.from(items);
+          fetchedItems.sort((a, b) {
+            final aDate = _parseDateTime(a['created_at']);
+            final bDate = _parseDateTime(b['created_at']);
+            return bDate.compareTo(aDate); // latest first
+          });
+          if (append) {
+            withdrawalHistory.addAll(fetchedItems);
+          } else {
+            withdrawalHistory.assignAll(fetchedItems);
+          }
         } else {
           withdrawalHistory.clear();
         }
@@ -415,7 +435,31 @@ class WalletController extends GetxController
       withdrawalHistoryError.value = 'Unable to load withdrawal history.';
     } finally {
       isWithdrawalHistoryLoading.value = false;
+      isMoreWithdrawalHistoryLoading.value = false;
     }
+  }
+
+  Future<void> loadMoreWithdrawalHistory({int limit = 20}) async {
+    if (isWithdrawalHistoryLoading.value ||
+        isMoreWithdrawalHistoryLoading.value ||
+        !canLoadMoreWithdrawals) {
+      return;
+    }
+    await fetchWithdrawalHistory(
+      skip: withdrawalHistory.length,
+      limit: limit,
+      append: true,
+    );
+  }
+
+  DateTime _parseDateTime(dynamic value) {
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value) ?? DateTime.fromMillisecondsSinceEpoch(0);
+    if (value is num) {
+      // Assume milliseconds since epoch
+      return DateTime.fromMillisecondsSinceEpoch(value.toInt());
+    }
+    return DateTime.fromMillisecondsSinceEpoch(0);
   }
 
   Future<void> refreshCurrentPeriod() async {

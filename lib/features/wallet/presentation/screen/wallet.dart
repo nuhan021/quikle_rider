@@ -7,8 +7,6 @@ import 'package:quikle_rider/features/profile/presentation/screen/add_paymentmet
 import 'package:quikle_rider/features/wallet/models/wallet_summary.dart';
 import 'package:quikle_rider/features/wallet/controllers/wallet_controller.dart';
 import 'package:quikle_rider/features/wallet/widgets/balance_card.dart';
-import 'package:quikle_rider/features/wallet/widgets/bonus_tracking.dart';
-import 'package:quikle_rider/features/wallet/widgets/dashboard_breakdown_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/delevery_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/monthly_earnings_forecast_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/rating_card.dart';
