@@ -140,7 +140,7 @@ class WalletServices {
   Future<ResponseData> fetchWithdrawalHistory({
     required String accessToken,
     int skip = 0,
-    int limit = 20,
+    int limit = 50,
   }) async {
     final uri = Uri.parse('$baseurl/payment/').replace(
       queryParameters: {

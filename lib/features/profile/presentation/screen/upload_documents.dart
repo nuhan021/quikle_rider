@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
@@ -240,8 +241,13 @@ class UploadDocumentsPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10.r),
                       ),
                     ),
-                    child: const Text('View',
-                        style: TextStyle(color: AppColors.backgroundDark, fontSize: 14)),
+                    child: const Text(
+                      'View',
+                      style: TextStyle(
+                        color: AppColors.backgroundDark,
+                        fontSize: 14,
+                      ),
+                    ),
                   ),
                 ),
                 SizedBox(width: 12.w),
@@ -348,12 +354,10 @@ class UploadDocumentsPage extends StatelessWidget {
             elevation: 8,
           ),
           child: isLoading
-              ? SizedBox(
-                  height: 22.h,
-                  width: 22.h,
-                  child: const CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
+              ? Center(
+                  child: LoadingAnimationWidget.inkDrop(
+                    color: AppColors.beakYellow,
+                    size: 35.w,
                   ),
                 )
               : Text(

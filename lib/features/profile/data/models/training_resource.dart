@@ -25,6 +25,7 @@ class TrainingResource {
         json['link'] ??
         json['video_url'] ??
         json['pdf_url'] ??
+        json['file_url'] ??
         json['file'] ??
         json['path'];
 
