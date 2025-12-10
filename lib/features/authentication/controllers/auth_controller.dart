@@ -89,8 +89,8 @@ class AuthController extends GetxController {
       phoneNumber: phoneNumber,
       purpose: 'rider_login',
     );
-
     if (otpSent) {
+     
       Get.toNamed(
         AppRoute.getLoginOtp(),
         arguments: {'phone': _pendingPhoneNumber},
@@ -243,15 +243,20 @@ class AuthController extends GetxController {
           refreshToken: refreshToken,
           tokenType: tokenType,
         );
-        unawaited(
-          _postLoginSetup(
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            tokenType: tokenType,
-            initialData: data,
-          ),
+        final inlineUserId = _extractUserId(data);
+        if (inlineUserId != null) {
+          await StorageService.saveUserId(inlineUserId);
+          AppLoggerHelper.debug(
+            'User ID saved from login response: $inlineUserId',
+          );
+        }
+        final resolvedUserId = await _postLoginSetup(
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          tokenType: tokenType,
+          initialData: data,
         );
-
+        AppLoggerHelper.debug('User ID : $resolvedUserId');
         AppLoggerHelper.debug(
           'Logged in successfully. Access token: $accessToken',
         );
@@ -261,17 +266,7 @@ class AuthController extends GetxController {
         AppLoggerHelper.debug('Logged in successfully. Token type: $tokenType');
 
         Get.offAllNamed(AppRoute.getWelcomeScreen());
-        final resolvedUserId = StorageService.userId ?? _extractUserId(data);
-        if (resolvedUserId != null) {
-          unawaited(
-            NotificationService.instance.sendInstantNotification(
-              userId: resolvedUserId,
-              title:
-                  'Hello ${phoneNumberForOtp.isNotEmpty ? phoneNumberForOtp : 'Rider'}',
-              body: 'You are logged in.',
-            ),
-          );
-        }
+
         Get.snackbar(
           'Login Successful',
           'You have logged in successfully.',
@@ -315,19 +310,13 @@ class AuthController extends GetxController {
     if (response.isSuccess) {
       _resetOtpFields();
       _startResendTimer();
-      // Get.snackbar(
-      //   'Code Sent',
-      //   'A verification code has been sent to $phoneNumber',
-      //   snackPosition: SnackPosition.BOTTOM,
-      //   backgroundColor: const Color(0xFFFFB800),
-      //   colorText: Colors.black,
-      //   duration: const Duration(seconds: 3),
-      // );
-      if (response.isSuccess) {
+     
+      final userId = StorageService.userId;
+      if (response.isSuccess && userId != null) {
         NotificationService.instance.sendInstantNotification(
-          userId: StorageService.userId ?? 0,
-          title: 'Hello there!',
-          body: 'You have a new notification.',
+          userId: userId,
+          title: 'Hello Rider!',
+          body: 'Your OTP is ${response.responseData['message']}.',
         );
       }
       return true;
@@ -415,24 +404,24 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> _syncFcmToken({
+  Future<bool> _syncFcmToken({
     required int userId,
     required String accessToken,
     required String tokenType,
   }) async {
     try {
+      final refreshedToken = await FirebaseService.instance.refreshToken();
       final existing = StorageService.cachedFcmToken;
-      final token = existing?.isNotEmpty == true
+      final token = refreshedToken?.isNotEmpty == true
+          ? refreshedToken
+          : existing?.isNotEmpty == true
           ? existing
           : await FirebaseService.instance.waitForToken();
-      final finalToken =
-          token ??
-          await FirebaseService.instance.refreshToken() ??
-          StorageService.cachedFcmToken;
+      final finalToken = token ?? StorageService.cachedFcmToken;
 
       if (finalToken == null || finalToken.isEmpty) {
         AppLoggerHelper.debug('FCM token unavailable.');
-        return;
+        return false;
       }
 
       await StorageService.cacheFcmToken(finalToken);
@@ -452,20 +441,14 @@ class AuthController extends GetxController {
             '${tokenType.trim().isEmpty ? 'Bearer' : tokenType.trim()} $accessToken',
       );
 
-      if (success) {
-        NotificationService.instance.sendInstantNotification(
-          userId: userId,
-          title: 'Hello there!',
-          body: 'You have a new notification.',
-        );
-        AppLoggerHelper.debug('notification sent');
-      }
+      return success;
     } catch (error) {
       AppLoggerHelper.debug('Error syncing FCM token: $error');
+      return false;
     }
   }
 
-  Future<void> _postLoginSetup({
+  Future<int?> _postLoginSetup({
     required String accessToken,
     required String refreshToken,
     required String tokenType,
@@ -487,19 +470,20 @@ class AuthController extends GetxController {
           ));
       if (resolvedUserId != null) {
         await StorageService.saveUserId(resolvedUserId);
-        unawaited(
-          _syncFcmToken(
-            userId: resolvedUserId,
-            accessToken: accessToken,
-            tokenType: tokenType,
-          ),
+        AppLoggerHelper.debug('User ID : $resolvedUserId');
+        await _syncFcmToken(
+          userId: resolvedUserId,
+          accessToken: accessToken,
+          tokenType: tokenType,
         );
+        print('FCM Token sent successfully: $accessToken');
       } else {
         AppLoggerHelper.debug('Unable to resolve user id post-login.');
       }
     } catch (error) {
       AppLoggerHelper.debug('Post login setup failed: $error');
     }
+    return StorageService.userId;
   }
 
   Future<int?> _fetchUserId({
@@ -507,12 +491,22 @@ class AuthController extends GetxController {
     required String refreshToken,
     required String tokenType,
   }) async {
-    final profile = await _authServices.fetchUserProfile(
+    final response = await _authServices.verifyToken(
       accessToken: accessToken,
       refreshToken: refreshToken,
       tokenType: tokenType,
     );
-    if (profile == null) return null;
+    if (!response.isSuccess) {
+      AppLoggerHelper.debug(
+        'verify-token failed (${response.statusCode}): ${response.errorMessage}',
+      );
+      return null;
+    }
+    final profile = response.responseData;
+    if (profile is! Map<String, dynamic>) {
+      AppLoggerHelper.debug('verify-token returned unexpected body: $profile');
+      return null;
+    }
     final id = profile['id'];
     if (id is int) return id;
     if (id is String) return int.tryParse(id);

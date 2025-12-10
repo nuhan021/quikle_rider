@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/widgets.dart';
 import 'package:quikle_rider/core/services/firebase/notification_payload.dart';
 import 'package:quikle_rider/core/services/firebase/notification_service.dart';
+import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
 import 'package:quikle_rider/firebase_options.dart';
 
@@ -50,6 +51,19 @@ class FirebaseService {
       if (token != null) {
         _cachedToken = token;
         AppLoggerHelper.debug('[FCM] Token: $token');
+
+        final userId = StorageService.userId;
+        if (userId != null) {
+          await NotificationService.instance.saveFcmToken(
+            userId: userId,
+            token: token,
+            platform: Platform.isIOS ? 'ios' : 'android',
+            authorization: 'Bearer ${StorageService.accessToken}',
+          );
+        }
+
+        AppLoggerHelper.debug("FCM token saved for user: $userId Notification sent successfully: $token");
+       
       } else {
         debugPrint('[FCM] Token is null (yet to be generated)');
       }

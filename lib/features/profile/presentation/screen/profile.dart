@@ -264,8 +264,21 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildProfileHeader() {
     return Obx(() {
+      final hasData = _controller.profile.value != null;
+      final isLoading = _controller.isLoading.value;
+      final hasError = _controller.shouldShowErrorHeader;
+
+      if (!isLoading && !hasData && !hasError) {
+        _controller.fetchProfile();
+        return _buildLoadingHeader();
+      }
+
       if (_controller.shouldShowLoadingHeader) {
         return _buildLoadingHeader();
+      }
+
+      if (_controller.shouldShowErrorHeader) {
+        return _buildErrorHeader(_controller.headerErrorText);
       }
 
       return _buildProfileDetailsCard(
@@ -326,6 +339,40 @@ class ProfileScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 40),
       decoration: _profileCardDecoration(),
       child: const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Widget _buildErrorHeader(String message) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 16.w),
+      decoration: _profileCardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Profile unavailable',
+            style: getTextStyle2(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            message,
+            style: getTextStyle2(fontSize: 13, color: Colors.black54),
+          ),
+          SizedBox(height: 12.h),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: _controller.fetchProfile,
+              child: const Text('Retry'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -33,11 +33,7 @@ class SplashController extends GetxController {
   void onInit() {
     super.onInit();
     _initVideo();
-    NotificationService.instance.sendInstantNotification(
-      userId: StorageService.userId ?? 0,
-      title: 'Hello there!',
-      body: 'You have a new notification.',
-    );
+    
   }
 
   Future<void> _initVideo() async {
@@ -82,9 +78,7 @@ class SplashController extends GetxController {
   }
 
   void _handleNavigation() {
-    if (StorageService.accessToken != null &&
-        profileController.isDocumentUploaded.value == true &&
-        profileController.isVerified.value == true) {
+    if (StorageService.accessToken != null ) {
       Get.offAllNamed(AppRoute.getBottomNavBar());
       AppLoggerHelper.debug(
         "documnets uploaded ${profileController.isDocumentUploaded.value}",
@@ -96,11 +90,12 @@ class SplashController extends GetxController {
       AppLoggerHelper.debug(
         "Navigating to Home ${profileController.isDocumentUploaded.value}",
       );
-    } else if (StorageService.accessToken != null &&
-        profileController.isDocumentUploaded.value == false &&
-        profileController.isVerified.value == false) {
-      Get.offAllNamed(AppRoute.uploaddocuments);
-    } else {
+    // } else if (StorageService.accessToken != null &&
+    //     profileController.isDocumentUploaded.value == false &&
+    //     profileController.isVerified.value == false) {
+    //   Get.offAllNamed(AppRoute.uploaddocuments);
+    // } else {
+     } else{
       Get.offAllNamed(AppRoute.getLoginScreen());
     }
   }

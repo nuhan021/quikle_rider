@@ -376,6 +376,7 @@ class _MassageScreenState extends State<MassageScreen> {
   }
 
   Future<void> _initChat() async {
+    _controller.startChatSession();
     await _controller.fetchChatHistory();
     _initialHistoryLoaded = true;
     _controller.connect();

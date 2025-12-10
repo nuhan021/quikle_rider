@@ -13,6 +13,7 @@ class StorageService {
   static Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
     AppLoggerHelper.debug('has token ${refreshToken}');
+    AppLoggerHelper.debug('User id ${userId}');
   }
 
   
