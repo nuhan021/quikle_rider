@@ -169,6 +169,51 @@ class Assignment {
     );
   }
 
+  factory Assignment.fromUpcomingOrderJson(Map<String, dynamic> json) {
+    final etaMinutes = (json['eta_minutes'] as num?)?.toInt();
+    final now = DateTime.now();
+    final expectedArrival = etaMinutes == null
+        ? now.add(const Duration(minutes: 45))
+        : now.add(Duration(minutes: etaMinutes));
+
+    final distanceValue =
+        _parseDouble(json['distance_km'] ?? json['distance'] ?? 0);
+    final basePayValue = _parseDouble(json['base_rate'] ?? json['base_pay']);
+    final distancePayValue =
+        _parseDouble(json['distance_bonus'] ?? json['distance_pay']);
+    final totalValue = _parseDouble(
+      json['total_payout'] ?? json['total_amount'] ?? basePayValue + distancePayValue,
+    );
+
+    final rawId = (json['id'] ?? json['order_id'] ?? '—').toString();
+    final orderId = rawId.isEmpty ? '—' : rawId;
+
+    return Assignment(
+      id: orderId,
+      customerName: (json['customer_name'] ??
+              (json['customer_id'] != null
+                  ? 'Customer #${json['customer_id']}'
+                  : 'Customer'))
+          .toString(),
+      expectedArrival: expectedArrival,
+      address: (json['delivery_address'] ??
+              json['address'] ??
+              'Vendor ${json['vendor_id'] ?? '-'} → Customer ${json['customer_id'] ?? '-'}')
+          .toString(),
+      distanceInKm: distanceValue,
+      totalAmount: totalValue,
+      basePay: basePayValue,
+      distancePay: distancePayValue,
+      orderType: (json['delivery_type'] ?? json['order_type'] ?? 'Delivery')
+          .toString(),
+      currency: (json['currency'] ?? '₹').toString(),
+      isUrgent: json['is_on_time'] == false,
+      isCombined: json['is_combined'] as bool? ?? false,
+      status: _statusFromApi(json['status'] as String?),
+      tierLabel: (json['tier_label'] ?? 'Payout Rate').toString(),
+    );
+  }
+
   factory Assignment.fromJson(Map<String, dynamic> json) {
     return Assignment(
       id: json['order_id'] as String,
@@ -226,6 +271,26 @@ class Assignment {
     if (value % 1 == 0) return value.toStringAsFixed(0);
     if ((value * 10) % 1 == 0) return value.toStringAsFixed(1);
     return value.toStringAsFixed(2);
+  }
+
+  static AssignmentStatus _statusFromApi(String? status) {
+    final normalized = status?.toLowerCase().replaceAll(' ', '') ?? '';
+    if (normalized.isEmpty || normalized == 'pending' || normalized == 'assigned') {
+      return AssignmentStatus.pending;
+    }
+    if (normalized.contains('reject') || normalized.contains('cancel')) {
+      return AssignmentStatus.rejected;
+    }
+    return AssignmentStatus.accepted;
+  }
+
+  static double _parseDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    if (value is String) {
+      final parsed = double.tryParse(value);
+      if (parsed != null) return parsed;
+    }
+    return 0;
   }
 }
 

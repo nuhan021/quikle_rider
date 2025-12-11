@@ -66,6 +66,28 @@ class WalletController extends GetxController
   final RxBool isMoreWithdrawalHistoryLoading = false.obs;
   final RxnString withdrawalHistoryError = RxnString();
   final RxnInt withdrawalHistoryCount = RxnInt();
+  
+  // New stats reactive variables
+  final Rxn<Map<String, dynamic>> allStats = Rxn<Map<String, dynamic>>();
+  final Rxn<Map<String, dynamic>> weeklyStats = Rxn<Map<String, dynamic>>();
+  final Rxn<Map<String, dynamic>> monthlyStats = Rxn<Map<String, dynamic>>();
+  final Rxn<Map<String, dynamic>> annualStats = Rxn<Map<String, dynamic>>();
+  
+  final RxBool isAllStatsLoading = false.obs;
+  final RxBool isWeeklyStatsLoading = false.obs;
+  final RxBool isMonthlyStatsLoading = false.obs;
+  final RxBool isAnnualStatsLoading = false.obs;
+  final RxBool isBonusProgressLoading = false.obs;
+  
+  final RxnString allStatsError = RxnString();
+  final RxnString weeklyStatsError = RxnString();
+  final RxnString monthlyStatsError = RxnString();
+  final RxnString annualStatsError = RxnString();
+  final RxnString bonusProgressError = RxnString();
+  
+  // Bonus progress data
+  final bonusProgress = Rxn<Map<String, dynamic>>();
+  
   // Data for different periods
   final _weekDeliveries = <DeliveryItem>[
     const DeliveryItem(
@@ -134,11 +156,15 @@ class WalletController extends GetxController
   @override
   void onInit() {
     super.onInit();
-    tabController = TabController(length: _periodFilters.length, vsync: this);
+    tabController = TabController(length: 4, vsync: this);
     tabController.addListener(() {
       if (tabController.indexIsChanging) return;
+      update(); // Trigger GetBuilder to rebuild when tab changes
       updateDataForPeriod(tabController.index);
     });
+    
+    // Fetch all stats on init
+    fetchAllStats();
     updateDataForPeriod(0);
     fetchPerformanceData();
     fetchLeaderboardData();
@@ -566,6 +592,160 @@ class WalletController extends GetxController
         ? value.toStringAsFixed(1)
         : value.toStringAsFixed(0);
     return '$formatted';
+  }
+
+  /// Fetch all rider stats
+  Future<void> fetchAllStats() async {
+    try {
+      isAllStatsLoading.value = true;
+      allStatsError.value = null;
+      
+      final accessToken = StorageService.accessToken;
+      if (accessToken == null || accessToken.isEmpty) {
+        allStatsError.value = 'Missing access token';
+        return;
+      }
+
+      final response = await _walletServices.fetchRiderStats(
+        accessToken: accessToken,
+      );
+
+      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+        allStats.value = response.responseData as Map<String, dynamic>;
+        allStatsError.value = null;
+      } else {
+        allStatsError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to fetch stats';
+      }
+    } catch (e) {
+      allStatsError.value = 'Error fetching stats: $e';
+    } finally {
+      isAllStatsLoading.value = false;
+    }
+  }
+
+  /// Fetch weekly rider stats
+  Future<void> fetchWeeklyStats() async {
+    try {
+      isWeeklyStatsLoading.value = true;
+      weeklyStatsError.value = null;
+      
+      final accessToken = StorageService.accessToken;
+      if (accessToken == null || accessToken.isEmpty) {
+        weeklyStatsError.value = 'Missing access token';
+        return;
+      }
+
+      final response = await _walletServices.fetchWeeklyStats(
+        accessToken: accessToken,
+      );
+
+      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+        weeklyStats.value = response.responseData as Map<String, dynamic>;
+        weeklyStatsError.value = null;
+      } else {
+        weeklyStatsError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to fetch weekly stats';
+      }
+    } catch (e) {
+      weeklyStatsError.value = 'Error fetching weekly stats: $e';
+    } finally {
+      isWeeklyStatsLoading.value = false;
+    }
+  }
+
+  /// Fetch monthly rider stats
+  Future<void> fetchMonthlyStats() async {
+    try {
+      isMonthlyStatsLoading.value = true;
+      monthlyStatsError.value = null;
+      
+      final accessToken = StorageService.accessToken;
+      if (accessToken == null || accessToken.isEmpty) {
+        monthlyStatsError.value = 'Missing access token';
+        return;
+      }
+
+      final response = await _walletServices.fetchMonthlyStats(
+        accessToken: accessToken,
+      );
+
+      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+        monthlyStats.value = response.responseData as Map<String, dynamic>;
+        monthlyStatsError.value = null;
+      } else {
+        monthlyStatsError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to fetch monthly stats';
+      }
+    } catch (e) {
+      monthlyStatsError.value = 'Error fetching monthly stats: $e';
+    } finally {
+      isMonthlyStatsLoading.value = false;
+    }
+  }
+
+  /// Fetch annual/yearly rider stats
+  Future<void> fetchAnnualStats() async {
+    try {
+      isAnnualStatsLoading.value = true;
+      annualStatsError.value = null;
+      
+      final accessToken = StorageService.accessToken;
+      if (accessToken == null || accessToken.isEmpty) {
+        annualStatsError.value = 'Missing access token';
+        return;
+      }
+
+      final response = await _walletServices.fetchAnnualStats(
+        accessToken: accessToken,
+      );
+
+      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+        annualStats.value = response.responseData as Map<String, dynamic>;
+        annualStatsError.value = null;
+      } else {
+        annualStatsError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to fetch annual stats';
+      }
+    } catch (e) {
+      annualStatsError.value = 'Error fetching annual stats: $e';
+    } finally {
+      isAnnualStatsLoading.value = false;
+    }
+  }
+
+  Future<void> fetchBonusProgress() async {
+    try {
+      isBonusProgressLoading.value = true;
+      bonusProgressError.value = null;
+      
+      final accessToken = StorageService.accessToken;
+      if (accessToken == null || accessToken.isEmpty) {
+        bonusProgressError.value = 'Missing access token';
+        return;
+      }
+
+      final response = await _walletServices.fetchBonusProgress(
+        accessToken: accessToken,
+      );
+
+      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+        bonusProgress.value = response.responseData as Map<String, dynamic>;
+        bonusProgressError.value = null;
+      } else {
+        bonusProgressError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to fetch bonus progress';
+      }
+    } catch (e) {
+      bonusProgressError.value = 'Error fetching bonus progress: $e';
+    } finally {
+      isBonusProgressLoading.value = false;
+    }
   }
 
   @override

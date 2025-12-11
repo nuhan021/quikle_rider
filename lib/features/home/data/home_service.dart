@@ -4,12 +4,58 @@ import 'package:http/http.dart' as http;
 import 'package:quikle_rider/core/models/response_data.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/constants/api_constants.dart';
+import 'package:quikle_rider/core/utils/logging/logger.dart';
 
 class HomeService {
   HomeService({http.Client? client}) : _client = client ?? http.Client();
 
   final http.Client _client;
 
+  Future<ResponseData> fetchUpcomingOrders({String? orderId}) async {
+    final accessToken = StorageService.accessToken;
+    final tokenType = StorageService.tokenType ?? 'Bearer';
+
+    if (accessToken == null || accessToken.isEmpty) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 401,
+        errorMessage: 'Not authenticated',
+        responseData: null,
+      );
+    }
+
+    try {
+      final path =
+          orderId == null ? '$baseurl/rider/orders/' : '$baseurl/rider/orders/$orderId/';
+      final uri = Uri.parse(path);
+      final response = await _client.get(
+        uri,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': '$tokenType $accessToken',
+        },
+      );
+
+      AppLoggerHelper.debug('Upcoming orders → status ${response.statusCode}');
+      AppLoggerHelper.debug('Upcoming orders body → ${response.body}');
+
+      final decodedBody = _decodeResponse(response.body);
+      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+      return ResponseData(
+        isSuccess: isSuccess,
+        statusCode: response.statusCode,
+        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to fetch upcoming orders.',
+        responseData: error.toString(),
+      );
+    }
+  }
 
   Future<ResponseData> toggleOnlineStatus({required bool isOnline}) async {
     final accessToken = StorageService.accessToken;

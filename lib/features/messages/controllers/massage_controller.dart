@@ -74,7 +74,7 @@ class MassageController {
       fromUser: true,
     );
     _appendMessage(outgoing);
-    _socketService.sendMessage(customerId: customerId, text: text);
+    _socketService.sendMessage(customerId: 2, text: text);
   }
 
   void dispose() {

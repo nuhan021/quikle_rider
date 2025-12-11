@@ -83,7 +83,7 @@ class AssignmentCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Order$orderId',
+                'Order $orderId',
                 style: TextStyle(
                   fontFamily: 'Obviously',
                   fontSize: 16.sp,

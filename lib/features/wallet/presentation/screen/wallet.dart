@@ -4,13 +4,12 @@ import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/add_paymentmethod.dart';
-import 'package:quikle_rider/features/wallet/models/wallet_summary.dart';
 import 'package:quikle_rider/features/wallet/controllers/wallet_controller.dart';
 import 'package:quikle_rider/features/wallet/widgets/balance_card.dart';
+import 'package:quikle_rider/features/wallet/widgets/bonus_progress_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/delevery_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/monthly_earnings_forecast_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/rating_card.dart';
-import 'package:quikle_rider/features/wallet/widgets/start_tile.dart';
 import 'package:quikle_rider/features/wallet/widgets/tier_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/wallet_shimmer_list.dart';
 
@@ -49,7 +48,6 @@ class WalletScreen extends GetView<WalletController> {
                 ),
                 child: TabBar(
                   dividerColor: Colors.transparent,
-
                   indicatorSize: TabBarIndicatorSize.tab,
                   controller: controller.tabController,
                   indicator: BoxDecoration(
@@ -68,10 +66,28 @@ class WalletScreen extends GetView<WalletController> {
                     fontWeight: FontWeight.w500,
                   ),
                   tabs: const [
+                    Tab(text: 'All'),
                     Tab(text: 'Week'),
                     Tab(text: 'Month'),
                     Tab(text: 'Year'),
                   ],
+                  onTap: (index) {
+                    switch (index) {
+                      case 0:
+                        controller.fetchAllStats();
+                        controller.fetchBonusProgress();
+                        break;
+                      case 1:
+                        controller.fetchWeeklyStats();
+                        break;
+                      case 2:
+                        controller.fetchMonthlyStats();
+                        break;
+                      case 3:
+                        controller.fetchAnnualStats();
+                        break;
+                    }
+                  },
                 ),
               ),
             ),
@@ -156,195 +172,67 @@ class WalletScreen extends GetView<WalletController> {
                           balance: "₹${controller.currentBalance.value.toString()}",
                           lastUpdated: controller.balanceSubtitle,
                           onWithdraw: () async {
-                        
+              
                             Get.to(AddPaymentMethodPage());
                           },
                         ),
                       ),
                       SizedBox(height: 12.h),
-                      // const WalletDashboardCard(),
-                      SizedBox(height: 12.h),
-                      // BonusTracking(
-                      //   performance: controller.performanceData,
-                      //   leaderboard: controller.leaderboardData,
-                      // ),
-                      SizedBox(height: 12.h),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: StatTile(
-                              title: 'Total Deliveries',
-                              value: controller.totalDeliveriesText,
-                              box: cardBox,
-                            ),
-                          ),
-                          SizedBox(width: 12.w),
-                          Expanded(
-                            child: StatTile(
-                              title: 'Delivery Pay',
-                              value: controller.deliveryPayText,
-                              box: cardBox,
-                            ),
-                          ),
-                        ],
+                      // Display stats based on selected tab
+                      GetBuilder<WalletController>(
+                        builder: (ctrl) {
+                          if (ctrl.tabController.index == 0) {
+                            return _buildAllStatsSection(ctrl);
+                          } else if (ctrl.tabController.index == 1) {
+                            return _buildWeeklyStatsSection(ctrl);
+                          } else if (ctrl.tabController.index == 2) {
+                            return _buildMonthlyStatsSection(ctrl);
+                          } else if (ctrl.tabController.index == 3) {
+                            return _buildAnnualStatsSection(ctrl);
+                          }
+                          return const SizedBox.shrink();
+                        },
                       ),
-                      SizedBox(height: 12.h),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: StatTile(
-                              title: 'Weekly Bonuses',
-                              value: controller.weeklyBonusText,
-                              box: cardBox,
-                            ),
-                          ),
-                          SizedBox(width: 12.w),
-                          Expanded(
-                            child: StatTile(
-                              title: 'Excellence Bonus',
-                              value: controller.excellenceBonusText,
-                              box: cardBox,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12.h),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: StatTile(
-                              title: 'Subtotal',
-                              value: controller.subtotalText,
-                              box: cardBox,
-                            ),
-                          ),
-                          SizedBox(width: 12.w),
-                          Expanded(
-                            child: StatTile(
-                              title: 'Top Up',
-                              value: controller.topUpText,
-                              box: cardBox,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12.h),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: StatTile(
-                              title: 'Final Earnings',
-                              value: controller.finalEarningsStatText,
-                              box: cardBox,
-                            ),
-                          ),
-                          SizedBox(width: 12.w),
-                          Expanded(
-                            child: StatTile(
-                              title: 'Forecast Progress',
-                              value: controller.forecastProgressText,
-                              box: cardBox,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12.h),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: StatTile(
-                              title: 'Bonus Deliveries',
-                              value: controller.bonusDeliveriesText,
-                              box: cardBox,
-                            ),
-                          ),
-                          SizedBox(width: 12.w),
-                          Expanded(
-                            child: StatTile(
-                              title: 'Acceptance Rate %',
-                              value: controller.bonusAcceptanceText,
-                              box: cardBox,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12.h),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: StatTile(
-                              title: 'On-Time Delivery %',
-                              value: controller.bonusOnTimeText,
-                              box: cardBox,
-                            ),
-                          ),
-                          SizedBox(width: 12.w),
-                          Expanded(
-                            child: StatTile(
-                              title: 'Avg. Delivery Time',
-                              value: controller.avgDeliveryTime.value,
-                              box: cardBox,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12.h),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: StatTile(
-                              title: 'Customer Rating',
-                              value: controller.customerRating.value,
-                              box: cardBox,
-                            ),
-                          ),
-                          SizedBox(width: 12.w),
-                          Expanded(
-                            child: StatTile(
-                              title: 'Completion Rate',
-                              value: controller.completionRate.value,
-                              box: cardBox,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (controller.weeklyStatuses.isNotEmpty) ...[
-                        SizedBox(height: 16.h),
-                        _WeeklyStatuses(
-                          statuses: controller.weeklyStatuses,
-                          box: cardBox,
-                        ),
-                      ],
                       SizedBox(height: 16.h),
                       Text(
                         'Customer Ratings',
                         style: headingStyle2(color: Colors.black),
                       ),
-                      if (controller.isRatingLoading.value) ...[
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 8.h),
-                          child: const LinearProgressIndicator(minHeight: 3),
-                        ),
-                      ] else if (controller.ratingError.value != null &&
-                          controller.riderRating.value == null) ...[
-                        Padding(
-                          padding: EdgeInsets.only(bottom: 8.h),
-                          child: Text(
-                            controller.ratingError.value!,
-                            style: TextStyle(
-                              color: Colors.red[700],
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ] else ...[
-                        RatingCard(
-                          rating: controller.riderRating.value ?? 0.0,
-                          totalRatings: controller.totalRatingsText,
-                          reviewCount: controller.riderReviewCount.value ?? 0,
-                        ),
-                      ],
+                      Obx(() {
+                        if (controller.isRatingLoading.value) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(vertical: 8.h),
+                            child: const LinearProgressIndicator(minHeight: 3),
+                          );
+                        } else {
+                          // Use rating from allStats if available, otherwise use riderRating
+                          final allStats = controller.allStats.value ?? {};
+                          final rating = (allStats['customer_rating'] ?? 0.0) as num;
+                          final ratingValue = rating.toDouble();
+                          final finalRating = ratingValue > 0 ? ratingValue : (controller.riderRating.value ?? 0.0);
+                          final reviewCount = controller.riderReviewCount.value ?? 0;
+                          
+                          if (finalRating == 0 && reviewCount == 0 && controller.ratingError.value != null) {
+                            return Padding(
+                              padding: EdgeInsets.only(bottom: 8.h),
+                              child: Text(
+                                'No ratings yet',
+                                style: TextStyle(
+                                  color: Colors.grey[600],
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            );
+                          }
+                          
+                          return RatingCard(
+                            rating: finalRating,
+                            totalRatings: reviewCount > 0 ? (reviewCount == 1 ? '1 Rating' : '$reviewCount Ratings') : '0 Ratings',
+                            reviewCount: reviewCount,
+                          );
+                        }
+                      }),
                       TierCard(benefits: '₹16,000-18,500/month'),
                       Padding(
                         padding: EdgeInsets.only(
@@ -384,96 +272,486 @@ class WalletScreen extends GetView<WalletController> {
             ),
           ],
         ),
-      ),
-    );
+    ));
+    
+    }
   }
-}
 
-class _WeeklyStatuses extends StatelessWidget {
-  const _WeeklyStatuses({required this.statuses, required this.box});
+  /// Build All Stats Section
+  Widget _buildAllStatsSection(WalletController ctrl) {
+    return Obx(() {
+      if (ctrl.isAllStatsLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      
+      if (ctrl.allStatsError.value != null && ctrl.allStatsError.value!.isNotEmpty) {
+        return Center(
+          child: Text(
+            ctrl.allStatsError.value!,
+            style: const TextStyle(color: Colors.red),
+          ),
+        );
+      }
 
-  final List<WeeklyStatus> statuses;
-  final BoxDecoration box;
+      final stats = ctrl.allStats.value ?? {};
+      return Column(
+        children: [
+          // Total Deliveries
+          _StatCard(
+            title: 'Total Deliveries',
+            value: '${stats['total_deliveries'] ?? 0}',
+            icon: Icons.shopping_bag_outlined,
+            backgroundColor: const Color(0xFFF0F4FF),
+          ),
+          SizedBox(height: 12.h),
+          
+          // Earnings Row
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  title: 'Today',
+                  value: '₹${stats['earnings_today'] ?? 0}',
+                  icon: Icons.today,
+                  backgroundColor: const Color(0xFFFFF4E6),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _StatCard(
+                  title: 'This Week',
+                  value: '₹${stats['earnings_this_week'] ?? 0}',
+                  icon: Icons.calendar_today,
+                  backgroundColor: const Color(0xFFE6F7FF),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          
+          // Monthly Earnings & Balance
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  title: 'This Month',
+                  value: '₹${stats['earnings_this_month'] ?? 0}',
+                  icon: Icons.date_range,
+                  backgroundColor: const Color(0xFFE6FFE6),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _StatCard(
+                  title: 'Balance',
+                  value: '₹${stats['current_balance'] ?? 0}',
+                  icon: Icons.account_balance_wallet,
+                  backgroundColor: const Color(0xFFFFE6E6),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          
+          // Rating & Acceptance Rate
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  title: 'Rating',
+                  value: '${(stats['customer_rating'] ?? 0).toStringAsFixed(1)}⭐',
+                  icon: Icons.star,
+                  backgroundColor: const Color(0xFFFFF9E6),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _StatCard(
+                  title: 'Acceptance',
+                  value: '${stats['acceptance_rate'] ?? 0}%',
+                  icon: Icons.done_all,
+                  backgroundColor: const Color(0xFFF0E6FF),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          
+          // On-Time Rate & Online Status
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  title: 'On-Time',
+                  value: '${stats['on_time_rate'] ?? 0}%',
+                  icon: Icons.schedule,
+                  backgroundColor: const Color(0xFFE6F9FF),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _StatCard(
+                  title: 'Status',
+                  value: (stats['is_online'] ?? false) ? 'Online' : 'Offline',
+                  icon: (stats['is_online'] ?? false) ? Icons.cloud_done : Icons.cloud_off,
+                  backgroundColor: (stats['is_online'] ?? false) ? const Color(0xFFE6FFE6) : const Color(0xFFFFE6E6),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16.h),
+          
+          // Bonus Progress Section
+          BonusProgressCard(controller: ctrl),
+        ],
+      );
+    });
+  }
+
+  /// Build Weekly Stats Section
+  Widget _buildWeeklyStatsSection(WalletController ctrl) {
+    return Obx(() {
+      if (ctrl.isWeeklyStatsLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      
+      if (ctrl.weeklyStatsError.value != null && ctrl.weeklyStatsError.value!.isNotEmpty) {
+        return Center(
+          child: Text(
+            ctrl.weeklyStatsError.value!,
+            style: const TextStyle(color: Colors.red),
+          ),
+        );
+      }
+
+      final stats = ctrl.weeklyStats.value ?? {};
+      return Column(
+        children: [
+          // Week Number
+          _StatCard(
+            title: 'Week Number',
+            value: 'Week ${stats['week_number'] ?? 0}',
+            icon: Icons.calendar_month,
+            backgroundColor: const Color(0xFFF0F4FF),
+          ),
+          SizedBox(height: 12.h),
+          
+          // Days & Hours Worked
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  title: 'Days Worked',
+                  value: '${stats['days_worked'] ?? 0}',
+                  icon: Icons.work,
+                  backgroundColor: const Color(0xFFFFF4E6),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _StatCard(
+                  title: 'Hours Worked',
+                  value: '${stats['hours_worked'] ?? 0}h',
+                  icon: Icons.timer,
+                  backgroundColor: const Color(0xFFE6F7FF),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          
+          // Deliveries & Delivery Pay
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  title: 'Deliveries',
+                  value: '${stats['deliveries'] ?? 0}',
+                  icon: Icons.local_shipping,
+                  backgroundColor: const Color(0xFFE6FFE6),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _StatCard(
+                  title: 'Delivery Pay',
+                  value: '₹${stats['delivery_pay'] ?? 0}',
+                  icon: Icons.payment,
+                  backgroundColor: const Color(0xFFFFE6E6),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          
+          // Bonus Status
+          _StatCard(
+            title: 'Weekly Bonus Status',
+            value: '${stats['weekly_bonus_status'] ?? 'N/A'}',
+            icon: Icons.card_giftcard,
+            backgroundColor: const Color(0xFFFFF9E6),
+          ),
+          SizedBox(height: 12.h),
+          
+          // Current Balance (from All Stats)
+          _StatCard(
+            title: 'Current Balance',
+            value: '₹${ctrl.allStats.value?['current_balance'] ?? 0}',
+            icon: Icons.account_balance_wallet,
+            backgroundColor: const Color(0xFFE6FFE6),
+          ),
+        ],
+      );
+    });
+  }
+
+  /// Build Monthly Stats Section
+  Widget _buildMonthlyStatsSection(WalletController ctrl) {
+    return Obx(() {
+      if (ctrl.isMonthlyStatsLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      
+      if (ctrl.monthlyStatsError.value != null && ctrl.monthlyStatsError.value!.isNotEmpty) {
+        return Center(
+          child: Text(
+            ctrl.monthlyStatsError.value!,
+            style: const TextStyle(color: Colors.red),
+          ),
+        );
+      }
+
+      final stats = ctrl.monthlyStats.value ?? {};
+      return Column(
+        children: [
+          // Delivery Pay & Weekly Bonuses
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  title: 'Delivery Pay',
+                  value: '₹${stats['delivery_pay'] ?? 0}',
+                  icon: Icons.payment,
+                  backgroundColor: const Color(0xFFF0F4FF),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _StatCard(
+                  title: 'Weekly Bonuses',
+                  value: '₹${stats['weekly_bonuses'] ?? 0}',
+                  icon: Icons.card_giftcard,
+                  backgroundColor: const Color(0xFFFFF4E6),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          
+          // Excellence Bonus & Guarantee Topup
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  title: 'Excellence Bonus',
+                  value: '₹${stats['excellence_bonus'] ?? 0}',
+                  icon: Icons.emoji_events,
+                  backgroundColor: const Color(0xFFE6F7FF),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _StatCard(
+                  title: 'Guarantee Topup',
+                  value: '₹${stats['guarantee_topup'] ?? 0}',
+                  icon: Icons.verified_user,
+                  backgroundColor: const Color(0xFFE6FFE6),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          
+          // Subtotal & Final Earnings
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  title: 'Subtotal Earned',
+                  value: '₹${stats['subtotal_earned'] ?? 0}',
+                  icon: Icons.calculate,
+                  backgroundColor: const Color(0xFFFFE6E6),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _StatCard(
+                  title: 'Final Earnings',
+                  value: '₹${stats['final_earnings'] ?? 0}',
+                  icon: Icons.trending_up,
+                  backgroundColor: const Color(0xFFFFF9E6),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          
+          // Current Balance (from All Stats)
+          _StatCard(
+            title: 'Current Balance',
+            value: '₹${ctrl.allStats.value?['current_balance'] ?? 0}',
+            icon: Icons.account_balance_wallet,
+            backgroundColor: const Color(0xFFE6FFE6),
+          ),
+        ],
+      );
+    });
+  }
+
+  /// Build Annual Stats Section
+  Widget _buildAnnualStatsSection(WalletController ctrl) {
+    return Obx(() {
+      if (ctrl.isAnnualStatsLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      
+      if (ctrl.annualStatsError.value != null && ctrl.annualStatsError.value!.isNotEmpty) {
+        return Center(
+          child: Text(
+            ctrl.annualStatsError.value!,
+            style: const TextStyle(color: Colors.red),
+          ),
+        );
+      }
+
+      final stats = ctrl.annualStats.value ?? {};
+      return Column(
+        children: [
+          // Total Deliveries & Total Earnings
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  title: 'Total Deliveries',
+                  value: '${stats['total_deliveries'] ?? 0}',
+                  icon: Icons.shopping_bag_outlined,
+                  backgroundColor: const Color(0xFFF0F4FF),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _StatCard(
+                  title: 'Total Earnings',
+                  value: '₹${stats['total_earnings'] ?? 0}',
+                  icon: Icons.trending_up,
+                  backgroundColor: const Color(0xFFFFF4E6),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          
+          // Average Monthly & Best Month
+          Row(
+            children: [
+              Expanded(
+                child: _StatCard(
+                  title: 'Average Monthly',
+                  value: '₹${stats['average_monthly'] ?? 0}',
+                  icon: Icons.bar_chart,
+                  backgroundColor: const Color(0xFFE6F7FF),
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: _StatCard(
+                  title: 'Best Month',
+                  value: '${(stats['best_month'] as Map?)?['month'] ?? 'N/A'}',
+                  icon: Icons.star,
+                  backgroundColor: const Color(0xFFFFF9E6),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          
+          // Current Balance (from All Stats)
+          _StatCard(
+            title: 'Current Balance',
+            value: '₹${ctrl.allStats.value?['current_balance'] ?? 0}',
+            icon: Icons.account_balance_wallet,
+            backgroundColor: const Color(0xFFE6FFE6),
+          ),
+        ],
+      );
+    });
+  }
+
+
+
+/// Simple stat card widget
+class _StatCard extends StatelessWidget {
+  final String title;
+  final String value;
+  final IconData icon;
+  final Color? backgroundColor;
+
+  const _StatCard({
+    required this.title,
+    required this.value,
+    required this.icon,
+    this.backgroundColor,
+  });
 
   @override
   Widget build(BuildContext context) {
-    if (statuses.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
     return Container(
-      padding: EdgeInsets.all(14.w),
-      decoration: box,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color:  Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0x14000000),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Weekly Bonus Status',
-            style: headingStyle2(color: Colors.black),
-          ),
-          SizedBox(height: 12.h),
-          ...statuses.map(
-            (status) => Padding(
-              padding: EdgeInsets.symmetric(vertical: 6.h),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8.w,
-                      vertical: 4.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFE8A3),
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: Text(
-                      'Week ${status.week}',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF8C6B00),
-                      ),
-                    ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey[600],
                   ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          status.status,
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        SizedBox(height: 2.h),
-                        Text(
-                          'Bonus: ${_formatBonus(status.bonus)}',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
+              Icon(icon, size: 16.w, color: Colors.grey[400]),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
+              color: Colors.black,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
     );
-  }
-
-  String _formatBonus(double bonus) {
-    final hasFraction = bonus % 1 != 0;
-    final formatted = hasFraction
-        ? bonus.toStringAsFixed(2)
-        : bonus.toStringAsFixed(0);
-    return '₹$formatted';
   }
 }
