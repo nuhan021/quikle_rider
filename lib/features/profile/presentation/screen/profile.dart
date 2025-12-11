@@ -25,6 +25,9 @@ class ProfileScreen extends StatelessWidget {
     _controller = Get.isRegistered<ProfileController>()
         ? Get.find<ProfileController>()
         : Get.put(ProfileController());
+    if (_controller.profile.value == null) {
+      _controller.resetProfileFetchState();
+    }
   }
 
   late final ProfileController _controller;
@@ -268,8 +271,9 @@ class ProfileScreen extends StatelessWidget {
       final hasData = _controller.profile.value != null;
       final isLoading = _controller.isLoading.value;
       final hasError = _controller.shouldShowErrorHeader;
+      final hasAttempted = _controller.hasAttemptedProfileFetch;
 
-      if (!isLoading && !hasData && !hasError) {
+      if (!isLoading && !hasData && !hasAttempted) {
         _controller.fetchProfile();
         return _buildLoadingHeader();
       }
@@ -278,7 +282,7 @@ class ProfileScreen extends StatelessWidget {
         return _buildLoadingHeader();
       }
 
-      if (_controller.shouldShowErrorHeader) {
+      if (hasError && hasAttempted) {
         return _buildErrorHeader(_controller.headerErrorText);
       }
 

@@ -102,6 +102,7 @@ class ProfileController extends GetxController {
   var startTime = TimeOfDay.now().obs;
   var endTime = TimeOfDay.now().obs;
   var isAvailable = false.obs;
+  bool _hasAttemptedProfileFetch = false;
 
   bool get shouldShowLoadingHeader => isLoading.value && profile.value == null;
 
@@ -110,6 +111,7 @@ class ProfileController extends GetxController {
         errorMessage.value != null && errorMessage.value!.isNotEmpty;
     return hasError && profile.value == null;
   }
+  bool get hasAttemptedProfileFetch => _hasAttemptedProfileFetch;
 
   String get headerErrorText => errorMessage.value?.isNotEmpty == true
       ? errorMessage.value!
@@ -157,6 +159,11 @@ class ProfileController extends GetxController {
       profileCompletion.value?.message.isNotEmpty == true
       ? profileCompletion.value!.message
       : 'Complete your profile to unlock new tiers.';
+
+  void resetProfileFetchState() {
+    _hasAttemptedProfileFetch = false;
+    errorMessage.value = null;
+  }
 
   // 🧭 Lifecycle hooks
   @override
@@ -285,6 +292,7 @@ class ProfileController extends GetxController {
     final accessToken = StorageService.accessToken;
     debugPrint('access token in practice file: $accessToken');
     final refreshToken = StorageService.refreshToken;
+    _hasAttemptedProfileFetch = true;
 
     if (accessToken == null || refreshToken == null) {
       errorMessage.value = 'Missing credentials. Please login again.';
