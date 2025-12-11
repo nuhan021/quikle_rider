@@ -8,8 +8,6 @@ import 'package:quikle_rider/features/home/data/home_service.dart';
 import 'package:quikle_rider/features/home/models/home_dashboard_models.dart';
 import 'package:quikle_rider/features/home/presentation/screen/goonline.dart';
 import 'package:quikle_rider/features/home/presentation/screen/gooffline.dart';
-import 'package:quikle_rider/features/home/presentation/widgets/alert_dialog.dart';
-import 'package:quikle_rider/features/home/presentation/widgets/incoming_assignment_dialog.dart';
 import 'package:quikle_rider/custom_tab_bar/notifications.dart';
 
 class HomepageController extends GetxController {
@@ -23,13 +21,8 @@ class HomepageController extends GetxController {
   final stats = <HomeStat>[].obs;
   final assignments = <Assignment>[].obs;
   final _pendingActions = <String>{}.obs;
-  final popupAssignment = Rxn<Assignment>();
   final HomeService _homeService;
 
-  Timer? _upcomingOrdersTimer;
-  Timer? _incomingAssignmentTimer;
-  Timer? _dialogAutoCloseTimer;
-  int _assignmentSequence = 6000;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
   void onToggleSwitch() async {
@@ -196,11 +189,7 @@ class HomepageController extends GetxController {
         isOnline.value = goOnline;
         if (goOnline) {
           await _refreshUpcomingAssignments(showLoader: true);
-          _scheduleIncomingAssignment();
-          _startUpcomingPolling();
         } else {
-          _stopUpcomingPolling();
-          _cancelIncomingAssignment();
           stats.clear();
           assignments.clear();
         }
@@ -256,40 +245,6 @@ class HomepageController extends GetxController {
     );
   }
 
-  void _startUpcomingPolling() {
-    _upcomingOrdersTimer?.cancel();
-    _upcomingOrdersTimer = Timer.periodic(
-      const Duration(seconds: 20),
-      (_) {
-        _refreshUpcomingAssignments();
-      },
-    );
-  }
-
-  void _stopUpcomingPolling() {
-    _upcomingOrdersTimer?.cancel();
-    _upcomingOrdersTimer = null;
-  }
-
-  void _scheduleIncomingAssignment() {
-    _incomingAssignmentTimer?.cancel();
-    _incomingAssignmentTimer = Timer(
-      const Duration(seconds: 200000),
-      _presentIncomingAssignment,
-    );
-  }
-
-  void _cancelIncomingAssignment() {
-    _incomingAssignmentTimer?.cancel();
-    _incomingAssignmentTimer = null;
-    _dialogAutoCloseTimer?.cancel();
-    _dialogAutoCloseTimer = null;
-    popupAssignment.value = null;
-    if (Get.isDialogOpen ?? false) {
-      Get.back();
-    }
-  }
-
   void _initConnectivityMonitoring() {
     final connectivity = Connectivity();
     _connectivitySubscription = connectivity.onConnectivityChanged.listen(
@@ -313,58 +268,6 @@ class HomepageController extends GetxController {
     }
   }
 
-  Assignment _createIncomingAssignment() {
-    _assignmentSequence += 1;
-    final now = DateTime.now();
-    final arrival = now.add(const Duration(minutes: 30));
-
-    return Assignment(
-      id: '#$_assignmentSequence',
-      customerName: 'Priya Sharma',
-      expectedArrival: arrival,
-      address: '221B Baker St, Park Town',
-      distanceInKm: 4.2,
-      totalAmount: 42,
-      currency: '₹',
-      basePay: 28,
-      distancePay: 14,
-      orderType: 'Grocery',
-      isUrgent: true,
-      isCombined: false,
-    );
-  }
-
-  Future<void> _presentIncomingAssignment() async {
-    final assignment = _createIncomingAssignment();
-    popupAssignment.value = assignment;
-
-    _dialogAutoCloseTimer?.cancel();
-    _dialogAutoCloseTimer = Timer(const Duration(seconds: 10), () {
-      if (Get.isDialogOpen ?? false) {
-        Get.back();
-      }
-    });
-
-    final status = await Get.dialog<AssignmentStatus>(
-      IncomingAssignmentDialog(
-        assignment: assignment,
-        onAccept: () => Get.back(result: AssignmentStatus.accepted),
-        onReject: () => Get.back(result: AssignmentStatus.rejected),
-      ),
-      barrierDismissible: false,
-    );
-
-    _dialogAutoCloseTimer?.cancel();
-    _dialogAutoCloseTimer = null;
-    popupAssignment.value = null;
-
-    await _handleIncomingAssignmentResult(assignment, status);
-
-    if (isOnline.value) {
-      _scheduleIncomingAssignment();
-    }
-  }
-
   void _setAssignmentStatus(Assignment assignment, AssignmentStatus status) {
     final updated = assignment.copyWith(status: status);
     final idx = assignments.indexWhere((item) => item.id == assignment.id);
@@ -375,59 +278,9 @@ class HomepageController extends GetxController {
     }
   }
 
-  Future<void> _handleIncomingAssignmentResult(
-    Assignment assignment,
-    AssignmentStatus? status,
-  ) async {
-    switch (status) {
-      case AssignmentStatus.accepted:
-        final success = await acceptAssignment(assignment);
-        if (success) {
-          // Show dialog
-          Get.dialog(
-            OrderStatusDialog(
-              imageUrl: "assets/images/success.png",
-              text: "Order Accepted",
-            ),
-            barrierDismissible: false,
-          );
-
-          // Auto close after 1s
-          Future.delayed(const Duration(seconds: 1), () {
-            if (Get.isDialogOpen ?? false) Get.back();
-          });
-        }
-        break;
-
-      case AssignmentStatus.rejected:
-        final success = await rejectAssignment(assignment);
-        if (success) {
-          Get.dialog(
-            OrderStatusDialog(
-              imageUrl: "assets/images/cancel.png",
-              text: "Order Rejected",
-            ),
-            barrierDismissible: false,
-          );
-
-          Future.delayed(const Duration(seconds: 1), () {
-            if (Get.isDialogOpen ?? false) Get.back();
-          });
-        }
-        break;
-
-      case AssignmentStatus.pending:
-      case null:
-        _setAssignmentStatus(assignment, AssignmentStatus.pending);
-        break;
-    }
-  }
-
   @override
   void onClose() {
     _connectivitySubscription?.cancel();
-    _stopUpcomingPolling();
-    _cancelIncomingAssignment();
     super.onClose();
   }
 
