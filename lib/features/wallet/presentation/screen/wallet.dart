@@ -6,6 +6,7 @@ import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/add_paymentmethod.dart';
 import 'package:quikle_rider/features/wallet/controllers/wallet_controller.dart';
 import 'package:quikle_rider/features/wallet/widgets/balance_card.dart';
+import 'package:quikle_rider/features/wallet/widgets/bonus_progress_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/delevery_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/monthly_earnings_forecast_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/rating_card.dart';
@@ -74,6 +75,7 @@ class WalletScreen extends GetView<WalletController> {
                     switch (index) {
                       case 0:
                         controller.fetchAllStats();
+                        controller.fetchBonusProgress();
                         break;
                       case 1:
                         controller.fetchWeeklyStats();
@@ -170,7 +172,7 @@ class WalletScreen extends GetView<WalletController> {
                           balance: "₹${controller.currentBalance.value.toString()}",
                           lastUpdated: controller.balanceSubtitle,
                           onWithdraw: () async {
-                        
+              
                             Get.to(AddPaymentMethodPage());
                           },
                         ),
@@ -397,6 +399,10 @@ class WalletScreen extends GetView<WalletController> {
               ),
             ],
           ),
+          SizedBox(height: 16.h),
+          
+          // Bonus Progress Section
+          BonusProgressCard(controller: ctrl),
         ],
       );
     });
@@ -484,6 +490,15 @@ class WalletScreen extends GetView<WalletController> {
             value: '${stats['weekly_bonus_status'] ?? 'N/A'}',
             icon: Icons.card_giftcard,
             backgroundColor: const Color(0xFFFFF9E6),
+          ),
+          SizedBox(height: 12.h),
+          
+          // Current Balance (from All Stats)
+          _StatCard(
+            title: 'Current Balance',
+            value: '₹${ctrl.allStats.value?['current_balance'] ?? 0}',
+            icon: Icons.account_balance_wallet,
+            backgroundColor: const Color(0xFFE6FFE6),
           ),
         ],
       );
@@ -579,6 +594,15 @@ class WalletScreen extends GetView<WalletController> {
               ),
             ],
           ),
+          SizedBox(height: 12.h),
+          
+          // Current Balance (from All Stats)
+          _StatCard(
+            title: 'Current Balance',
+            value: '₹${ctrl.allStats.value?['current_balance'] ?? 0}',
+            icon: Icons.account_balance_wallet,
+            backgroundColor: const Color(0xFFE6FFE6),
+          ),
         ],
       );
     });
@@ -649,10 +673,20 @@ class WalletScreen extends GetView<WalletController> {
               ),
             ],
           ),
+          SizedBox(height: 12.h),
+          
+          // Current Balance (from All Stats)
+          _StatCard(
+            title: 'Current Balance',
+            value: '₹${ctrl.allStats.value?['current_balance'] ?? 0}',
+            icon: Icons.account_balance_wallet,
+            backgroundColor: const Color(0xFFE6FFE6),
+          ),
         ],
       );
     });
   }
+
 
 
 /// Simple stat card widget

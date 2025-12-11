@@ -77,11 +77,16 @@ class WalletController extends GetxController
   final RxBool isWeeklyStatsLoading = false.obs;
   final RxBool isMonthlyStatsLoading = false.obs;
   final RxBool isAnnualStatsLoading = false.obs;
+  final RxBool isBonusProgressLoading = false.obs;
   
   final RxnString allStatsError = RxnString();
   final RxnString weeklyStatsError = RxnString();
   final RxnString monthlyStatsError = RxnString();
   final RxnString annualStatsError = RxnString();
+  final RxnString bonusProgressError = RxnString();
+  
+  // Bonus progress data
+  final bonusProgress = Rxn<Map<String, dynamic>>();
   
   // Data for different periods
   final _weekDeliveries = <DeliveryItem>[
@@ -710,6 +715,36 @@ class WalletController extends GetxController
       annualStatsError.value = 'Error fetching annual stats: $e';
     } finally {
       isAnnualStatsLoading.value = false;
+    }
+  }
+
+  Future<void> fetchBonusProgress() async {
+    try {
+      isBonusProgressLoading.value = true;
+      bonusProgressError.value = null;
+      
+      final accessToken = StorageService.accessToken;
+      if (accessToken == null || accessToken.isEmpty) {
+        bonusProgressError.value = 'Missing access token';
+        return;
+      }
+
+      final response = await _walletServices.fetchBonusProgress(
+        accessToken: accessToken,
+      );
+
+      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+        bonusProgress.value = response.responseData as Map<String, dynamic>;
+        bonusProgressError.value = null;
+      } else {
+        bonusProgressError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to fetch bonus progress';
+      }
+    } catch (e) {
+      bonusProgressError.value = 'Error fetching bonus progress: $e';
+    } finally {
+      isBonusProgressLoading.value = false;
     }
   }
 

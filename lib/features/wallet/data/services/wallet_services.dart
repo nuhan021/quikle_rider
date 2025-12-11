@@ -319,4 +319,38 @@ class WalletServices {
       );
     }
   }
+
+  /// Fetch bonus progress
+  Future<ResponseData> fetchBonusProgress({
+    required String accessToken,
+  }) async {
+    final uri = Uri.parse('$baseurl/rider/rider/bonus-progress/');
+
+    try {
+      final response = await _client.get(
+        uri,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      final decodedBody = _decodeResponseBody(response.body);
+      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+      AppLoggerHelper.debug("Bonus progress response: $decodedBody");
+      return ResponseData(
+        isSuccess: isSuccess,
+        statusCode: response.statusCode,
+        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to fetch bonus progress. Please try again.',
+        responseData: error.toString(),
+      );
+    }
+  }
 }
