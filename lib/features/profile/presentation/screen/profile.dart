@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/add_paymentmethod.dart';
@@ -566,8 +567,9 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                Get.offAllNamed(AppRoute.loginScreen);
+              onPressed: () async{
+               await StorageService.logoutUser();
+               Get.offAllNamed(AppRoute.loginScreen);
               },
               style: ElevatedButton.styleFrom(
                 side: BorderSide.none,

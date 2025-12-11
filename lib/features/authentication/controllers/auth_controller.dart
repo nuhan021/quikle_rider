@@ -29,6 +29,7 @@ class AuthController extends GetxController {
   final currentOtp = ''.obs;
   final resendTimer = 27.obs;
   final canResend = false.obs;
+  final isVerifying = false.obs;
   Timer? _resendCountdown;
   bool _isSignupFlow = false;
   String _currentOtpPurpose = 'rider_login';
@@ -90,7 +91,6 @@ class AuthController extends GetxController {
       purpose: 'rider_login',
     );
     if (otpSent) {
-     
       Get.toNamed(
         AppRoute.getLoginOtp(),
         arguments: {'phone': _pendingPhoneNumber},
@@ -132,10 +132,15 @@ class AuthController extends GetxController {
       return;
     }
 
-    if (_isSignupFlow) {
-      await _submitSignup(otpValue);
-    } else {
-      await _loginWithOtp(otpValue);
+    isVerifying.value = true;
+    try {
+      if (_isSignupFlow) {
+        await _submitSignup(otpValue);
+      } else {
+        await _loginWithOtp(otpValue);
+      }
+    } finally {
+      isVerifying.value = false;
     }
   }
 
@@ -243,13 +248,6 @@ class AuthController extends GetxController {
           refreshToken: refreshToken,
           tokenType: tokenType,
         );
-        final inlineUserId = _extractUserId(data);
-        if (inlineUserId != null) {
-          await StorageService.saveUserId(inlineUserId);
-          AppLoggerHelper.debug(
-            'User ID saved from login response: $inlineUserId',
-          );
-        }
         final resolvedUserId = await _postLoginSetup(
           accessToken: accessToken,
           refreshToken: refreshToken,
@@ -260,6 +258,9 @@ class AuthController extends GetxController {
         AppLoggerHelper.debug(
           'Logged in successfully. Access token: $accessToken',
         );
+        if (resolvedUserId != null) {
+          await NotificationService.instance.sendInstantNotification(userId: resolvedUserId, title: "success", body: "Login");
+        }
         AppLoggerHelper.debug(
           'Logged in successfully. Refresh token: $refreshToken',
         );
@@ -310,7 +311,7 @@ class AuthController extends GetxController {
     if (response.isSuccess) {
       _resetOtpFields();
       _startResendTimer();
-     
+
       final userId = StorageService.userId;
       if (response.isSuccess && userId != null) {
         NotificationService.instance.sendInstantNotification(
@@ -455,28 +456,29 @@ class AuthController extends GetxController {
     required Map<String, dynamic> initialData,
   }) async {
     try {
-      final cachedId = StorageService.userId;
-      final userId = cachedId ?? _extractUserId(initialData);
-      if (userId != null) {
-        await StorageService.saveUserId(userId);
-      }
+      final fetchedUserId = await _fetchUserId(
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        tokenType: tokenType,
+      );
+      final inlineUserId = _extractUserId(initialData);
+      final cachedUserId = StorageService.userId;
 
-      final resolvedUserId =
-          userId ??
-          (await _fetchUserId(
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            tokenType: tokenType,
-          ));
+      final resolvedUserId = fetchedUserId ?? inlineUserId ?? cachedUserId;
       if (resolvedUserId != null) {
         await StorageService.saveUserId(resolvedUserId);
-        AppLoggerHelper.debug('User ID : $resolvedUserId');
-        await _syncFcmToken(
+        AppLoggerHelper.debug('User ID saved post-login: $resolvedUserId');
+
+        final fcmSynced = await _syncFcmToken(
           userId: resolvedUserId,
           accessToken: accessToken,
           tokenType: tokenType,
         );
-        print('FCM Token sent successfully: $accessToken');
+        AppLoggerHelper.debug(
+          fcmSynced
+              ? 'FCM token synced for user $resolvedUserId'
+              : 'FCM token sync skipped or failed for user $resolvedUserId',
+        );
       } else {
         AppLoggerHelper.debug('Unable to resolve user id post-login.');
       }

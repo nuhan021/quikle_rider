@@ -14,12 +14,12 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await FirebaseService.instance.init();
+   //Initialize notification
+  await NotificationService.instance.init();
+  await NotificationService.instance.requestPermission();
   await StorageService.init();
 
 
-  //Initialize notification
-
-  await NotificationService.instance.init();
-  await NotificationService.instance.requestPermission();
+ 
   runApp(const MyApp());
 }
