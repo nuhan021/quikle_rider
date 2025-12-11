@@ -10,7 +10,7 @@ class AuthServies {
   final http.Client _client;
 
   static final Uri _verifyTokenUri = Uri.parse(
-    'https://caditya619-backend.onrender.com/auth/verify-token/',
+    '$baseurl/auth/verify-token/',
   );
 
   Future<ResponseData> sendOtp({
@@ -119,7 +119,7 @@ class AuthServies {
     return 'Something went wrong. Please try again.';
   }
 
-  Future<Map<String, dynamic>?> fetchUserProfile({
+  Future<ResponseData> verifyToken({
     required String accessToken,
     required String refreshToken,
     required String tokenType,
@@ -135,13 +135,39 @@ class AuthServies {
         },
       );
 
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        final decoded = _decodeResponseBody(response.body);
-        if (decoded is Map<String, dynamic>) {
-          return decoded;
-        }
-      }
-    } catch (_) {}
+      final decodedBody = _decodeResponseBody(response.body);
+      final success = response.statusCode >= 200 && response.statusCode < 300;
+
+      return ResponseData(
+        isSuccess: success,
+        statusCode: response.statusCode,
+        errorMessage: success ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to verify token. Please try again.',
+        responseData: error.toString(),
+      );
+    }
+  }
+
+  Future<Map<String, dynamic>?> fetchUserProfile({
+    required String accessToken,
+    required String refreshToken,
+    required String tokenType,
+  }) async {
+    final response = await verifyToken(
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      tokenType: tokenType,
+    );
+
+    if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+      return response.responseData as Map<String, dynamic>;
+    }
     return null;
   }
 }

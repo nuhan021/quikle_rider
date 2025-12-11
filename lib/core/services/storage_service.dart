@@ -13,9 +13,9 @@ class StorageService {
   static Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
     AppLoggerHelper.debug('has token ${refreshToken}');
+    AppLoggerHelper.debug('User id ${userId}');
   }
 
-  
   static bool hasToken() {
     final token = _preferences?.getString(_accessTokenKey);
     return token != null && token.isNotEmpty;
@@ -32,11 +32,7 @@ class StorageService {
   }
 
   static Future<void> logoutUser() async {
-    await _preferences?.remove(_accessTokenKey);
-    await _preferences?.remove(_refreshTokenKey);
-    await _preferences?.remove(_tokenTypeKey);
-    await _preferences?.remove(_fcmTokenKey);
-    await _preferences?.remove(_userIdKey);
+    await clearAll();
   }
 
   static String? get accessToken => _preferences?.getString(_accessTokenKey);
@@ -54,4 +50,8 @@ class StorageService {
   }
 
   static int? get userId => _preferences?.getInt(_userIdKey);
+
+  static Future<void> clearAll() async {
+    await _preferences?.clear();
+  }
 }

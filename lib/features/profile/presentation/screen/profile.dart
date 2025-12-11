@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/add_paymentmethod.dart';
@@ -24,6 +25,9 @@ class ProfileScreen extends StatelessWidget {
     _controller = Get.isRegistered<ProfileController>()
         ? Get.find<ProfileController>()
         : Get.put(ProfileController());
+    if (_controller.profile.value == null) {
+      _controller.resetProfileFetchState();
+    }
   }
 
   late final ProfileController _controller;
@@ -264,8 +268,22 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildProfileHeader() {
     return Obx(() {
+      final hasData = _controller.profile.value != null;
+      final isLoading = _controller.isLoading.value;
+      final hasError = _controller.shouldShowErrorHeader;
+      final hasAttempted = _controller.hasAttemptedProfileFetch;
+
+      if (!isLoading && !hasData && !hasAttempted) {
+        _controller.fetchProfile();
+        return _buildLoadingHeader();
+      }
+
       if (_controller.shouldShowLoadingHeader) {
         return _buildLoadingHeader();
+      }
+
+      if (hasError && hasAttempted) {
+        return _buildErrorHeader(_controller.headerErrorText);
       }
 
       return _buildProfileDetailsCard(
@@ -326,6 +344,40 @@ class ProfileScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 40),
       decoration: _profileCardDecoration(),
       child: const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Widget _buildErrorHeader(String message) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 16.w),
+      decoration: _profileCardDecoration(),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Profile unavailable',
+            style: getTextStyle2(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            message,
+            style: getTextStyle2(fontSize: 13, color: Colors.black54),
+          ),
+          SizedBox(height: 12.h),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: _controller.fetchProfile,
+              child: const Text('Retry'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -519,8 +571,9 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-              onPressed: () {
-                Get.offAllNamed(AppRoute.loginScreen);
+              onPressed: () async{
+               await StorageService.logoutUser();
+               Get.offAllNamed(AppRoute.loginScreen);
               },
               style: ElevatedButton.styleFrom(
                 side: BorderSide.none,

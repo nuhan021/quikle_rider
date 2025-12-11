@@ -29,6 +29,7 @@ class AuthController extends GetxController {
   final currentOtp = ''.obs;
   final resendTimer = 27.obs;
   final canResend = false.obs;
+  final isVerifying = false.obs;
   Timer? _resendCountdown;
   bool _isSignupFlow = false;
   String _currentOtpPurpose = 'rider_login';
@@ -89,7 +90,6 @@ class AuthController extends GetxController {
       phoneNumber: phoneNumber,
       purpose: 'rider_login',
     );
-
     if (otpSent) {
       Get.toNamed(
         AppRoute.getLoginOtp(),
@@ -132,10 +132,15 @@ class AuthController extends GetxController {
       return;
     }
 
-    if (_isSignupFlow) {
-      await _submitSignup(otpValue);
-    } else {
-      await _loginWithOtp(otpValue);
+    isVerifying.value = true;
+    try {
+      if (_isSignupFlow) {
+        await _submitSignup(otpValue);
+      } else {
+        await _loginWithOtp(otpValue);
+      }
+    } finally {
+      isVerifying.value = false;
     }
   }
 
@@ -243,35 +248,26 @@ class AuthController extends GetxController {
           refreshToken: refreshToken,
           tokenType: tokenType,
         );
-        unawaited(
-          _postLoginSetup(
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            tokenType: tokenType,
-            initialData: data,
-          ),
+        final resolvedUserId = await _postLoginSetup(
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+          tokenType: tokenType,
+          initialData: data,
         );
-
+        AppLoggerHelper.debug('User ID : $resolvedUserId');
         AppLoggerHelper.debug(
           'Logged in successfully. Access token: $accessToken',
         );
+        if (resolvedUserId != null) {
+          await NotificationService.instance.sendInstantNotification(userId: resolvedUserId, title: "success", body: "Login");
+        }
         AppLoggerHelper.debug(
           'Logged in successfully. Refresh token: $refreshToken',
         );
         AppLoggerHelper.debug('Logged in successfully. Token type: $tokenType');
 
         Get.offAllNamed(AppRoute.getWelcomeScreen());
-        final resolvedUserId = StorageService.userId ?? _extractUserId(data);
-        if (resolvedUserId != null) {
-          unawaited(
-            NotificationService.instance.sendInstantNotification(
-              userId: resolvedUserId,
-              title:
-                  'Hello ${phoneNumberForOtp.isNotEmpty ? phoneNumberForOtp : 'Rider'}',
-              body: 'You are logged in.',
-            ),
-          );
-        }
+
         Get.snackbar(
           'Login Successful',
           'You have logged in successfully.',
@@ -315,19 +311,13 @@ class AuthController extends GetxController {
     if (response.isSuccess) {
       _resetOtpFields();
       _startResendTimer();
-      // Get.snackbar(
-      //   'Code Sent',
-      //   'A verification code has been sent to $phoneNumber',
-      //   snackPosition: SnackPosition.BOTTOM,
-      //   backgroundColor: const Color(0xFFFFB800),
-      //   colorText: Colors.black,
-      //   duration: const Duration(seconds: 3),
-      // );
-      if (response.isSuccess) {
+
+      final userId = StorageService.userId;
+      if (response.isSuccess && userId != null) {
         NotificationService.instance.sendInstantNotification(
-          userId: StorageService.userId ?? 0,
-          title: 'Hello there!',
-          body: 'You have a new notification.',
+          userId: userId,
+          title: 'Hello Rider!',
+          body: 'Your OTP is ${response.responseData['message']}.',
         );
       }
       return true;
@@ -415,24 +405,24 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<void> _syncFcmToken({
+  Future<bool> _syncFcmToken({
     required int userId,
     required String accessToken,
     required String tokenType,
   }) async {
     try {
+      final refreshedToken = await FirebaseService.instance.refreshToken();
       final existing = StorageService.cachedFcmToken;
-      final token = existing?.isNotEmpty == true
+      final token = refreshedToken?.isNotEmpty == true
+          ? refreshedToken
+          : existing?.isNotEmpty == true
           ? existing
           : await FirebaseService.instance.waitForToken();
-      final finalToken =
-          token ??
-          await FirebaseService.instance.refreshToken() ??
-          StorageService.cachedFcmToken;
+      final finalToken = token ?? StorageService.cachedFcmToken;
 
       if (finalToken == null || finalToken.isEmpty) {
         AppLoggerHelper.debug('FCM token unavailable.');
-        return;
+        return false;
       }
 
       await StorageService.cacheFcmToken(finalToken);
@@ -452,47 +442,42 @@ class AuthController extends GetxController {
             '${tokenType.trim().isEmpty ? 'Bearer' : tokenType.trim()} $accessToken',
       );
 
-      if (success) {
-        NotificationService.instance.sendInstantNotification(
-          userId: userId,
-          title: 'Hello there!',
-          body: 'You have a new notification.',
-        );
-        AppLoggerHelper.debug('notification sent');
-      }
+      return success;
     } catch (error) {
       AppLoggerHelper.debug('Error syncing FCM token: $error');
+      return false;
     }
   }
 
-  Future<void> _postLoginSetup({
+  Future<int?> _postLoginSetup({
     required String accessToken,
     required String refreshToken,
     required String tokenType,
     required Map<String, dynamic> initialData,
   }) async {
     try {
-      final cachedId = StorageService.userId;
-      final userId = cachedId ?? _extractUserId(initialData);
-      if (userId != null) {
-        await StorageService.saveUserId(userId);
-      }
+      final fetchedUserId = await _fetchUserId(
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        tokenType: tokenType,
+      );
+      final inlineUserId = _extractUserId(initialData);
+      final cachedUserId = StorageService.userId;
 
-      final resolvedUserId =
-          userId ??
-          (await _fetchUserId(
-            accessToken: accessToken,
-            refreshToken: refreshToken,
-            tokenType: tokenType,
-          ));
+      final resolvedUserId = fetchedUserId ?? inlineUserId ?? cachedUserId;
       if (resolvedUserId != null) {
         await StorageService.saveUserId(resolvedUserId);
-        unawaited(
-          _syncFcmToken(
-            userId: resolvedUserId,
-            accessToken: accessToken,
-            tokenType: tokenType,
-          ),
+        AppLoggerHelper.debug('User ID saved post-login: $resolvedUserId');
+
+        final fcmSynced = await _syncFcmToken(
+          userId: resolvedUserId,
+          accessToken: accessToken,
+          tokenType: tokenType,
+        );
+        AppLoggerHelper.debug(
+          fcmSynced
+              ? 'FCM token synced for user $resolvedUserId'
+              : 'FCM token sync skipped or failed for user $resolvedUserId',
         );
       } else {
         AppLoggerHelper.debug('Unable to resolve user id post-login.');
@@ -500,6 +485,7 @@ class AuthController extends GetxController {
     } catch (error) {
       AppLoggerHelper.debug('Post login setup failed: $error');
     }
+    return StorageService.userId;
   }
 
   Future<int?> _fetchUserId({
@@ -507,12 +493,22 @@ class AuthController extends GetxController {
     required String refreshToken,
     required String tokenType,
   }) async {
-    final profile = await _authServices.fetchUserProfile(
+    final response = await _authServices.verifyToken(
       accessToken: accessToken,
       refreshToken: refreshToken,
       tokenType: tokenType,
     );
-    if (profile == null) return null;
+    if (!response.isSuccess) {
+      AppLoggerHelper.debug(
+        'verify-token failed (${response.statusCode}): ${response.errorMessage}',
+      );
+      return null;
+    }
+    final profile = response.responseData;
+    if (profile is! Map<String, dynamic>) {
+      AppLoggerHelper.debug('verify-token returned unexpected body: $profile');
+      return null;
+    }
     final id = profile['id'];
     if (id is int) return id;
     if (id is String) return int.tryParse(id);

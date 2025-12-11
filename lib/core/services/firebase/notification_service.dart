@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -28,6 +29,8 @@ class NotificationService {
 
   NotificationTapCallback? _onNotificationTap;
   bool _isInitialized = false;
+  static const int _tokenSaveTimeoutSeconds = 10;
+  static const int _maxRetryAttempts = 3;
 
   Future<void> init({NotificationTapCallback? onNotificationTap}) async {
     if (_isInitialized) {
@@ -126,8 +129,11 @@ class NotificationService {
     required String token,
     required String platform,
     required String authorization,
+    int retryCount = 0,
   }) async {
     try {
+      AppLoggerHelper.debug('Attempting to save FCM token for user: $userId (Attempt ${retryCount + 1}/$_maxRetryAttempts)');
+      
       final response = await _httpClient.post(
         _saveTokenUri,
         headers: {
@@ -140,11 +146,65 @@ class NotificationService {
           'token': token,
           'platform': platform,
         }),
+      ).timeout(
+        const Duration(seconds: _tokenSaveTimeoutSeconds),
+        onTimeout: () => throw TimeoutException('FCM token save request timed out'),
       );
-      return response.statusCode >= 200 && response.statusCode < 300;
-
       
-    } catch (_) {
+      AppLoggerHelper.debug('Response: ${response.body}');
+      
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        AppLoggerHelper.debug('✓ FCM Token successfully saved for user: $userId');
+        return true;
+      } else {
+        AppLoggerHelper.debug('✗ FCM Token save failed with status: ${response.statusCode}');
+        AppLoggerHelper.debug('Response: ${response.body}');
+        
+        // Retry on server errors
+        if (response.statusCode >= 500 && retryCount < _maxRetryAttempts - 1) {
+          AppLoggerHelper.debug('Retrying FCM token save...');
+          await Future.delayed(Duration(seconds: 2 * (retryCount + 1)));
+          return saveFcmToken(
+            userId: userId,
+            token: token,
+            platform: platform,
+            authorization: authorization,
+            retryCount: retryCount + 1,
+          );
+        }
+        return false;
+      }
+    } on TimeoutException catch (e) {
+      AppLoggerHelper.debug('⏱ FCM token save timeout: $e');
+      
+      // Retry on timeout
+      if (retryCount < _maxRetryAttempts - 1) {
+        AppLoggerHelper.debug('Retrying after timeout...');
+        await Future.delayed(Duration(seconds: 2 * (retryCount + 1)));
+        return saveFcmToken(
+          userId: userId,
+          token: token,
+          platform: platform,
+          authorization: authorization,
+          retryCount: retryCount + 1,
+        );
+      }
+      return false;
+    } catch (e) {
+      AppLoggerHelper.debug('✗ Error saving FCM token: $e');
+      
+      // Retry on network errors
+      if (retryCount < _maxRetryAttempts - 1) {
+        AppLoggerHelper.debug('Retrying due to error...');
+        await Future.delayed(Duration(seconds: 2 * (retryCount + 1)));
+        return saveFcmToken(
+          userId: userId,
+          token: token,
+          platform: platform,
+          authorization: authorization,
+          retryCount: retryCount + 1,
+        );
+      }
       return false;
     }
   }
@@ -153,6 +213,7 @@ class NotificationService {
     required int userId,
     required String title,
     required String body,
+    String? payload,
   }) async {
     try {
       final response = await _httpClient.post(
@@ -166,12 +227,69 @@ class NotificationService {
           'title': title,
           'body': body,
         }),
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () => throw TimeoutException('Send notification request timed out'),
       );
-       AppLoggerHelper.debug("Notification sent $userId");
-       AppLoggerHelper.debug("Notification reponse ${response.body}");
-      return response.statusCode >= 200 && response.statusCode < 300;
-    } catch (_) {
+      
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        AppLoggerHelper.debug('Notification sent to user: $userId');
+        AppLoggerHelper.debug('Response: ${response.body}');
+        
+        // Also show local notification in release mode
+        await _showLocalNotification(
+          title: title,
+          body: body,
+          payload: payload,
+          isUrgent: true,
+        );
+        
+        return true;
+      } else {
+        AppLoggerHelper.debug('Failed to send notification. Status: ${response.statusCode}');
+        AppLoggerHelper.debug('Response: ${response.body}');
+        
+        // Show local notification as fallback
+        await _showLocalNotification(
+          title: title,
+          body: body,
+          payload: payload,
+          isUrgent: true,
+        );
+        
+        return false;
+      }
+    } catch (e) {
+      AppLoggerHelper.debug('Error sending notification: $e');
+      
+      // Show local notification as fallback
+      await _showLocalNotification(
+        title: title,
+        body: body,
+        payload: payload,
+        isUrgent: true,
+      );
+      
       return false;
+    }
+  }
+
+  Future<void> _showLocalNotification({
+    required String title,
+    required String body,
+    String? payload,
+    bool isUrgent = false,
+  }) async {
+    try {
+      await show(
+        id: DateTime.now().millisecondsSinceEpoch.remainder(0x7fffffff),
+        title: title,
+        body: body,
+        payload: payload,
+        isUrgent: isUrgent,
+      );
+    } catch (e) {
+      AppLoggerHelper.debug('Error showing local notification: $e');
     }
   }
 }

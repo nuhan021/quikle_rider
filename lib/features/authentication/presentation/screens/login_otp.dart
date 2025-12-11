@@ -133,27 +133,41 @@ class LoginOtp extends GetView<AuthController> {
                 SizedBox(height: 40.h),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
-
-                    onPressed: () => controller.verifyOtp(context),
-                    style: ElevatedButton.styleFrom(
-                      side: BorderSide.none,
-                      backgroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
+                  child: Obx(() {
+                    final isLoading = controller.isVerifying.value;
+                    return ElevatedButton(
+                      onPressed:
+                          isLoading ? null : () => controller.verifyOtp(context),
+                      style: ElevatedButton.styleFrom(
+                        side: BorderSide.none,
+                        backgroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        elevation: 0,
                       ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      "Verify Code",
-                      style: getTextStyle(
-                        font: CustomFonts.manrope,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFFFFB800),
-                      ),
-                    ),
-                  ),
+                      child: isLoading
+                          ? SizedBox(
+                              height: 22.h,
+                              width: 22.h,
+                              child: const CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Color(0xFFFFB800),
+                                ),
+                              ),
+                            )
+                          : Text(
+                              "Verify Code",
+                              style: getTextStyle(
+                                font: CustomFonts.manrope,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFFFFB800),
+                              ),
+                            ),
+                    );
+                  }),
                 ),
                 SizedBox(height: 20.h),
                 GestureDetector(
