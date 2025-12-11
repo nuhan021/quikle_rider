@@ -26,6 +26,7 @@ class HomepageController extends GetxController {
   final popupAssignment = Rxn<Assignment>();
   final HomeService _homeService;
 
+  Timer? _upcomingOrdersTimer;
   Timer? _incomingAssignmentTimer;
   Timer? _dialogAutoCloseTimer;
   int _assignmentSequence = 6000;
@@ -68,90 +69,78 @@ class HomepageController extends GetxController {
   }
 
   Future<void> fetchDashboardData() async {
-    isLoading.value = true;
-    errorMessage.value = null;
+    await _refreshUpcomingAssignments(showLoader: true);
+  }
+
+  Future<HomeDashboardData> _loadDashboardData() async {
+    final upcomingAssignments = await _fetchUpcomingAssignments();
+    return HomeDashboardData(
+      stats: _buildStats(upcomingAssignments),
+      assignments: upcomingAssignments,
+    );
+  }
+
+  Future<List<Assignment>> _fetchUpcomingAssignments() async {
+    final response = await _homeService.fetchUpcomingOrders(orderId: "ORD_13C60AEB");
+    if (!response.isSuccess) {
+      throw response.errorMessage.isNotEmpty
+          ? response.errorMessage
+          : 'Unable to load upcoming orders.';
+    }
+
+    return _mapAssignmentsResponse(response.responseData);
+  }
+
+  List<HomeStat> _buildStats(List<Assignment> upcomingAssignments) {
+    final totalPayout = upcomingAssignments.fold<double>(
+      0,
+      (previousValue, assignment) => previousValue + assignment.totalAmount,
+    );
+
+    return [
+      HomeStat(
+        id: 'upcoming',
+        title: 'Upcoming',
+        subtitle: 'Orders',
+        value: upcomingAssignments.length,
+      ),
+      HomeStat(
+        id: 'payout',
+        title: 'Payout',
+        subtitle: 'Potential',
+        value: totalPayout,
+        unit: '₹',
+      ),
+      const HomeStat(
+        id: 'rating',
+        title: 'Rating',
+        subtitle: 'Out of 5',
+        value: 4.8,
+      ),
+    ];
+  }
+
+  Future<void> _refreshUpcomingAssignments({bool showLoader = false}) async {
+    if (showLoader) {
+      isLoading.value = true;
+      errorMessage.value = null;
+    }
+
     try {
       final data = await _loadDashboardData();
       stats.assignAll(data.stats);
       assignments.assignAll(data.assignments);
     } catch (error) {
-      errorMessage.value = 'Unable to load dashboard data. Please try again.';
+      if (showLoader) {
+        errorMessage.value = error is String
+            ? error
+            : 'Unable to load upcoming orders. Please try again.';
+      }
     } finally {
-      isLoading.value = false;
+      if (showLoader) {
+        isLoading.value = false;
+      }
     }
-  }
-
-  Future<HomeDashboardData> _loadDashboardData() async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    return HomeDashboardData(
-      stats: const [
-        HomeStat(
-          id: 'today-deliveries',
-          title: 'Today',
-          subtitle: 'Deliveries',
-          value: 5,
-        ),
-        HomeStat(
-          id: 'weekly-deliveries',
-          title: 'This Week',
-          subtitle: 'Deliveries',
-          value: 32,
-        ),
-        HomeStat(
-          id: 'rating',
-          title: 'Rating',
-          subtitle: 'Out of 5',
-          value: 4.8,
-        ),
-      ],
-      assignments: [
-        Assignment(
-          id: '#5678',
-          customerName: 'Aanya Desai',
-          expectedArrival: DateTime.now().add(const Duration(hours: 1)),
-          address: '456 Oak Ave, Downtown',
-          distanceInKm: 4.0,
-          totalAmount: 34,
-          basePay: 20,
-          distancePay: 14,
-          orderType: 'Grocery',
-          currency: '₹',
-          isUrgent: true,
-          isCombined: true,
-          tierLabel: 'Bronze Tier Rate',
-        ),
-        Assignment(
-          id: '#5677',
-          customerName: 'Rahul Verma',
-          expectedArrival: DateTime.now().add(const Duration(hours: 3)),
-          address: '89 Lake View Road, Uptown',
-          distanceInKm: 2.5,
-          totalAmount: 28,
-          basePay: 18,
-          distancePay: 10,
-          orderType: 'Pharmacy',
-          currency: '₹',
-          isUrgent: false,
-          isCombined: false,
-          status: AssignmentStatus.accepted,
-        ),
-        Assignment(
-          id: '#5676',
-          customerName: 'Neha Kapoor',
-          expectedArrival: DateTime.now().add(const Duration(hours: 5)),
-          address: '12 Garden Blvd, Midtown',
-          distanceInKm: 5.4,
-          totalAmount: 48,
-          basePay: 30,
-          distancePay: 18,
-          orderType: 'Grocery',
-          currency: '₹',
-          isUrgent: false,
-          isCombined: true,
-          status: AssignmentStatus.rejected,
-        ),
-      ],
-    );
   }
 
   bool isAssignmentActionPending(String assignmentId) =>
@@ -206,9 +195,14 @@ class HomepageController extends GetxController {
       if (response.isSuccess) {
         isOnline.value = goOnline;
         if (goOnline) {
+          await _refreshUpcomingAssignments(showLoader: true);
           _scheduleIncomingAssignment();
+          _startUpcomingPolling();
         } else {
+          _stopUpcomingPolling();
           _cancelIncomingAssignment();
+          stats.clear();
+          assignments.clear();
         }
         final message = _extractStatusMessage(response.responseData, goOnline);
         _showStatusSnack(
@@ -260,6 +254,21 @@ class HomepageController extends GetxController {
       margin: const EdgeInsets.all(16),
       duration: const Duration(seconds: 3),
     );
+  }
+
+  void _startUpcomingPolling() {
+    _upcomingOrdersTimer?.cancel();
+    _upcomingOrdersTimer = Timer.periodic(
+      const Duration(seconds: 20),
+      (_) {
+        _refreshUpcomingAssignments();
+      },
+    );
+  }
+
+  void _stopUpcomingPolling() {
+    _upcomingOrdersTimer?.cancel();
+    _upcomingOrdersTimer = null;
   }
 
   void _scheduleIncomingAssignment() {
@@ -417,7 +426,39 @@ class HomepageController extends GetxController {
   @override
   void onClose() {
     _connectivitySubscription?.cancel();
+    _stopUpcomingPolling();
     _cancelIncomingAssignment();
     super.onClose();
+  }
+
+  List<Assignment> _mapAssignmentsResponse(dynamic data) {
+    if (data is List) {
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(Assignment.fromUpcomingOrderJson)
+          .toList();
+    }
+
+    if (data is Map<String, dynamic>) {
+      if (data['results'] is List) {
+        final results = data['results'] as List<dynamic>;
+        return results
+            .whereType<Map<String, dynamic>>()
+            .map(Assignment.fromUpcomingOrderJson)
+            .toList();
+      }
+
+      if (data['orders'] is List) {
+        final orders = data['orders'] as List<dynamic>;
+        return orders
+            .whereType<Map<String, dynamic>>()
+            .map(Assignment.fromUpcomingOrderJson)
+            .toList();
+      }
+
+      return [Assignment.fromUpcomingOrderJson(data)];
+    }
+
+    return [];
   }
 }
