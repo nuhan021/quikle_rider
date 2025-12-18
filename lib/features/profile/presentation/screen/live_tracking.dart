@@ -9,11 +9,18 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:quikle_rider/features/map/presentation/widgets/map_shimmer.dart';
 import 'package:quikle_rider/features/map/presentation/controller/tracking_controller.dart';
 
-// 4 miles in meters for the location accuracy circle.
+// 4 km radius circle around current location.
 const double _currentCircleRadiusMeters = 4000;
 
 class LiveMap extends StatefulWidget {
-  const LiveMap({super.key});
+  const LiveMap({
+    super.key,
+    this.vendorLocation,
+    this.customerLocation,
+  });
+
+  final LatLng? vendorLocation;
+  final LatLng? customerLocation;
 
   @override
   State<LiveMap> createState() => _LiveMapState();
@@ -33,6 +40,11 @@ class _LiveMapState extends State<LiveMap> {
       controller = Get.put(TrackingController());
       _ownsController = true;
     }
+    controller.ensureInitialized();
+    controller.updatePartnerAndCustomer(
+      vendor: widget.vendorLocation,
+      customer: widget.customerLocation,
+    );
   }
 
   @override
@@ -47,7 +59,7 @@ class _LiveMapState extends State<LiveMap> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final isTrackingLive = controller.isTrackingLive.value;
+      // final isTrackingLive = controller.isTrackingLive.value;
       final currentLocation = controller.currentLocation.value;
 
       return Container(
@@ -72,7 +84,6 @@ class _LiveMapState extends State<LiveMap> {
                         strokeWidth: 2,
                       ),
                     },
-
                     initialCameraPosition: CameraPosition(
                       target: currentLocation,
                       zoom: 14,
@@ -89,36 +100,36 @@ class _LiveMapState extends State<LiveMap> {
                       ),
                     },
                   ),
-                  Positioned(
-                    bottom: 16,
-                    right: 60,
-                    child: ElevatedButton.icon(
-                      onPressed: isTrackingLive
-                          ? controller.stopLiveTracking
-                          : controller.startLiveTracking,
-                      icon: Icon(
-                        isTrackingLive
-                            ? Icons.pause_circle_outline
-                            : Icons.play_arrow,
-                        size: 18,
-                      ),
-                      label: Text(
-                        isTrackingLive ? 'Stop Live' : 'Start Live',
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            isTrackingLive ? Colors.red.shade700 : Colors.blue.shade700,
-                        foregroundColor: Colors.white,
-                        padding:
-                            const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 3,
-                      ),
-                    ),
-                  ),
+                  // Positioned(
+                  //   bottom: 16,
+                  //   right: 60,
+                  //   child: ElevatedButton.icon(
+                  //     onPressed: isTrackingLive
+                  //         ? controller.stopLiveTracking
+                  //         : controller.startLiveTracking,
+                  //     icon: Icon(
+                  //       isTrackingLive
+                  //           ? Icons.pause_circle_outline
+                  //           : Icons.play_arrow,
+                  //       size: 18,
+                  //     ),
+                  //     label: Text(
+                  //       isTrackingLive ? 'Stop Live' : 'Start Live',
+                  //       style: const TextStyle(fontSize: 14),
+                  //     ),
+                  //     style: ElevatedButton.styleFrom(
+                  //       backgroundColor:
+                  //           isTrackingLive ? Colors.red.shade700 : Colors.blue.shade700,
+                  //       foregroundColor: Colors.white,
+                  //       padding:
+                  //           const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  //       shape: RoundedRectangleBorder(
+                  //         borderRadius: BorderRadius.circular(12),
+                  //       ),
+                  //       elevation: 3,
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
       );

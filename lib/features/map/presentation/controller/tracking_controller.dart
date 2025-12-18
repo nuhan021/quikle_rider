@@ -1,6 +1,5 @@
-// ignore_for_file: deprecated_member_use
-
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -8,45 +7,94 @@ import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:quikle_rider/core/services/location_services.dart';
+import 'package:quikle_rider/core/utils/logging/logger.dart';
 
-// Static points for vendor and customer; swap with live values when wired.
-const LatLng _vendorLocation = LatLng(26.78559602360313, 73.59072604921964); // Bengaluru vendor
-const LatLng _userLocation = LatLng(26.791236475585176, 73.58672901218489); // Bengaluru customer
-const LatLng _dummyCurrentLocation = LatLng(26.788910909422594, 73.58118541371569); // Bengaluru rider
+// Load the key from .env or --dart-define.
+final String googleMapsApiKey = dotenv.env['GOOGLE_MAP_API_KEY'] ?? '';
 
-
-
-//Load the key from .env
-final String googleMapsApiKey =
-    dotenv.env['GOOGLE_MAP_API_KEY']?.trim() ??
-        const String.fromEnvironment(
-          'GOOGLE_MAP_API_KEY',
-          defaultValue: '',
-        );
 class TrackingController extends GetxController {
+  final Rxn<LatLng> vendorLocation = Rxn<LatLng>();
+  final Rxn<LatLng> customerLocation = Rxn<LatLng>();
   BitmapDescriptor currentLocationIcon = BitmapDescriptor.defaultMarker;
+
   final Completer<GoogleMapController> mapController = Completer();
   final Rxn<LatLng> currentLocation = Rxn<LatLng>();
   final RxSet<Marker> markers = <Marker>{}.obs;
   final RxSet<Polyline> polylines = <Polyline>{}.obs;
   final RxBool isTrackingLive = false.obs;
   bool _mapActive = true;
+  bool _initialized = false;
   StreamSubscription<Position>? positionSubscription;
   LatLng? _lastPolylineOrigin;
+  bool _partnerAndCustomerProvided = false;
+
+  final LocationServices _locationServices = LocationServices();
+  StreamSubscription? _locationServiceSubscription;
 
   TrackingController();
 
   @override
   void onInit() {
     super.onInit();
+    ensureInitialized();
+  }
+
+  Future<void> ensureInitialized() async {
+    if (_initialized) return;
+    _initialized = true;
+    await _initTracking();
+  }
+
+  Future<void> _initTracking() async {
     _setFixedMarkers();
-    _determinePosition();
+    await _seedInitialPosition();
+    await _determinePosition();
+
+    _locationServices.connect();
+    _locationServiceSubscription = _locationServices.socketResponse.listen((
+      location,
+    ) {
+      vendorLocation.value = LatLng(location['lat']!, location['lng']!);
+      _setFixedMarkers();
+      _buildRoutePolylines();
+      _fitCameraToPoints();
+    });
+
+    // Start live tracking immediately so markers refresh as GPS updates.
+    await startLiveTracking();
+    AppLoggerHelper.debug(
+      'Current location after init: ${currentLocation.value}',
+    );
+  }
+
+  /// Allow external screens to provide vendor/customer coordinates.
+  void updatePartnerAndCustomer({LatLng? vendor, LatLng? customer}) async {
+    bool changed = false;
+    if (vendor != null) {
+      vendorLocation.value = vendor;
+      _partnerAndCustomerProvided = true;
+      changed = true;
+    }
+    if (customer != null) {
+      customerLocation.value = customer;
+      _partnerAndCustomerProvided = true;
+      changed = true;
+    }
+
+    if (changed) {
+      _setFixedMarkers();
+      await _buildRoutePolylines();
+      _fitCameraToPoints();
+    }
   }
 
   @override
   void onClose() {
     _mapActive = false;
     positionSubscription?.cancel();
+    _locationServiceSubscription?.cancel();
+    _locationServices.disconnect();
     super.onClose();
   }
 
@@ -72,14 +120,34 @@ class TrackingController extends GetxController {
     await _fitCameraToPoints();
   }
 
+  Future<void> _seedInitialPosition() async {
+    try {
+      final lastKnown = await Geolocator.getLastKnownPosition();
+      if (lastKnown != null) {
+        final known = LatLng(lastKnown.latitude, lastKnown.longitude);
+        currentLocation.value = known;
+        _setCurrentMarker(known);
+        _setFixedMarkers();
+        await _buildRoutePolylines();
+        await _fitCameraToPoints();
+        return;
+      }
+    } catch (_) {}
+
+    // Don't fall back to a dummy coordinate; wait for a real GPS fix.
+    currentLocation.value = null;
+  }
+
   Future<void> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      _showError('Location services are disabled. Showing dummy location.');
-      await _useDummyLocation();
+      _showError(
+        'Location services are disabled. Unable to show your current location.',
+      );
+      _clearCurrentMarker();
       return;
     }
 
@@ -87,36 +155,38 @@ class TrackingController extends GetxController {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        _showError('Location permissions are denied. Showing dummy location.');
-        await _useDummyLocation();
+        _showError(
+          'Location permissions are denied. Unable to show your current location.',
+        );
+        _clearCurrentMarker();
         return;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
       _showError(
-        'Location permissions are permanently denied. Showing dummy location.',
+        'Location permissions are permanently denied. Unable to show your current location.',
       );
-      await _useDummyLocation();
+      _clearCurrentMarker();
       return;
     }
 
     try {
       final position = await Geolocator.getCurrentPosition(
-        // ignore: deprecated_member_use
         desiredAccuracy: LocationAccuracy.high,
       );
 
       final newLocation = LatLng(position.latitude, position.longitude);
       currentLocation.value = newLocation;
+      _ensurePartnerAndCustomerNearCurrent(newLocation);
       _setCurrentMarker(newLocation);
       _setFixedMarkers();
       await _buildRoutePolylines();
       await _fitCameraToPoints();
       await _moveCameraToPosition(newLocation, 16);
     } catch (e) {
-      _showError('Unable to fetch GPS location. Showing dummy location.');
-      await _useDummyLocation();
+      _showError('Unable to fetch GPS location.');
+      _clearCurrentMarker();
     }
   }
 
@@ -151,8 +221,10 @@ class TrackingController extends GetxController {
       (Position position) {
         final newLocation = LatLng(position.latitude, position.longitude);
         currentLocation.value = newLocation;
+        _ensurePartnerAndCustomerNearCurrent(newLocation);
         _setCurrentMarker(newLocation);
         _buildRoutePolylines();
+        _fitCameraToPoints();
       },
       onError: (e) {
         _showError('Error during live tracking: ${e.toString()}');
@@ -167,6 +239,12 @@ class TrackingController extends GetxController {
     isTrackingLive.value = false;
   }
 
+  void _clearCurrentMarker() {
+    markers.removeWhere((marker) => marker.markerId.value == 'current');
+    markers.refresh();
+    currentLocation.value = null;
+  }
+
   void _setCurrentMarker(LatLng position) {
     markers.removeWhere((marker) => marker.markerId.value == 'current');
     markers.add(
@@ -178,6 +256,7 @@ class TrackingController extends GetxController {
         zIndex: 1,
       ),
     );
+    markers.refresh();
   }
 
   Marker _buildMarker(
@@ -198,29 +277,43 @@ class TrackingController extends GetxController {
 
   void _setFixedMarkers() {
     markers.removeWhere(
-      (marker) => marker.markerId.value == 'vendor' || marker.markerId.value == 'user',
+      (marker) =>
+          marker.markerId.value == 'vendor' ||
+          marker.markerId.value == 'customer' ||
+          marker.markerId.value == 'user',
     );
-    markers.addAll([
-      _buildMarker(
-        'vendor',
-        'Vendor Location',
-        _vendorLocation,
-        BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
-        zIndex: 0.5,
-      ),
-      _buildMarker(
-        'user',
-        'Customer Location',
-        _userLocation,
-        BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-        zIndex: 0.5,
-      ),
-    ]);
+    final vendor = vendorLocation.value;
+    final customer = customerLocation.value;
+    if (vendor != null) {
+      markers.add(
+        _buildMarker(
+          'vendor',
+          'Vendor Location',
+          vendor,
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+          zIndex: 0.5,
+        ),
+      );
+    }
+    if (customer != null) {
+      markers.add(
+        _buildMarker(
+          'customer',
+          'Customer Location',
+          customer,
+          BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+          zIndex: 0.5,
+        ),
+      );
+    }
+    markers.refresh();
   }
 
   Future<void> _buildRoutePolylines() async {
     final origin = currentLocation.value;
-    if (origin == null) return;
+    final vendor = vendorLocation.value;
+    final customer = customerLocation.value;
+    if (origin == null || vendor == null || customer == null) return;
 
     if (_lastPolylineOrigin != null) {
       final diff = Geolocator.distanceBetween(
@@ -242,8 +335,8 @@ class TrackingController extends GetxController {
 
     final polylinePoints = PolylinePoints(apiKey: apiKey);
     final legs = [
-      (origin, _vendorLocation, 'current-to-vendor'),
-      (_vendorLocation, _userLocation, 'vendor-to-user'),
+      (origin, vendor, 'current-to-vendor'),
+      (vendor, customer, 'vendor-to-user'),
     ];
 
     polylines.clear();
@@ -259,6 +352,7 @@ class TrackingController extends GetxController {
 
       if (result.points.isEmpty) {
         _showError('Could not draw route for ${leg.$3}.');
+        AppLoggerHelper.debug('Polyline empty for ${leg.$3}. Status: ${result.status}');
         continue;
       }
 
@@ -275,30 +369,34 @@ class TrackingController extends GetxController {
         ),
       );
     }
+    polylines.refresh();
     _lastPolylineOrigin = origin;
     await _fitCameraToPoints();
-  }
-
-  Future<void> _useDummyLocation() async {
-    currentLocation.value = _dummyCurrentLocation;
-    _setCurrentMarker(_dummyCurrentLocation);
-    _setFixedMarkers();
-    await _buildRoutePolylines();
-    await _fitCameraToPoints();
-    await _moveCameraToPosition(_dummyCurrentLocation, 14);
   }
 
   Future<void> _fitCameraToPoints() async {
     final current = currentLocation.value;
     if (!_mapActive || !mapController.isCompleted || current == null) return;
 
-    final boundsPoints = [current, _vendorLocation, _userLocation];
+    final boundsPoints = <LatLng>[
+      current,
+      if (vendorLocation.value != null) vendorLocation.value!,
+      if (customerLocation.value != null) customerLocation.value!,
+    ];
     double? south, north, west, east;
     for (final p in boundsPoints) {
-      south = south == null ? p.latitude : (south > p.latitude ? p.latitude : south);
-      north = north == null ? p.latitude : (north < p.latitude ? p.latitude : north);
-      west = west == null ? p.longitude : (west > p.longitude ? p.longitude : west);
-      east = east == null ? p.longitude : (east < p.longitude ? p.longitude : east);
+      south = south == null
+          ? p.latitude
+          : (south > p.latitude ? p.latitude : south);
+      north = north == null
+          ? p.latitude
+          : (north < p.latitude ? p.latitude : north);
+      west = west == null
+          ? p.longitude
+          : (west > p.longitude ? p.longitude : west);
+      east = east == null
+          ? p.longitude
+          : (east < p.longitude ? p.longitude : east);
     }
 
     if (south == null || north == null || west == null || east == null) return;
@@ -323,5 +421,41 @@ class TrackingController extends GetxController {
         duration: const Duration(seconds: 4),
       ),
     );
+  }
+
+  void _ensurePartnerAndCustomerNearCurrent(LatLng origin) {
+    if (_partnerAndCustomerProvided) return;
+
+    final vendor = vendorLocation.value;
+    final customer = customerLocation.value;
+
+    if (vendor == null) {
+      vendorLocation.value = _offsetLatLng(
+        origin,
+        metersNorth: 140,
+        metersEast: 90,
+      );
+    }
+
+    if (customer == null) {
+      customerLocation.value = _offsetLatLng(
+        origin,
+        metersNorth: -120,
+        metersEast: -80,
+      );
+    }
+  }
+
+  LatLng _offsetLatLng(
+    LatLng origin, {
+    required double metersNorth,
+    required double metersEast,
+  }) {
+    const metersPerDegreeLat = 111320.0;
+    final dLat = metersNorth / metersPerDegreeLat;
+    final metersPerDegreeLng =
+        metersPerDegreeLat * cos(origin.latitude * pi / 180);
+    final dLng = metersEast / metersPerDegreeLng;
+    return LatLng(origin.latitude + dLat, origin.longitude + dLng);
   }
 }

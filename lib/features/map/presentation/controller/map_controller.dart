@@ -13,6 +13,8 @@ class MapController extends GetxController {
   final Rx<DeliveryModel?> currentDelivery = Rx<DeliveryModel?>(null);
   final RxBool isFetchingLocation = false.obs;
   final Rxn<LatLng> currentPosition = Rxn<LatLng>();
+  final Rxn<LatLng> vendorPosition = Rxn<LatLng>();
+  final Rxn<LatLng> customerPosition = Rxn<LatLng>();
   final RxnString locationError = RxnString();
   final RxString currentAddress = 'Fetching location...'.obs;
   final Rxn<LatLng> selectedDestination = Rxn<LatLng>();
@@ -27,14 +29,49 @@ class MapController extends GetxController {
       hasUserLocation && selectedDestination.value != null;
 
   Set<Marker> get mapMarkers {
-    final markers = <Marker>{
-      Marker(
-        
-        markerId: const MarkerId('current-location'),
-        position: currentPosition.value ?? fallbackLocation,
-        infoWindow: const InfoWindow(title: 'You are here'),
-      ),
-    };
+    final markers = <Marker>{};
+    final current = currentPosition.value;
+    if (current != null) {
+      markers.add(
+        Marker(
+          markerId: const MarkerId('current-location'),
+          position: current,
+          infoWindow: const InfoWindow(title: 'You are here'),
+        ),
+      );
+    }
+
+    final vendor = vendorPosition.value;
+    if (vendor != null) {
+      markers.add(
+        Marker(
+          markerId: const MarkerId('vendor-location'),
+          position: vendor,
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueOrange,
+          ),
+          infoWindow: InfoWindow(
+            title: currentDelivery.value?.restaurantName ?? 'Vendor',
+          ),
+        ),
+      );
+    }
+
+    final customer = customerPosition.value;
+    if (customer != null) {
+      markers.add(
+        Marker(
+          markerId: const MarkerId('customer-location'),
+          position: customer,
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueAzure,
+          ),
+          infoWindow: InfoWindow(
+            title: currentDelivery.value?.customerName ?? 'Customer',
+          ),
+        ),
+      );
+    }
 
     final destination = selectedDestination.value;
     if (destination != null) {
@@ -152,6 +189,7 @@ class MapController extends GetxController {
         ),
       );
       currentPosition.value = LatLng(position.latitude, position.longitude);
+      _ensureVendorAndCustomerNearby(currentPosition.value!);
       await _updateAddressFromCoordinates();
       _moveCameraToCurrentLocation();
       if (selectedDestination.value != null) {
@@ -396,5 +434,31 @@ class MapController extends GetxController {
         60,
       ),
     );
+  }
+
+  void _ensureVendorAndCustomerNearby(LatLng origin) {
+    vendorPosition.value ??= _offsetLatLng(
+      origin,
+      metersNorth: 140,
+      metersEast: 90,
+    );
+    customerPosition.value ??= _offsetLatLng(
+      origin,
+      metersNorth: -120,
+      metersEast: -80,
+    );
+  }
+
+  LatLng _offsetLatLng(
+    LatLng origin, {
+    required double metersNorth,
+    required double metersEast,
+  }) {
+    const metersPerDegreeLat = 111320.0;
+    final dLat = metersNorth / metersPerDegreeLat;
+    final metersPerDegreeLng =
+        metersPerDegreeLat * cos(origin.latitude * pi / 180);
+    final dLng = metersEast / metersPerDegreeLng;
+    return LatLng(origin.latitude + dLat, origin.longitude + dLng);
   }
 }

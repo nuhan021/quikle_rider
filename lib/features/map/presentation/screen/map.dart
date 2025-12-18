@@ -1,13 +1,16 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/features/map/presentation/controller/map_controller.dart';
 import 'package:quikle_rider/features/map/presentation/model/delivery_model.dart';
-import 'package:quikle_rider/features/profile/presentation/screen/live_tracking.dart';
+import 'package:quikle_rider/features/map/presentation/widgets/map_shimmer.dart';
 
 class MapScreen extends StatelessWidget {
   MapScreen({super.key});
@@ -42,8 +45,7 @@ class MapScreen extends StatelessWidget {
                   : SingleChildScrollView(
                       child: Column(
                         children: [
-                          // _buildMapArea(controller),
-                          _buildlivetracking(),
+                          _buildMapArea(controller),
                           _buildDeliveryInfo(context, controller, delivery),
                         ],
                       ),
@@ -55,8 +57,33 @@ class MapScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildlivetracking() {
-    return LiveMap();
+  Widget _buildMapArea(MapController controller) {
+    final showLoading =
+        controller.isFetchingLocation.value || !controller.hasUserLocation;
+
+    if (showLoading) {
+      return SizedBox(height: 400.h, child: const MapShimmer());
+    }
+
+    final current = controller.currentPosition.value!;
+
+    return SizedBox(
+      height: 400.h,
+      child: GoogleMap(
+        mapType: MapType.normal,
+        initialCameraPosition: CameraPosition(target: current, zoom: 15),
+        onMapCreated: controller.attachMapController,
+        markers: controller.mapMarkers,
+        polylines: controller.activePolylines,
+        myLocationEnabled: true,
+        myLocationButtonEnabled: true,
+        zoomControlsEnabled: true,
+        onTap: controller.handleMapTap,
+        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+          Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer()),
+        },
+      ),
+    );
   }
 
   Widget _buildDeliveryInfo(
