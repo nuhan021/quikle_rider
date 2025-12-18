@@ -1,23 +1,51 @@
 // ignore_for_file: deprecated_member_use
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/map/presentation/controller/map_controller.dart';
 import 'package:quikle_rider/features/map/presentation/model/delivery_model.dart';
-import 'package:quikle_rider/features/profile/presentation/screen/live_tracking.dart';
+import 'package:quikle_rider/features/map/presentation/widgets/map_shimmer.dart';
 
-class MapScreen extends StatelessWidget {
-  MapScreen({super.key});
+class MapScreen extends StatefulWidget {
+  const MapScreen({super.key});
 
-  final MapController mapController = Get.isRegistered<MapController>()
-      ? Get.find<MapController>()
-      : Get.put(MapController());
+  @override
+  State<MapScreen> createState() => _MapScreenState();
+}
+
+class _MapScreenState extends State<MapScreen> {
+  late final MapController mapController;
+
+  @override
+  void initState() {
+    super.initState();
+    mapController = Get.isRegistered<MapController>()
+        ? Get.find<MapController>()
+        : Get.put(MapController());
+    debugPrint('MapScreen: opening, requesting current location...');
+    mapController.requestCurrentLocation();
+  }
+
+  @override
+  void dispose() {
+    mapController.detachMapController();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final args = Get.arguments;
+    if (args is RiderOrder) {
+      mapController.applyOrderIfNeeded(args);
+    }
+
     return GetX<MapController>(
       init: mapController,
       builder: (controller) {
@@ -42,8 +70,7 @@ class MapScreen extends StatelessWidget {
                   : SingleChildScrollView(
                       child: Column(
                         children: [
-                          // _buildMapArea(controller),
-                          _buildlivetracking(),
+                          _buildMapArea(controller),
                           _buildDeliveryInfo(context, controller, delivery),
                         ],
                       ),
@@ -55,8 +82,33 @@ class MapScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildlivetracking() {
-    return LiveMap();
+  Widget _buildMapArea(MapController controller) {
+    final showLoading =
+        controller.isFetchingLocation.value || !controller.hasUserLocation;
+
+    if (showLoading) {
+      return SizedBox(height: 400.h, child: const MapShimmer());
+    }
+
+    final current = controller.currentPosition.value!;
+
+    return SizedBox(
+      height: 400.h,
+      child: GoogleMap(
+        mapType: MapType.normal,
+        initialCameraPosition: CameraPosition(target: current, zoom: 15),
+        onMapCreated: controller.attachMapController,
+        markers: controller.mapMarkers,
+        polylines: controller.activePolylines,
+        myLocationEnabled: true,
+        myLocationButtonEnabled: true,
+        zoomControlsEnabled: true,
+        onTap: controller.handleMapTap,
+        gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+          Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer()),
+        },
+      ),
+    );
   }
 
   Widget _buildDeliveryInfo(
@@ -86,6 +138,8 @@ class MapScreen extends StatelessWidget {
         children: [
           _buildHeader(delivery),
           SizedBox(height: 15.h),
+          _buildPickupInfo(controller, delivery),
+          SizedBox(height: 15.h),
           _buildCustomerInfo(delivery, controller),
           SizedBox(height: 15.h),
           _buildDeliveryAddress(delivery),
@@ -102,7 +156,7 @@ class MapScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text('Delivery Address', style: headingStyle2(color: Colors.black87)),
+        Text('Order Details', style: headingStyle2(color: Colors.black87)),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
           decoration: BoxDecoration(
@@ -117,6 +171,46 @@ class MapScreen extends StatelessWidget {
               color: Colors.black,
             ),
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPickupInfo(MapController controller, DeliveryModel delivery) {
+    final pickupAddress = controller.vendorPickupAddress.value.trim();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Pickup', style: headingStyle2(color: Colors.black87)),
+        SizedBox(height: 8.h),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.store, color: Colors.grey[600], size: 16.sp),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    delivery.restaurantName,
+                    style: getTextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.grey[800],
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    pickupAddress.isNotEmpty
+                        ? pickupAddress
+                        : 'Pickup location not available',
+                    style: getTextStyle(fontSize: 13, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ],
     );

@@ -2,88 +2,50 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/features/all_orders/models/combine_ordermodel.dart';
+import 'package:quikle_rider/features/all_orders/controllers/all_order_controller.dart';
 
 
 class CombinedOrderController extends GetxController {
-  final Rx<CombinedOrderModel> order = _getDummyOrder().obs;
+  final Rxn<CombinedOrderModel> order = Rxn<CombinedOrderModel>();
+  Worker? _ordersWorker;
 
-  // Dummy data
-  static CombinedOrderModel _getDummyOrder() {
-    return CombinedOrderModel(
-      customerName: 'Aanya Desai',
-      customerImage: 'assets/images/avatar.png',
-      deliveryAddress: '789 River Rd, Apartment 3B, Riverside Mohakhali',
-      completedSteps: 2,
-      totalSteps: 3,
-      totalPayout: 70,
-      distanceInKm: 4,
-      distancePay: 14,
-      combinedOrderBonus: 0,
-      pickupPoints: [
-        PickupPoint(
-          name: 'Thai Spice Restaurant',
-          address: '123 Main St, Bangkok',
-          statusText: 'Pickup completed at 15:10 PM',
-          status: PickupStatus.completed,
-        ),
-        PickupPoint(
-          name: 'Sushi Express',
-          address: '456 Central Ave, Bangkok',
-          statusText: 'Estimated arrival in 5 min',
-          status: PickupStatus.pending,
-        ),
-      ],
-      restaurants: [
-        Restaurant(
-          name: 'Thai Spice Restaurant',
-          items: [
-            MenuItem(
-              name: 'Pad Thai Chicken X 1',
-              details: 'Medium spicy, no peanuts',
-              imagePath: 'assets/images/foodimage.png',
-            ),
-            MenuItem(
-              name: 'Spring Rolls X 2',
-              details: 'Vegetarian',
-              imagePath: 'assets/images/foodimage02.png',
-            ),
-          ],
-        ),
-        Restaurant(
-          name: 'Sushi Express',
-          items: [
-            MenuItem(
-              name: 'Dragon Roll Set X 1',
-              details: '8 pieces, extra wasabi',
-              imagePath: 'assets/images/foodimage03.png',
-            ),
-            MenuItem(
-              name: 'Miso Soup X 1',
-              details: 'Regular size',
-              imagePath: 'assets/images/foodimage03.png',
-            ),
-          ],
-        ),
-      ],
-      pickupPayouts: [
-        PickupPayout(
-          pickupName: 'Thai Spice Restaurant',
-          baseAmount: 28,
-        ),
-        PickupPayout(
-          pickupName: 'Sushi Express',
-          baseAmount: 28,
-        ),
-      ],
-    );
+  @override
+  void onInit() {
+    super.onInit();
+    if (Get.isRegistered<AllOrdersController>()) {
+      final allOrdersController = Get.find<AllOrdersController>();
+      _syncFromAllOrders(allOrdersController);
+      _ordersWorker = ever(allOrdersController.orders, (_) {
+        _syncFromAllOrders(allOrdersController);
+      });
+    }
   }
 
-  void makePhoneCall() {
-    _showSnackbar('Calling ${order.value.customerName}');
+  void _syncFromAllOrders(AllOrdersController allOrdersController) {
+    final combined = allOrdersController.combinedOrders;
+    if (combined.isEmpty) {
+      order.value = null;
+      return;
+    }
+    order.value = CombinedOrderModel.fromRiderOrder(combined.first);
   }
 
-  void sendMessage() {
-    _showSnackbar('Opening chat with ${order.value.customerName}');
+  void makePhoneCall([CombinedOrderModel? target]) {
+    final current = target ?? order.value;
+    if (current == null) {
+      _showSnackbar('No combined order loaded');
+      return;
+    }
+    _showSnackbar('Calling ${current.customerName}');
+  }
+
+  void sendMessage([CombinedOrderModel? target]) {
+    final current = target ?? order.value;
+    if (current == null) {
+      _showSnackbar('No combined order loaded');
+      return;
+    }
+    _showSnackbar('Opening chat with ${current.customerName}');
   }
 
   void _showSnackbar(String message) {
@@ -105,5 +67,11 @@ class CombinedOrderController extends GetxController {
       colorText: Colors.white,
       snackPosition: SnackPosition.BOTTOM,
     );
+  }
+
+  @override
+  void onClose() {
+    _ordersWorker?.dispose();
+    super.onClose();
   }
 }

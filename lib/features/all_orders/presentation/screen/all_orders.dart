@@ -22,10 +22,13 @@ class _AllOrdersState extends State<AllOrders>
   @override
   void initState() {
     super.initState();
-    controller.tabController = TabController(length: 2, vsync: this);
-    controller.tabController.addListener(() {
-      if (!controller.tabController.indexIsChanging) {
-        controller.selectedIndex.value = controller.tabController.index;
+    final tabController = TabController(length: 2, vsync: this);
+    controller.attachTabController(tabController);
+    controller.tabController?.addListener(() {
+      final currentTabController = controller.tabController;
+      if (currentTabController == null) return;
+      if (!currentTabController.indexIsChanging) {
+        controller.selectedIndex.value = currentTabController.index;
       }
     });
   }
@@ -95,7 +98,7 @@ class _AllOrdersState extends State<AllOrders>
 
   @override
   void dispose() {
-    controller.tabController.dispose();
+    controller.tabController?.dispose();
     super.dispose();
   }
 }
