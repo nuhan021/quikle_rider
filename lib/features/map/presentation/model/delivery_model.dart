@@ -16,6 +16,26 @@ class DeliveryModel {
     required this.items,
     required this.customerAvatar,
   });
+
+  DeliveryModel copyWith({
+    String? customerName,
+    String? customerAddress,
+    String? deliveryAddress,
+    String? estimatedTime,
+    String? restaurantName,
+    List<DeliveryItem>? items,
+    String? customerAvatar,
+  }) {
+    return DeliveryModel(
+      customerName: customerName ?? this.customerName,
+      customerAddress: customerAddress ?? this.customerAddress,
+      deliveryAddress: deliveryAddress ?? this.deliveryAddress,
+      estimatedTime: estimatedTime ?? this.estimatedTime,
+      restaurantName: restaurantName ?? this.restaurantName,
+      items: items ?? this.items,
+      customerAvatar: customerAvatar ?? this.customerAvatar,
+    );
+  }
 }
 
 class DeliveryItem {

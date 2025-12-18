@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/utils/device/device_utility.dart';
+import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/map/presentation/model/delivery_model.dart';
 
 class MapController extends GetxController {
@@ -17,9 +18,11 @@ class MapController extends GetxController {
   final Rxn<LatLng> customerPosition = Rxn<LatLng>();
   final RxnString locationError = RxnString();
   final RxString currentAddress = 'Fetching location...'.obs;
+  final RxString vendorPickupAddress = ''.obs;
   final Rxn<LatLng> selectedDestination = Rxn<LatLng>();
   final RxString selectedDestinationAddress = ''.obs;
   GoogleMapController? _mapController;
+  String? _activeOrderId;
 
   LatLng get fallbackLocation =>
       const LatLng(37.42796133580664, -122.085749655962);
@@ -27,6 +30,7 @@ class MapController extends GetxController {
   bool get hasUserLocation => currentPosition.value != null;
   bool get hasActiveRoute =>
       hasUserLocation && selectedDestination.value != null;
+  bool get hasActiveOrder => _activeOrderId != null;
 
   Set<Marker> get mapMarkers {
     final markers = <Marker>{};
@@ -136,8 +140,9 @@ class MapController extends GetxController {
 
   @override
   void onInit() {
-    _loadDeliveryData();
+    _loadDeliveryData(Get.arguments);
     requestCurrentLocation();
+    
     super.onInit();
   }
 
@@ -146,8 +151,18 @@ class MapController extends GetxController {
     isOnline.toggle();
   }
 
-  // Load delivery data (simulate API call)
-  void _loadDeliveryData() {
+  void applyOrderIfNeeded(RiderOrder order) {
+    if (_activeOrderId == order.id) return;
+    _applyOrder(order);
+  }
+
+  // Load delivery data (supports RiderOrder via Get.arguments)
+  void _loadDeliveryData(dynamic args) {
+    if (args is RiderOrder) {
+      _applyOrder(args);
+      return;
+    }
+
     currentDelivery.value = const DeliveryModel(
       customerName: 'Aanya Desai',
       customerAddress: '123 Main St, Bangkok',
@@ -172,6 +187,53 @@ class MapController extends GetxController {
     );
   }
 
+  void _applyOrder(RiderOrder order) {
+    _activeOrderId = order.id;
+
+    final vendor = order.metadata?.vendorInfo;
+    final shipping = order.metadata?.shippingAddress;
+
+    final restaurantName = (vendor?.storeName ?? '').trim();
+    final customerName = (shipping?.fullName ?? '').trim();
+    final deliveryAddress = (shipping?.addressLine1 ?? '').trim();
+
+    final estimated = order.etaMinutes != null
+        ? '${order.etaMinutes} min'
+        : (order.estimatedDelivery?.toIso8601String() ?? '');
+
+    currentDelivery.value = DeliveryModel(
+      customerName: customerName.isNotEmpty ? customerName : 'Customer',
+      customerAddress:
+          deliveryAddress.isNotEmpty ? deliveryAddress : 'Delivery location',
+      deliveryAddress:
+          deliveryAddress.isNotEmpty ? deliveryAddress : 'Delivery location',
+      estimatedTime: estimated,
+      restaurantName: restaurantName.isNotEmpty ? restaurantName : 'Vendor',
+      customerAvatar: 'assets/images/avatar.png',
+      items: const [],
+    );
+
+    if (vendor?.storeLatitude != null && vendor?.storeLongitude != null) {
+      vendorPickupAddress.value = 'Resolving pickup address...';
+      vendorPosition.value = LatLng(vendor!.storeLatitude!, vendor.storeLongitude!);
+      _resolveVendorAddressFromCoordinates(vendorPosition.value!);
+    } else {
+      vendorPosition.value = null;
+      vendorPickupAddress.value = '';
+    }
+
+    if (shipping?.latitude != null && shipping?.longitude != null) {
+      customerPosition.value =
+          LatLng(shipping!.latitude!, shipping.longitude!);
+    } else if ((shipping?.addressLine1 ?? '').trim().isNotEmpty) {
+      _resolveCustomerCoordinatesFromAddress(shipping!.addressLine1!.trim());
+    } else {
+      customerPosition.value = null;
+    }
+
+    _fitCameraToOrder();
+  }
+
   Future<void> requestCurrentLocation() async {
     isFetchingLocation.value = true;
     locationError.value = null;
@@ -189,9 +251,18 @@ class MapController extends GetxController {
         ),
       );
       currentPosition.value = LatLng(position.latitude, position.longitude);
-      _ensureVendorAndCustomerNearby(currentPosition.value!);
+      debugPrint(
+        'MapController: Current location → lat=${position.latitude}, lng=${position.longitude}',
+      );
+      if (!hasActiveOrder) {
+        _ensureVendorAndCustomerNearby(currentPosition.value!);
+      }
       await _updateAddressFromCoordinates();
-      _moveCameraToCurrentLocation();
+      if (hasActiveOrder) {
+        _fitCameraToOrder();
+      } else {
+        _moveCameraToCurrentLocation();
+      }
       if (selectedDestination.value != null) {
         _fitCameraToRoute();
       }
@@ -235,16 +306,26 @@ class MapController extends GetxController {
   void attachMapController(GoogleMapController controller) {
     _mapController = controller;
     _moveCameraToCurrentLocation();
+    _fitCameraToOrder();
+  }
+
+  void detachMapController() {
+    _mapController = null;
   }
 
   void _moveCameraToCurrentLocation() {
     final target = currentPosition.value;
     if (_mapController == null || target == null) return;
-    _mapController!.animateCamera(
-      CameraUpdate.newCameraPosition(
-        CameraPosition(target: target, zoom: 15.5),
-      ),
-    );
+    try {
+      _mapController!.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(target: target, zoom: 15.5),
+        ),
+      );
+    } catch (error) {
+      debugPrint('MapController: animateCamera failed - $error');
+      _mapController = null;
+    }
   }
 
   Future<void> _updateAddressFromCoordinates() async {
@@ -359,7 +440,7 @@ class MapController extends GetxController {
 
   @override
   void onClose() {
-    _mapController?.dispose();
+    detachMapController();
     super.onClose();
   }
 
@@ -428,12 +509,94 @@ class MapController extends GetxController {
       max(start.longitude, destination.longitude),
     );
 
-    _mapController!.animateCamera(
-      CameraUpdate.newLatLngBounds(
-        LatLngBounds(southwest: southwest, northeast: northeast),
-        60,
-      ),
-    );
+    try {
+      _mapController!.animateCamera(
+        CameraUpdate.newLatLngBounds(
+          LatLngBounds(southwest: southwest, northeast: northeast),
+          60,
+        ),
+      );
+    } catch (error) {
+      debugPrint('MapController: animateCamera failed - $error');
+      _mapController = null;
+    }
+  }
+
+  void _fitCameraToOrder() {
+    if (_mapController == null) return;
+    final current = currentPosition.value;
+    final vendor = vendorPosition.value;
+    final customer = customerPosition.value;
+
+    final points = <LatLng>[
+      if (current != null) current,
+      if (vendor != null) vendor,
+      if (customer != null) customer,
+    ];
+    if (points.length < 2) return;
+
+    var minLat = points.first.latitude;
+    var maxLat = points.first.latitude;
+    var minLng = points.first.longitude;
+    var maxLng = points.first.longitude;
+
+    for (final p in points.skip(1)) {
+      minLat = min(minLat, p.latitude);
+      maxLat = max(maxLat, p.latitude);
+      minLng = min(minLng, p.longitude);
+      maxLng = max(maxLng, p.longitude);
+    }
+
+    try {
+      _mapController!.animateCamera(
+        CameraUpdate.newLatLngBounds(
+          LatLngBounds(
+            southwest: LatLng(minLat, minLng),
+            northeast: LatLng(maxLat, maxLng),
+          ),
+          60,
+        ),
+      );
+    } catch (error) {
+      debugPrint('MapController: animateCamera failed - $error');
+      _mapController = null;
+    }
+  }
+
+  Future<void> _resolveCustomerCoordinatesFromAddress(String address) async {
+    try {
+      final locations = await locationFromAddress(address);
+      if (locations.isEmpty) return;
+      if (isClosed) return;
+      final first = locations.first;
+      customerPosition.value = LatLng(first.latitude, first.longitude);
+      _fitCameraToOrder();
+    } catch (error) {
+      debugPrint('MapController: Failed to geocode delivery address - $error');
+    }
+  }
+
+  Future<void> _resolveVendorAddressFromCoordinates(LatLng position) async {
+    try {
+      final placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+      if (placemarks.isEmpty) return;
+      if (isClosed) return;
+      final place = placemarks.first;
+      final segments = <String>[
+        if ((place.name ?? '').trim().isNotEmpty) place.name!,
+        if ((place.street ?? '').trim().isNotEmpty) place.street!,
+        if ((place.locality ?? '').trim().isNotEmpty) place.locality!,
+      ];
+      final formatted = segments.where((e) => e.trim().isNotEmpty).join(', ');
+      if (formatted.isNotEmpty) {
+        vendorPickupAddress.value = formatted;
+      }
+    } catch (error) {
+      debugPrint('MapController: Failed to reverse-geocode vendor - $error');
+    }
   }
 
   void _ensureVendorAndCustomerNearby(LatLng origin) {
@@ -461,4 +624,5 @@ class MapController extends GetxController {
     final dLng = metersEast / metersPerDegreeLng;
     return LatLng(origin.latitude + dLat, origin.longitude + dLng);
   }
+
 }

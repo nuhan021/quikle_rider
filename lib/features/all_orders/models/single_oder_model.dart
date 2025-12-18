@@ -1,6 +1,8 @@
 // models/order_model.dart
 import 'dart:ui';
 
+import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
+
 class OrderModel {
   final String id;
   final String customerName;
@@ -27,6 +29,26 @@ class OrderModel {
     required this.customerImage,
     required this.items,
   });
+
+  factory OrderModel.fromRiderOrder(RiderOrder order) {
+    final shipping = order.metadata?.shippingAddress;
+    final vendor = order.metadata?.vendorInfo;
+    return OrderModel(
+      id: order.id,
+      customerName: shipping?.fullName ?? '',
+      restaurant: vendor?.storeName ?? '',
+      address: shipping?.addressLine1 ?? '',
+      estimatedTime: order.etaMinutes != null ? '${order.etaMinutes} min' : '',
+      distance: order.pickupDistanceKm != null
+          ? '${order.pickupDistanceKm!.toStringAsFixed(1)} km'
+          : '',
+      amount: order.total ?? '',
+      status: _mapStatus(order.status),
+      restaurantImage: 'assets/images/foodimage.png',
+      customerImage: 'assets/images/avatar.png',
+      items: const [],
+    );
+  }
 
   OrderModel copyWith({
     String? id,
@@ -127,6 +149,27 @@ class OrderModel {
         ? 'Completed'
         : 'Pending';
   }
+
+  static OrderStatus _mapStatus(String? apiStatus) {
+    switch (apiStatus) {
+      case 'delivered':
+      case 'completed':
+        return OrderStatus.delivered;
+      case 'outForDelivery':
+      case 'out_for_delivery':
+      case 'inProgress':
+      case 'in_progress':
+        return OrderStatus.inProgress;
+      case 'readyForPickup':
+      case 'ready_for_pickup':
+        return OrderStatus.readyForPickup;
+      case 'pickedUp':
+      case 'picked_up':
+        return OrderStatus.inProgress;
+      default:
+        return OrderStatus.preparing;
+    }
+  }
 }
 
 enum OrderStatus { preparing, readyForPickup, inProgress, delivered }
@@ -137,4 +180,3 @@ class OrderItem {
 
   OrderItem({required this.name, required this.details});
 }
-

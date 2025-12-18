@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:quikle_rider/features/all_orders/controllers/all_order_controller.dart';
+import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/all_orders/models/single_oder_model.dart';
 
 class OrderController extends GetxController {
   final Rx<OrderModel> order = _getDummyOrder().obs;
+  final Rxn<RiderOrder> apiOrder = Rxn<RiderOrder>();
+  Worker? _ordersWorker;
 
   // Dummy data
   static OrderModel _getDummyOrder() {
@@ -24,6 +28,26 @@ class OrderController extends GetxController {
         OrderItem(name: 'Garlic Bread X 2', details: 'With dipping sauce'),
       ],
     );
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    if (Get.isRegistered<AllOrdersController>()) {
+      final allOrdersController = Get.find<AllOrdersController>();
+      _syncFromAllOrders(allOrdersController);
+      _ordersWorker = ever(allOrdersController.orders, (_) {
+        _syncFromAllOrders(allOrdersController);
+      });
+    }
+  }
+
+  void _syncFromAllOrders(AllOrdersController allOrdersController) {
+    final singles = allOrdersController.singleOrders;
+    if (singles.isEmpty) return;
+    apiOrder.value = singles.first;
+    order.value = OrderModel.fromRiderOrder(singles.first);
+    update();
   }
 
   void cancelOrder() {
@@ -48,8 +72,15 @@ class OrderController extends GetxController {
   }
 
   void navigateToDetails() {
+    if (apiOrder.value == null) {
+      _showSnackbar('No order details found');
+      return;
+    }
     try {
-      Get.toNamed('/mapScreen'); // Use named route for robustness
+      Get.toNamed(
+        '/mapScreen',
+        arguments: apiOrder.value,
+      );
       _showSnackbar('Navigated to details for ${order.value.id}');
     } catch (e) {
       _showSnackbar('Error navigating to map: $e');
@@ -141,5 +172,11 @@ class OrderController extends GetxController {
       colorText: Colors.white,
       snackPosition: SnackPosition.BOTTOM,
     );
+  }
+
+  @override
+  void onClose() {
+    _ordersWorker?.dispose();
+    super.onClose();
   }
 }

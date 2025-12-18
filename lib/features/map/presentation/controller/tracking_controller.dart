@@ -29,7 +29,7 @@ class TrackingController extends GetxController {
   LatLng? _lastPolylineOrigin;
   bool _partnerAndCustomerProvided = false;
 
-  final LocationServices _locationServices = LocationServices();
+  final LocationServices _locationServices = LocationServices.instance;
   StreamSubscription? _locationServiceSubscription;
 
   TrackingController();
@@ -51,7 +51,7 @@ class TrackingController extends GetxController {
     await _seedInitialPosition();
     await _determinePosition();
 
-    _locationServices.connect();
+    await _locationServices.connectAndStart();
     _locationServiceSubscription = _locationServices.socketResponse.listen((
       location,
     ) {

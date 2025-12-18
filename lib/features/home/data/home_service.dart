@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:quikle_rider/core/services/location_services.dart';
 import 'package:quikle_rider/core/models/response_data.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/constants/api_constants.dart';
@@ -85,12 +86,22 @@ class HomeService {
 
       final decodedBody = _decodeResponse(response.body);
       final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-      return ResponseData(
+      final responseData = ResponseData(
         isSuccess: isSuccess,
         statusCode: response.statusCode,
         errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
         responseData: decodedBody,
       );
+
+      if (responseData.isSuccess) {
+        if (isOnline) {
+          await LocationServices.instance.connectAndStart();
+        } else {
+          await LocationServices.instance.disconnect();
+        }
+      }
+
+      return responseData;
     } catch (error) {
       return ResponseData(
         isSuccess: false,

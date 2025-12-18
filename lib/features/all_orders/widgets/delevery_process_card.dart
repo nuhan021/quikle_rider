@@ -313,11 +313,15 @@ class _PickupPointItem extends StatelessWidget {
 class DeliveryInfoCard extends StatelessWidget {
   final CombinedOrderModel order;
   final CombinedOrderController controller;
+  final VoidCallback? onCancel;
+  final VoidCallback? onViewDetails;
 
   const DeliveryInfoCard({
     super.key,
     required this.order,
     required this.controller,
+    this.onCancel,
+    this.onViewDetails,
   });
 
   @override
@@ -347,8 +351,74 @@ class DeliveryInfoCard extends StatelessWidget {
           _DeliveryAddressSection(address: order.deliveryAddress),
           SizedBox(height: 24.h),
           _ItemsToDeliverSection(restaurants: order.restaurants),
+          if (onCancel != null || onViewDetails != null) ...[
+            SizedBox(height: 24.h),
+            _CombinedActionButtons(
+              onCancel: onCancel,
+              onViewDetails: onViewDetails,
+            ),
+          ],
         ],
       ),
+    );
+  }
+}
+
+class _CombinedActionButtons extends StatelessWidget {
+  final VoidCallback? onCancel;
+  final VoidCallback? onViewDetails;
+
+  const _CombinedActionButtons({
+    required this.onCancel,
+    required this.onViewDetails,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: onCancel,
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Color(0xFF333333)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4.r),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 10.h),
+            ),
+            child: Text(
+              'Cancel',
+              style: buttonTextStyle(
+                color: const Color(0xFF333333),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+        SizedBox(width: 10.w),
+        Expanded(
+          child: ElevatedButton(
+            onPressed: onViewDetails,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF333333),
+              side: const BorderSide(color: Color(0xFF333333)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4.r),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 10.h),
+              elevation: 0,
+            ),
+            child: Text(
+              'View Details',
+              style: buttonTextStyle(
+                color: const Color(0xFFFFFFFF),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -441,7 +511,7 @@ class _DeliveryInfoSection extends StatelessWidget {
                 SizedBox(width: 16.w),
                 _ContactButton(
                   icon: 'assets/images/call.png',
-                  onTap: controller.makePhoneCall,
+                  onTap: () => controller.makePhoneCall(order),
                 ),
               ],
             ),

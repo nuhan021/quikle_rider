@@ -1,6 +1,8 @@
 // models/combined_order_model.dart
 import 'dart:ui';
 
+import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
+
 class CombinedOrderModel {
   final String customerName;
   final String customerImage;
@@ -32,6 +34,37 @@ class CombinedOrderModel {
     this.currency = '₹',
   });
 
+  factory CombinedOrderModel.fromRiderOrder(RiderOrder order) {
+    final shipping = order.metadata?.shippingAddress;
+    final vendor = order.metadata?.vendorInfo;
+
+    final completedSteps = _mapCompletedSteps(order.status);
+    final pickupPoints = <PickupPoint>[
+      if (vendor?.storeName != null || shipping?.addressLine1 != null)
+        PickupPoint(
+          name: vendor?.storeName ?? 'Pickup',
+          address: shipping?.addressLine1 ?? '',
+          statusText: order.status ?? '',
+          status: completedSteps >= 1 ? PickupStatus.completed : PickupStatus.pending,
+        ),
+    ];
+
+    return CombinedOrderModel(
+      customerName: shipping?.fullName ?? '',
+      customerImage: 'assets/images/avatar.png',
+      deliveryAddress: shipping?.addressLine1 ?? '',
+      pickupPoints: pickupPoints,
+      restaurants: const [],
+      completedSteps: completedSteps,
+      totalSteps: 3,
+      totalPayout: double.tryParse(order.total ?? '') ?? 0,
+      distanceInKm: order.pickupDistanceKm ?? 0,
+      distancePay: double.tryParse(order.distanceBonus ?? '') ?? 0,
+      combinedOrderBonus: 0,
+      pickupPayouts: const [],
+    );
+  }
+
   String get progressText => '$completedSteps of $totalSteps steps';
   double get progressWidth => (completedSteps / totalSteps) * 328;
   
@@ -49,6 +82,26 @@ class CombinedOrderModel {
   String get formattedDistance => distanceInKm % 1 == 0
       ? distanceInKm.toStringAsFixed(0)
       : distanceInKm.toStringAsFixed(1);
+
+  static int _mapCompletedSteps(String? apiStatus) {
+    switch (apiStatus) {
+      case 'delivered':
+      case 'completed':
+        return 3;
+      case 'outForDelivery':
+      case 'out_for_delivery':
+      case 'inProgress':
+      case 'in_progress':
+        return 2;
+      case 'pickedUp':
+      case 'picked_up':
+      case 'readyForPickup':
+      case 'ready_for_pickup':
+        return 1;
+      default:
+        return 0;
+    }
+  }
 }
 
 class PickupPoint {

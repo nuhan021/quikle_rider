@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import '../models/response_data.dart';
 
 class NetworkCaller {
-  NetworkCaller({http.Client? client, this.timeoutDuration = 10})
+  NetworkCaller({http.Client? client, this.timeoutDuration = 20})
       : _client = client ?? http.Client();
 
   final http.Client _client;

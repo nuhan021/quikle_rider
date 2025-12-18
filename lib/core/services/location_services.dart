@@ -6,18 +6,45 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:geolocator/geolocator.dart';
 
 class LocationServices {
-  late WebSocketChannel _channel;
-  final _socketResponseController = StreamController<Map<String, double>>.broadcast();
+  LocationServices._();
+
+  static final LocationServices instance = LocationServices._();
+
+  WebSocketChannel? _channel;
+  StreamSubscription? _channelSubscription;
+
+  final _socketResponseController =
+      StreamController<Map<String, double>>.broadcast();
   Stream<Map<String, double>> get socketResponse => _socketResponseController.stream;
 
   Timer? _sendTimer;
+  bool _isConnecting = false;
 
-  void connect() async {
-    final riderId = StorageService.userId.toString();
+  bool get isConnected => _channel != null;
+
+  Future<void> connectAndStart() async {
+    if (isConnected || _isConnecting) return;
+    _isConnecting = true;
+
+    final riderId = StorageService.userId;
+    if (riderId == null) {
+      AppLoggerHelper.debug('LocationServices: missing riderId, cannot connect');
+      _isConnecting = false;
+      return;
+    }
+
+    final hasPermission = await _ensurePermissions();
+    if (!hasPermission) {
+      _isConnecting = false;
+      return;
+    }
+
     final wsUrl = Uri.parse('wss://quikle-u4dv.onrender.com/rider/ws/location/riders/$riderId');
-    _channel = WebSocketChannel.connect(wsUrl);
+    final channel = WebSocketChannel.connect(wsUrl);
+    _channel = channel;
 
-    _channel.stream.listen(
+    _channelSubscription?.cancel();
+    _channelSubscription = channel.stream.listen(
       (message) {
         final decodedMessage = jsonDecode(message);
         if (decodedMessage is Map<String, dynamic> &&
@@ -30,47 +57,93 @@ class LocationServices {
         }
       },
       onDone: () {
-        print('WebSocket connection closed');
-        // Optionally try to reconnect
+        AppLoggerHelper.debug('LocationServices: WebSocket connection closed');
+        _stopSendingLocation();
+        _channel = null;
       },
       onError: (error) {
-        print('WebSocket error: $error');
-        // Optionally try to reconnect
+        AppLoggerHelper.debug('LocationServices: WebSocket error: $error');
+        _stopSendingLocation();
+        _channel = null;
       },
     );
 
     _startSendingLocation();
+    _isConnecting = false;
   }
 
   void _startSendingLocation() {
     _sendTimer?.cancel();
     _sendCurrentLocation();
-    _sendTimer = Timer.periodic(const Duration(seconds: 20), (_) {
+    _sendTimer = Timer.periodic(const Duration(seconds: 10), (_) {
       _sendCurrentLocation();
     });
-    AppLoggerHelper.debug('Location service started (20s interval)');
+    AppLoggerHelper.debug('Location service started (10s interval)');
  
   }
 
   Future<void> _sendCurrentLocation() async {
     try {
+      if (!isConnected) return;
+
+      final hasPermission = await _ensurePermissions();
+      if (!hasPermission) return;
+
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
       );
       final locationData = {
         "lat": position.latitude,
         "lng": position.longitude,
       };
-      _channel.sink.add(jsonEncode(locationData));
-      AppLoggerHelper.debug("$locationData");
+      _channel?.sink.add(jsonEncode(locationData));
+      AppLoggerHelper.debug('LocationServices: sent $locationData');
     } catch (e) {
       AppLoggerHelper.debug('Unable to fetch location for websocket: $e');
     }
   }
 
-  void disconnect() {
+  Future<void> disconnect() async {
+    _stopSendingLocation();
+    await _channelSubscription?.cancel();
+    _channelSubscription = null;
+    await _channel?.sink.close();
+    _channel = null;
+  }
+
+  void _stopSendingLocation() {
     _sendTimer?.cancel();
-    _channel.sink.close();
+    _sendTimer = null;
+  }
+
+  Future<bool> _ensurePermissions() async {
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      AppLoggerHelper.debug(
+        'LocationServices: location service disabled, cannot send location',
+      );
+      return false;
+    }
+
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      AppLoggerHelper.debug(
+        'LocationServices: location permission denied, cannot send location',
+      );
+      return false;
+    }
+    return true;
+  }
+
+  void dispose() {
+    disconnect();
     _socketResponseController.close();
   }
 }
