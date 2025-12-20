@@ -10,7 +10,6 @@ import 'package:quikle_rider/features/wallet/widgets/bonus_progress_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/delevery_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/monthly_earnings_forecast_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/rating_card.dart';
-import 'package:quikle_rider/features/wallet/widgets/tier_card.dart';
 import 'package:quikle_rider/features/wallet/widgets/wallet_shimmer_list.dart';
 
 class WalletScreen extends GetView<WalletController> {
@@ -153,21 +152,35 @@ class WalletScreen extends GetView<WalletController> {
                             ),
                           ),
                         ),
-                      MonthlyEarningsForecastCard(
-                        title: 'Monthly Earnings Forecast',
-                        projectedAmount: controller.forecastProjectedAmountText,
-                        basisNote: controller.forecastBasisNoteText,
-                        goals: const [
-                          'Complete 5 more deliveries this week',
-                          'Maintain 4.5+ rating',
-                        ],
-                        currentBalanceText:
-                            "${controller.formatCurrency(controller.currentBalance.value)}",
-                        onViewDetails: null,
-                        currentAmount: controller.forecastCurrentValue,
-                        targetAmount: controller.forecastTargetValue,
+                      GetBuilder<WalletController>(
+                        builder: (ctrl) {
+                          if (ctrl.tabController.index != 0) {
+                            return const SizedBox.shrink();
+                          }
+
+                          return Column(
+                            children: [
+                              MonthlyEarningsForecastCard(
+                                title: 'Monthly Earnings Forecast',
+                                projectedAmount:
+                                    controller.forecastProjectedAmountText,
+                                basisNote: controller.forecastBasisNoteText,
+                                goals: const [
+                                  'Complete 5 more deliveries this week',
+                                  'Maintain 4.5+ rating',
+                                ],
+                                currentBalanceText: controller.formatCurrency(
+                                  controller.currentBalance.value,
+                                ),
+                                onViewDetails: null,
+                                currentAmount: controller.forecastCurrentValue,
+                                targetAmount: controller.forecastTargetValue,
+                              ),
+                              SizedBox(height: 12.h),
+                            ],
+                          );
+                        },
                       ),
-                      SizedBox(height: 12.h),
                       GetBuilder<WalletController>(
                         builder: (ctrl) {
                           if (ctrl.tabController.index != 0) {
@@ -270,18 +283,18 @@ class WalletScreen extends GetView<WalletController> {
                                   );
                                 }
                               }),
-                              TierCard(benefits: '₹16,000-18,500/month'),
-                              Padding(
-                                padding: EdgeInsets.only(
-                                  left: 4.w,
-                                  bottom: 8.h,
-                                  top: 8.h,
-                                ),
-                                child: Text(
-                                  'Past Deliveries',
-                                  style: headingStyle2(color: Colors.black),
-                                ),
-                              ),
+                              // TierCard(benefits: '₹16,000-18,500/month'),
+                              // Padding(
+                              //   padding: EdgeInsets.only(
+                              //     left: 4.w,
+                              //     bottom: 8.h,
+                              //     top: 8.h,
+                              //   ),
+                              //   child: Text(
+                              //     'Past Deliveries',
+                              //     style: headingStyle2(color: Colors.black),
+                              //   ),
+                              // ),
                               ListView.builder(
                                 itemCount: controller.deliveries.length,
                                 shrinkWrap: true,

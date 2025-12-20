@@ -96,12 +96,10 @@ class _MonthlyEarningsForecastCardState
               _buildHeader(),
               SizedBox(height: 16.h),
               _buildProgress(),
-              SizedBox(height: 12.h),
+        
 
-              SizedBox(height: 18.h),
-              _buildGoals(),
-              SizedBox(height: 20.h),
-              _buildButton(),
+             
+    
             ],
           ),
         ),
@@ -286,112 +284,4 @@ class _MonthlyEarningsForecastCardState
       },
     );
   }
-
-  Widget _buildGoals() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'To reach ₹${widget.targetAmount.toInt()}:',
-          style: TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF111827),
-          ),
-        ),
-        SizedBox(height: 10.h),
-        ...widget.goals.asMap().entries.map(
-          (e) => TweenAnimationBuilder<double>(
-            duration: Duration(milliseconds: 600 + (e.key * 100)),
-            curve: Curves.easeOutCubic,
-            tween: Tween(begin: 0.0, end: 1.0),
-            builder: (_, v, __) => Transform.translate(
-              offset: Offset(20 * (1 - v), 0),
-              child: Opacity(
-                opacity: v,
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    bottom: e.key == widget.goals.length - 1 ? 0 : 10.h,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        width: 6.w,
-                        height: 6.w,
-                        margin: EdgeInsets.only(top: 6.h),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFB87700), Color(0xFFD97706)],
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFB87700).withOpacity(0.3),
-                              blurRadius: 4.r,
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: 10.w),
-                      Expanded(
-                        child: Text(
-                          e.value,
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF4B5563),
-                            height: 1.5,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildButton() {
-    return TweenAnimationBuilder<double>(
-      duration: const Duration(milliseconds: 800),
-      curve: Curves.easeOut,
-      tween: Tween(begin: 0.0, end: 1.0),
-      builder: (_, v, __) => Transform.scale(
-        scale: 0.8 + (0.2 * v),
-        child: Opacity(
-          opacity: v,
-          child: SizedBox(
-            width: double.infinity,
-            height: 46.h,
-            child: OutlinedButton(
-              onPressed: widget.onViewDetails,
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Color(0xFFB87700), width: 1.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                foregroundColor: const Color(0xFFB87700),
-              ),
-              child: Text(
-                'View Detailed Breakdown',
-                style: TextStyle(
-                  fontFamily: 'Inter',
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0.2,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+    }

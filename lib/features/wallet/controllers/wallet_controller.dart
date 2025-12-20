@@ -174,6 +174,7 @@ class WalletController extends GetxController
     fetchWithdrawalHistory();
     fetchRiderRating();
     fetchMonthlyForecast();
+    fetchBonusProgress();
   }
 
   void updateDataForPeriod(int index) {
@@ -548,6 +549,7 @@ class WalletController extends GetxController
       fetchPerformanceData(),
       fetchLeaderboardData(),
       fetchMonthlyForecast(),
+      fetchBonusProgress(),
     ]);
   }
 
