@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 
 class CombinedOrderModel {
+  final String orderId;
   final String customerName;
   final String customerImage;
   final String deliveryAddress;
@@ -19,6 +20,7 @@ class CombinedOrderModel {
   final String currency;
 
   CombinedOrderModel({
+    required this.orderId,
     required this.customerName,
     required this.customerImage,
     required this.deliveryAddress,
@@ -50,6 +52,7 @@ class CombinedOrderModel {
     ];
 
     return CombinedOrderModel(
+      orderId: order.id ,
       customerName: shipping?.fullName ?? '',
       customerImage: 'assets/images/avatar.png',
       deliveryAddress: shipping?.addressLine1 ?? '',

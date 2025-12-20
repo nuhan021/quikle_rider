@@ -46,6 +46,48 @@ class WalletServices {
     }
   }
 
+  Future<ResponseData> fetchWalletSummaryWithBalance({
+    required String accessToken,
+    required String period,
+  }) async {
+    return fetchWalletSummary(
+      accessToken: accessToken,
+      period: period,
+    );
+  }
+
+  Future<ResponseData> fetchMonthlyForecast({
+    required String accessToken,
+  }) async {
+    final uri = Uri.parse('$baseurl/rider/rider-monthly-forecast/');
+
+    try {
+      final response = await _client.get(
+        uri,
+        headers: {
+          'accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      final decodedBody = _decodeResponseBody(response.body);
+      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
+      return ResponseData(
+        isSuccess: isSuccess,
+        statusCode: response.statusCode,
+        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+    } catch (error) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to fetch monthly forecast. Please try again.',
+        responseData: error.toString(),
+      );
+    }
+  }
+
   Future<ResponseData> fetchPerformance({required String accessToken}) async {
     final uri = Uri.parse('$baseurl/rider/performance/');
     try {

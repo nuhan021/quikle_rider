@@ -22,6 +22,7 @@ class IncomingAssignmentDialog extends StatelessWidget {
       backgroundColor: Colors.transparent,
       child: Center(
         child: AssignmentCard(
+          deleverystatus: assignment.deleverystatus,
           orderId: assignment.id,
           customerName: assignment.customerName,
           arrivalTime: assignment.formattedArrival,
@@ -31,7 +32,7 @@ class IncomingAssignmentDialog extends StatelessWidget {
           breakdown: assignment.formattedBreakdown,
           isUrgent: assignment.isUrgent,
           isCombined: assignment.isCombined,
-          status: AssignmentStatus.pending,
+          status: assignment.status,
           onAccept: onAccept,
           onReject: onReject,
         ),

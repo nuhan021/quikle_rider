@@ -5,30 +5,9 @@ import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/all_orders/models/single_oder_model.dart';
 
 class OrderController extends GetxController {
-  final Rx<OrderModel> order = _getDummyOrder().obs;
+  final Rxn<OrderModel> order = Rxn<OrderModel>();
   final Rxn<RiderOrder> apiOrder = Rxn<RiderOrder>();
   Worker? _ordersWorker;
-
-  // Dummy data
-  static OrderModel _getDummyOrder() {
-    return OrderModel(
-      id: '#5680',
-      customerName: 'John Smith',
-      restaurant: 'Pizza Palace',
-      address: '123 Main Street, Downtown',
-      estimatedTime: '25 min',
-      distance: '1.5 miles',
-      amount: '\$18.50',
-      status: OrderStatus
-          .readyForPickup, // Ensures "Pick Up" button shows initially
-      restaurantImage: 'assets/images/foodimage.png',
-      customerImage: 'assets/images/avatar.png',
-      items: [
-        OrderItem(name: 'Margherita Pizza X 1', details: 'Extra cheese'),
-        OrderItem(name: 'Garlic Bread X 2', details: 'With dipping sauce'),
-      ],
-    );
-  }
 
   @override
   void onInit() {
@@ -44,31 +23,46 @@ class OrderController extends GetxController {
 
   void _syncFromAllOrders(AllOrdersController allOrdersController) {
     final singles = allOrdersController.singleOrders;
-    if (singles.isEmpty) return;
+    if (singles.isEmpty) {
+      apiOrder.value = null;
+      order.value = null;
+      update();
+      return;
+    }
     apiOrder.value = singles.first;
     order.value = OrderModel.fromRiderOrder(singles.first);
     update();
   }
 
   void cancelOrder() {
+    final currentOrder = order.value;
+    if (currentOrder == null) {
+      _showSnackbar('No order available to cancel');
+      return;
+    }
     Get.dialog(
       _buildActionDialog(
         'Cancel Order',
-        'Are you sure you want to cancel order ${order.value.id}?',
+        'Are you sure you want to cancel order ${currentOrder.id}?',
         onConfirm: () {
           Get.back();
-          _showSnackbar('Order ${order.value.id} has been cancelled');
+          _showSnackbar('Order ${currentOrder.id} has been cancelled');
         },
       ),
     );
   }
 
   void markAsPickedUp() {
-    this.order.value = this.order.value.copyWith(
+    final currentOrder = order.value;
+    if (currentOrder == null) {
+      _showSnackbar('No order available to update');
+      return;
+    }
+    order.value = currentOrder.copyWith(
       status: OrderStatus.inProgress,
     );
     update();
-    _showSnackbar('Order ${order.value.id} marked as picked up');
+    _showSnackbar('Order ${currentOrder.id} marked as picked up');
   }
 
   void navigateToDetails() {
@@ -81,14 +75,14 @@ class OrderController extends GetxController {
         '/mapScreen',
         arguments: apiOrder.value,
       );
-      _showSnackbar('Navigated to details for ${order.value.id}');
+      final currentOrder = order.value;
+      if (currentOrder != null) {
+        _showSnackbar('Navigated to details for ${currentOrder.id}');
+      }
     } catch (e) {
       _showSnackbar('Error navigating to map: $e');
     }
   }
-
-
- 
 
   Widget _buildActionDialog(
     String title,

@@ -20,6 +20,9 @@ class LocationServices {
   Timer? _sendTimer;
   bool _isConnecting = false;
 
+  static const double _dummyLat = 28.6139;
+  static const double _dummyLng = 77.2090;
+
   bool get isConnected => _channel != null;
 
   Future<void> connectAndStart() async {
@@ -86,18 +89,19 @@ class LocationServices {
     try {
       if (!isConnected) return;
 
-      final hasPermission = await _ensurePermissions();
-      if (!hasPermission) return;
+      // final hasPermission = await _ensurePermissions();
+      // if (!hasPermission) return;
 
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-        ),
-      );
+      // final position = await Geolocator.getCurrentPosition(
+      //   locationSettings: const LocationSettings(
+      //     accuracy: LocationAccuracy.high,
+      //   ),
+      // );
       final locationData = {
-        "lat": position.latitude,
-        "lng": position.longitude,
+        "lat": _dummyLat,
+        "lng": _dummyLng,
       };
+      
       _channel?.sink.add(jsonEncode(locationData));
       AppLoggerHelper.debug('LocationServices: sent $locationData');
     } catch (e) {

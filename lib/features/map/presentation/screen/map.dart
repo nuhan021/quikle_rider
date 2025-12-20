@@ -8,6 +8,8 @@ import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/core/services/storage_service.dart';
+import 'package:quikle_rider/features/all_orders/data/services/order_services.dart';
 import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/map/presentation/controller/map_controller.dart';
 import 'package:quikle_rider/features/map/presentation/model/delivery_model.dart';
@@ -22,6 +24,8 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late final MapController mapController;
+  final OrderServices _orderServices = OrderServices();
+  bool _isFetchingCurrentOrder = false;
 
   @override
   void initState() {
@@ -31,12 +35,54 @@ class _MapScreenState extends State<MapScreen> {
         : Get.put(MapController());
     debugPrint('MapScreen: opening, requesting current location...');
     mapController.requestCurrentLocation();
+    _loadCurrentOrder();
   }
 
   @override
   void dispose() {
     mapController.detachMapController();
     super.dispose();
+  }
+
+  Future<void> _loadCurrentOrder() async {
+    if (_isFetchingCurrentOrder) return;
+    final args = Get.arguments;
+    if (args is RiderOrder) {
+      return;
+    }
+
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null || accessToken.isEmpty) {
+      debugPrint('MapScreen: missing access token for current orders.');
+      return;
+    }
+
+    _isFetchingCurrentOrder = true;
+    try {
+      final response = await _orderServices.fetchcurrent_order(
+        accessToken: accessToken,
+      );
+
+      if (response.isSuccess && response.responseData is List) {
+        final list = response.responseData as List;
+        final parsedOrders = list
+            .whereType<Map<String, dynamic>>()
+            .map(RiderOrder.fromJson)
+            .toList(growable: false);
+        if (parsedOrders.isNotEmpty) {
+          mapController.applyOrderIfNeeded(parsedOrders.first);
+          return;
+        }
+      }
+
+      debugPrint(
+        'MapScreen: no current orders available or failed response.',
+      );
+    } catch (error) {
+      debugPrint('MapScreen: failed to load current order - $error');
+    } finally {
+      _isFetchingCurrentOrder = false;
+    }
   }
 
   @override

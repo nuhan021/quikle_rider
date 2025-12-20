@@ -10,6 +10,7 @@ import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/map/presentation/model/delivery_model.dart';
 
 class MapController extends GetxController {
+  static const LatLng _hardcodedLocation = LatLng(28.6139, 77.209);
   final RxBool isOnline = true.obs;
   final Rx<DeliveryModel?> currentDelivery = Rx<DeliveryModel?>(null);
   final RxBool isFetchingLocation = false.obs;
@@ -24,8 +25,7 @@ class MapController extends GetxController {
   GoogleMapController? _mapController;
   String? _activeOrderId;
 
-  LatLng get fallbackLocation =>
-      const LatLng(37.42796133580664, -122.085749655962);
+  LatLng get fallbackLocation => _hardcodedLocation;
 
   bool get hasUserLocation => currentPosition.value != null;
   bool get hasActiveRoute =>
@@ -245,14 +245,11 @@ class MapController extends GetxController {
         return;
       }
 
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-        ),
-      );
-      currentPosition.value = LatLng(position.latitude, position.longitude);
+      // Hardcoded for testing; swap back to Geolocator when ready.
+      currentPosition.value = _hardcodedLocation;
       debugPrint(
-        'MapController: Current location → lat=${position.latitude}, lng=${position.longitude}',
+        'MapController: Current location → lat=${_hardcodedLocation.latitude}, '
+        'lng=${_hardcodedLocation.longitude}',
       );
       if (!hasActiveOrder) {
         _ensureVendorAndCustomerNearby(currentPosition.value!);

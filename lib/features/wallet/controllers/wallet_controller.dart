@@ -41,6 +41,7 @@ class WalletController extends GetxController
   final WalletServices _walletServices;
   final ProfileServices _profileServices;
   final walletSummary = Rxn<WalletSummary>();
+  final monthlyForecast = Rxn<WalletForecast>();
   final isWalletLoading = false.obs;
   final walletError = RxnString();
   final riderPerformance = Rxn<RiderPerformance>();
@@ -78,12 +79,14 @@ class WalletController extends GetxController
   final RxBool isMonthlyStatsLoading = false.obs;
   final RxBool isAnnualStatsLoading = false.obs;
   final RxBool isBonusProgressLoading = false.obs;
+  final RxBool isMonthlyForecastLoading = false.obs;
   
   final RxnString allStatsError = RxnString();
   final RxnString weeklyStatsError = RxnString();
   final RxnString monthlyStatsError = RxnString();
   final RxnString annualStatsError = RxnString();
   final RxnString bonusProgressError = RxnString();
+  final RxnString monthlyForecastError = RxnString();
   
   // Bonus progress data
   final bonusProgress = Rxn<Map<String, dynamic>>();
@@ -168,9 +171,10 @@ class WalletController extends GetxController
     updateDataForPeriod(0);
     fetchPerformanceData();
     fetchLeaderboardData();
-    fetchCurrentBalance();
     fetchWithdrawalHistory();
     fetchRiderRating();
+    fetchMonthlyForecast();
+    fetchBonusProgress();
   }
 
   void updateDataForPeriod(int index) {
@@ -179,6 +183,9 @@ class WalletController extends GetxController
     walletError.value = null;
     final period = _currentPeriod;
     walletSummary.value = _periodSummaries[period];
+    if (walletSummary.value != null) {
+      currentBalance.value = walletSummary.value!.currentBalance;
+    }
     fetchWalletSummary(periodOverride: period);
   }
 
@@ -216,6 +223,7 @@ class WalletController extends GetxController
       if (period == _currentPeriod) {
         walletError.value = 'Missing access token. Please login again.';
         walletSummary.value = null;
+        currentBalance.value = 0;
       }
       _periodSummaries.remove(period);
       return;
@@ -227,22 +235,30 @@ class WalletController extends GetxController
     }
 
     try {
-      final response = await _walletServices.fetchWalletSummary(
+      final response = await _walletServices.fetchWalletSummaryWithBalance(
         accessToken: accessToken,
         period: period,
       );
 
       if (response.isSuccess && response.responseData is Map<String, dynamic>) {
-        final summary = WalletSummary.fromJson(
-          response.responseData as Map<String, dynamic>,
-        );
+        final body = response.responseData as Map<String, dynamic>;
+        final summary = WalletSummary.fromJson(body);
         _periodSummaries[period] = summary;
         if (period == _currentPeriod) {
           walletSummary.value = summary;
+          final value = body['current_balance'];
+          if (value is num) {
+            currentBalance.value = value.toDouble();
+          } else if (value is String) {
+            currentBalance.value = double.tryParse(value) ?? 0;
+          } else {
+            currentBalance.value = 0;
+          }
         }
       } else {
         if (period == _currentPeriod) {
           walletSummary.value = null;
+          currentBalance.value = 0;
           walletError.value = response.errorMessage.isNotEmpty
               ? response.errorMessage
               : 'Failed to load wallet data.';
@@ -251,6 +267,7 @@ class WalletController extends GetxController
     } catch (_) {
       if (period == _currentPeriod) {
         walletSummary.value = null;
+        currentBalance.value = 0;
         walletError.value = 'Failed to load wallet data.';
       }
     } finally {
@@ -399,6 +416,44 @@ class WalletController extends GetxController
     }
   }
 
+  Future<void> fetchMonthlyForecast() async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null || accessToken.isEmpty) {
+      monthlyForecastError.value = 'Missing access token.';
+      monthlyForecast.value = null;
+      return;
+    }
+
+    isMonthlyForecastLoading.value = true;
+    monthlyForecastError.value = null;
+
+    try {
+      final response = await _walletServices.fetchMonthlyForecast(
+        accessToken: accessToken,
+      );
+      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
+        final body = response.responseData as Map<String, dynamic>;
+        final mapped = <String, dynamic>{
+          'current': body['subtotal'],
+          'percentage': body['percentage'],
+          'remaining_deliveries': body['remaining_deliveries'],
+          'target': body['target'],
+        };
+        monthlyForecast.value = WalletForecast.fromJson(mapped);
+      } else {
+        monthlyForecast.value = null;
+        monthlyForecastError.value = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Failed to load monthly forecast.';
+      }
+    } catch (_) {
+      monthlyForecast.value = null;
+      monthlyForecastError.value = 'Failed to load monthly forecast.';
+    } finally {
+      isMonthlyForecastLoading.value = false;
+    }
+  }
+
   bool get canLoadMoreWithdrawals =>
       (withdrawalHistoryCount.value ?? 0) > withdrawalHistory.length;
 
@@ -493,11 +548,15 @@ class WalletController extends GetxController
       fetchWalletSummary(periodOverride: _currentPeriod),
       fetchPerformanceData(),
       fetchLeaderboardData(),
-      fetchCurrentBalance(),
+      fetchMonthlyForecast(),
+      fetchBonusProgress(),
     ]);
   }
 
   WalletSummary? get _summary => walletSummary.value;
+
+  WalletForecast? get _activeForecast =>
+      monthlyForecast.value ?? _summary?.forecast;
 
   String get finalEarningsText =>
       _summary == null ? '₹0' : formatCurrency(_summary!.finalEarnings);
@@ -526,13 +585,13 @@ class WalletController extends GetxController
   String get finalEarningsStatText => finalEarningsText;
 
   String get forecastProgressText {
-    final summary = _summary;
-    if (summary == null) return '--';
-    final safePercentage = summary.forecast.percentage;
+    final forecast = _activeForecast;
+    if (forecast == null) return '--';
+    final safePercentage = forecast.percentage;
     final displayPercentage = safePercentage == 0
         ? '0%'
         : '${safePercentage.toStringAsFixed(0)}%';
-    return '${formatCurrency(summary.forecast.current)} / ${formatCurrency(summary.forecast.target)} ($displayPercentage)';
+    return '${formatCurrency(forecast.current)} / ${formatCurrency(forecast.target)} ($displayPercentage)';
   }
 
   String get bonusDeliveriesText => _summary?.bonusDeliveries ?? '--';
@@ -542,24 +601,24 @@ class WalletController extends GetxController
   String get bonusOnTimeText => _summary?.bonusOnTime ?? '--';
 
   String get forecastProjectedAmountText {
-    final summary = _summary;
-    if (summary == null) {
+    final forecast = _activeForecast;
+    if (forecast == null) {
       return 'On track for: --';
     }
-    return 'On track for: ${formatCurrency(summary.forecast.target)}';
+    return 'On track for: ${formatCurrency(forecast.target)}';
   }
 
   String get forecastBasisNoteText {
-    final summary = _summary;
-    if (summary == null) {
+    final forecast = _activeForecast;
+    if (forecast == null) {
       return '(Based on current pace)';
     }
-    return 'Remaining deliveries: ${_formatCount(summary.forecast.remainingDeliveries)}';
+    return 'Remaining deliveries: ${_formatCount(forecast.remainingDeliveries)}';
   }
 
-  double get forecastCurrentValue => _summary?.forecast.current ?? 0;
+  double get forecastCurrentValue => _activeForecast?.current ?? 0;
 
-  double get _rawForecastTarget => _summary?.forecast.target ?? 0;
+  double get _rawForecastTarget => _activeForecast?.target ?? 0;
 
   double get forecastTargetValue {
     final target = _rawForecastTarget;
