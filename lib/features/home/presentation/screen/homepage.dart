@@ -176,6 +176,7 @@ class HomeScreen extends GetView<HomepageController> {
                     return Padding(
                       padding: EdgeInsets.only(bottom: 16.h),
                       child: AssignmentCard(
+                        deleverystatus: assignment.deleverystatus,
                         orderId: assignment.id,
                         customerName: assignment.customerName,
                         arrivalTime: assignment.formattedArrival,

@@ -17,6 +17,18 @@ class OrderCard extends StatelessWidget {
       init: controller,
       builder: (controller) {
         final order = controller.order.value;
+        if (order == null) {
+          return Center(
+            child: Text(
+              'No single orders found',
+              style: getTextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF7C7C7C),
+              ),
+            ),
+          );
+        }
         return Container(
           padding: EdgeInsets.all(16.w),
           decoration: ShapeDecoration(

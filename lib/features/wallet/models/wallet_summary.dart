@@ -8,6 +8,7 @@ class WalletSummary {
     required this.subtotal,
     required this.topUp,
     required this.finalEarnings,
+    required this.currentBalance,
     required this.bonusDeliveries,
     required this.bonusAcceptance,
     required this.bonusOnTime,
@@ -26,6 +27,7 @@ class WalletSummary {
       subtotal: _toDouble(json['subtotal']),
       topUp: _toDouble(json['top_up']),
       finalEarnings: _toDouble(json['final_earnings']),
+      currentBalance: _toDouble(json['current_balance']),
       bonusDeliveries: (json['bonus_status']?['deliveries'] as String?) ?? '--',
       bonusAcceptance: (json['bonus_status']?['acceptance'] as String?) ?? '--',
       bonusOnTime: (json['bonus_status']?['on_time'] as String?) ?? '--',
@@ -41,6 +43,7 @@ class WalletSummary {
   final double subtotal;
   final double topUp;
   final double finalEarnings;
+  final double currentBalance;
   final String bonusDeliveries;
   final String bonusAcceptance;
   final String bonusOnTime;

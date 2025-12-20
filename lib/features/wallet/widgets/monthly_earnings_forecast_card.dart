@@ -97,7 +97,7 @@ class _MonthlyEarningsForecastCardState
               SizedBox(height: 16.h),
               _buildProgress(),
               SizedBox(height: 12.h),
-              _buildCurrentBalance(),
+
               SizedBox(height: 18.h),
               _buildGoals(),
               SizedBox(height: 20.h),
@@ -155,61 +155,6 @@ class _MonthlyEarningsForecastCardState
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildCurrentBalance() {
-    return Container(
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: const Color(0xFFFFD966).withOpacity(0.5)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 38.w,
-            height: 38.w,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFF1C1),
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: const Icon(
-              Icons.account_balance_wallet_outlined,
-              color: Color(0xFFB87700),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Current Balance',
-                  style: TextStyle(
-                    fontFamily: 'Inter',
-                    fontSize: 12.sp,
-                    color: const Color(0xFF92400E),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                Text(
-                  widget.currentBalanceText,
-                  style: TextStyle(
-                    fontFamily: 'Obviously',
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w800,
-                    color: const Color(0xFFB87700),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const Icon(Icons.chevron_right, color: Color(0xFFB87700)),
-        ],
-      ),
     );
   }
 

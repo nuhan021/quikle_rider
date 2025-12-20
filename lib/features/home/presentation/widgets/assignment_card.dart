@@ -15,6 +15,7 @@ class AssignmentCard extends StatelessWidget {
   final String? breakdown;
   final bool isUrgent;
   final bool isCombined;
+  final String? deleverystatus;
   final AssignmentStatus? status;
   final bool showActions;
   final VoidCallback? onAccept;
@@ -23,6 +24,7 @@ class AssignmentCard extends StatelessWidget {
   const AssignmentCard({
     super.key,
     required this.orderId,
+    required this.deleverystatus,
     required this.customerName,
     required this.arrivalTime,
     required this.address,
@@ -58,6 +60,9 @@ class AssignmentCard extends StatelessWidget {
         case AssignmentStatus.rejected:
           statusColor = const Color(0xFFE03E1A);
           break;
+        case AssignmentStatus.outForDelivery:
+          statusColor = const Color(0xFF2563EB);
+          break;
       }
     }
 
@@ -83,7 +88,7 @@ class AssignmentCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Order $orderId',
+                orderId,
                 style: TextStyle(
                   fontFamily: 'Obviously',
                   fontSize: 16.sp,
@@ -117,7 +122,7 @@ class AssignmentCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4.r),
                 ),
                 child: Text(
-                  isCombined ? 'Combined' : 'Single',
+                  deleverystatus!,
                   style: TextStyle(
                     fontFamily: 'Inter',
                     fontSize: 12.sp,
@@ -182,37 +187,44 @@ class AssignmentCard extends StatelessWidget {
           ),
 
           SizedBox(height: 12.h),
-
-          // Address and Distance
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.location_on_outlined,
-                    size: 18.sp,
-                    color: Colors.black,
-                  ),
-                  SizedBox(width: 6.w),
-                  Text(
-                    address,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 14.sp,
-                      color: Colors.black,
-                      fontWeight: FontWeight.w400,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      address,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontSize: 14.sp,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              Text(
-                distance,
-                style: TextStyle(
-                  fontFamily: 'Manrope', // Manrope font requested
-                  fontSize: 14.sp,
-                  color: const Color(0xFF484848),
-                  fontWeight: FontWeight.w400,
+                    SizedBox(height: 6.h),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.location_on_outlined,
+                          size: 18.sp,
+                          color: Colors.black,
+                        ),
+                        SizedBox(width: 6.w),
+                        Text(
+                          distance,
+                          style: TextStyle(
+                            fontFamily: 'Manrope',
+                            fontSize: 14.sp,
+                            color: const Color(0xFF484848),
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ],

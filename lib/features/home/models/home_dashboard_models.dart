@@ -4,6 +4,7 @@ enum AssignmentStatus {
   pending,
   accepted,
   rejected,
+  outForDelivery,
 }
 
 extension AssignmentStatusX on AssignmentStatus {
@@ -15,6 +16,8 @@ extension AssignmentStatusX on AssignmentStatus {
         return 'Accepted';
       case AssignmentStatus.rejected:
         return 'Rejected';
+      case AssignmentStatus.outForDelivery:
+        return 'Out for delivery';
     }
   }
 }
@@ -72,6 +75,7 @@ class HomeStat {
 
 class Assignment {
   final String id;
+  final String deleverystatus;
   final String customerName;
   final DateTime expectedArrival;
   final String address;
@@ -87,6 +91,7 @@ class Assignment {
   final String ?tierLabel;
 
   const Assignment({
+    required this.deleverystatus,
     required this.id,
     required this.customerName,
     required this.expectedArrival,
@@ -152,6 +157,7 @@ class Assignment {
     String? tierLabel,
   }) {
     return Assignment(
+      deleverystatus: deleverystatus,
       id: id ?? this.id,
       customerName: customerName ?? this.customerName,
       expectedArrival: expectedArrival ?? this.expectedArrival,
@@ -172,43 +178,80 @@ class Assignment {
   factory Assignment.fromUpcomingOrderJson(Map<String, dynamic> json) {
     final etaMinutes = (json['eta_minutes'] as num?)?.toInt();
     final now = DateTime.now();
-    final expectedArrival = etaMinutes == null
-        ? now.add(const Duration(minutes: 45))
-        : now.add(Duration(minutes: etaMinutes));
+    final estimatedDeliveryRaw = json['estimated_delivery'] as String?;
+    final estimatedDelivery = estimatedDeliveryRaw == null
+        ? null
+        : DateTime.tryParse(estimatedDeliveryRaw);
+    final expectedArrival = estimatedDelivery ??
+        (etaMinutes == null
+            ? now.add(const Duration(minutes: 45))
+            : now.add(Duration(minutes: etaMinutes)));
 
     final distanceValue =
-        _parseDouble(json['distance_km'] ?? json['distance'] ?? 0);
+        _parseDouble(json['pickup_distance_km'] ?? json['distance_km'] ?? json['distance'] ?? 0);
     final basePayValue = _parseDouble(json['base_rate'] ?? json['base_pay']);
     final distancePayValue =
         _parseDouble(json['distance_bonus'] ?? json['distance_pay']);
     final totalValue = _parseDouble(
-      json['total_payout'] ?? json['total_amount'] ?? basePayValue + distancePayValue,
+      json['total'] ??
+          json['total_payout'] ??
+          json['total_amount'] ??
+          basePayValue + distancePayValue,
     );
 
     final rawId = (json['id'] ?? json['order_id'] ?? '—').toString();
     final orderId = rawId.isEmpty ? '—' : rawId;
+    final orderType =
+        (json['delivery_type'] ?? json['order_type'] ?? 'Delivery').toString();
+    final normalizedType = orderType.toLowerCase().trim();
+    final combinedFromType =
+        normalizedType == 'combined' || normalizedType.contains('combined');
+    final metadata = json['metadata'];
+    final shippingAddress = metadata is Map<String, dynamic>
+        ? metadata['shipping_address'] as Map<String, dynamic>?
+        : null;
+    final vendorInfo = metadata is Map<String, dynamic>
+        ? metadata['vendor_info'] as Map<String, dynamic>?
+        : null;
+    final customerName = (shippingAddress?['full_name'] ??
+            shippingAddress?['name'] ??
+            json['customer_name'] ??
+            (json['customer_id'] != null
+                ? 'Customer #${json['customer_id']}'
+                : 'Customer'))
+        .toString();
+    final addressLine1 = shippingAddress?['address_line1']?.toString() ?? '';
+    final addressLine2 = shippingAddress?['address_line2']?.toString() ?? '';
+    final city = shippingAddress?['city']?.toString() ?? '';
+    final state = shippingAddress?['state']?.toString() ?? '';
+    final postal = shippingAddress?['postal_code']?.toString() ?? '';
+    final addressParts = [
+      addressLine1,
+      addressLine2,
+      city,
+      state,
+      postal,
+    ].where((part) => part.trim().isNotEmpty).toList();
+    final fallbackAddress =
+        'Vendor ${vendorInfo?['vendor_id'] ?? '-'} → Customer ${json['customer_id'] ?? '-'}';
+    final address =
+        addressParts.isEmpty ? fallbackAddress : addressParts.join(', ');
 
     return Assignment(
       id: orderId,
-      customerName: (json['customer_name'] ??
-              (json['customer_id'] != null
-                  ? 'Customer #${json['customer_id']}'
-                  : 'Customer'))
-          .toString(),
+      customerName: customerName,
       expectedArrival: expectedArrival,
-      address: (json['delivery_address'] ??
-              json['address'] ??
-              'Vendor ${json['vendor_id'] ?? '-'} → Customer ${json['customer_id'] ?? '-'}')
+      deleverystatus: orderType,
+      address: (json['delivery_address'] ?? json['address'] ?? address)
           .toString(),
       distanceInKm: distanceValue,
       totalAmount: totalValue,
       basePay: basePayValue,
       distancePay: distancePayValue,
-      orderType: (json['delivery_type'] ?? json['order_type'] ?? 'Delivery')
-          .toString(),
+      orderType: orderType,
       currency: (json['currency'] ?? '₹').toString(),
       isUrgent: json['is_on_time'] == false,
-      isCombined: json['is_combined'] as bool? ?? false,
+      isCombined: json['is_combined'] as bool? ?? combinedFromType,
       status: _statusFromApi(json['status'] as String?),
       tierLabel: (json['tier_label'] ?? 'Payout Rate').toString(),
     );
@@ -218,6 +261,7 @@ class Assignment {
     return Assignment(
       id: json['order_id'] as String,
       customerName: json['customer_name'] as String,
+      deleverystatus: json['delivery_type'] as String? ?? 'Pending',
       expectedArrival: DateTime.parse(json['expected_arrival'] as String),
       address: json['address'] as String,
       distanceInKm: (json['distance_km'] as num).toDouble(),
@@ -277,6 +321,9 @@ class Assignment {
     final normalized = status?.toLowerCase().replaceAll(' ', '') ?? '';
     if (normalized.isEmpty || normalized == 'pending' || normalized == 'assigned') {
       return AssignmentStatus.pending;
+    }
+    if (normalized == 'outfordelivery') {
+      return AssignmentStatus.outForDelivery;
     }
     if (normalized.contains('reject') || normalized.contains('cancel')) {
       return AssignmentStatus.rejected;

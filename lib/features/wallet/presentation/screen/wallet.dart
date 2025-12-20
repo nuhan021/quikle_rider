@@ -168,17 +168,29 @@ class WalletScreen extends GetView<WalletController> {
                         targetAmount: controller.forecastTargetValue,
                       ),
                       SizedBox(height: 12.h),
-                      Obx(
-                        () => BalanceCard(
-                          balance:
-                              "₹${controller.currentBalance.value.toString()}",
-                          lastUpdated: controller.balanceSubtitle,
-                          onWithdraw: () async {
-                            Get.to(AddPaymentMethodPage());
-                          },
-                        ),
+                      GetBuilder<WalletController>(
+                        builder: (ctrl) {
+                          if (ctrl.tabController.index != 0) {
+                            return const SizedBox.shrink();
+                          }
+
+                          return Column(
+                            children: [
+                              Obx(
+                                () => BalanceCard(
+                                  balance:
+                                      "₹${controller.currentBalance.value.toString()}",
+                                  lastUpdated: controller.balanceSubtitle,
+                                  onWithdraw: () async {
+                                    Get.to(AddPaymentMethodPage());
+                                  },
+                                ),
+                              ),
+                              SizedBox(height: 12.h),
+                            ],
+                          );
+                        },
                       ),
-                      SizedBox(height: 12.h),
                       // Display stats based on selected tab
                       GetBuilder<WalletController>(
                         builder: (ctrl) {
@@ -195,87 +207,105 @@ class WalletScreen extends GetView<WalletController> {
                         },
                       ),
                       SizedBox(height: 16.h),
-                      Text(
-                        'Customer Ratings',
-                        style: headingStyle2(color: Colors.black),
-                      ),
-                      Obx(() {
-                        if (controller.isRatingLoading.value) {
-                          return Padding(
-                            padding: EdgeInsets.symmetric(vertical: 8.h),
-                            child: const LinearProgressIndicator(minHeight: 3),
-                          );
-                        } else {
-                          // Use rating from allStats if available, otherwise use riderRating
-                          final allStats = controller.allStats.value ?? {};
-                          final rating =
-                              (allStats['customer_rating'] ?? 0.0) as num;
-                          final ratingValue = rating.toDouble();
-                          final finalRating = ratingValue > 0
-                              ? ratingValue
-                              : (controller.riderRating.value ?? 0.0);
-                          final reviewCount =
-                              controller.riderReviewCount.value ?? 0;
-
-                          if (finalRating == 0 &&
-                              reviewCount == 0 &&
-                              controller.ratingError.value != null) {
-                            return Padding(
-                              padding: EdgeInsets.only(bottom: 8.h),
-                              child: Text(
-                                'No ratings yet',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            );
+                      GetBuilder<WalletController>(
+                        builder: (ctrl) {
+                          if (ctrl.tabController.index != 0) {
+                            return const SizedBox.shrink();
                           }
 
-                          return RatingCard(
-                            rating: finalRating,
-                            totalRatings: reviewCount > 0
-                                ? (reviewCount == 1
-                                      ? '1 Rating'
-                                      : '$reviewCount Ratings')
-                                : '0 Ratings',
-                            reviewCount: reviewCount,
-                          );
-                        }
-                      }),
-                      TierCard(benefits: '₹16,000-18,500/month'),
-                      Padding(
-                        padding: EdgeInsets.only(
-                          left: 4.w,
-                          bottom: 8.h,
-                          top: 8.h,
-                        ),
-                        child: Text(
-                          'Past Deliveries',
-                          style: headingStyle2(color: Colors.black),
-                        ),
-                      ),
-                      ListView.builder(
-                        itemCount: controller.deliveries.length,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          final d = controller.deliveries[index];
-                          return DeliveryCard(
-                            box: cardBox,
-                            orderId: d.id,
-                            status: d.status,
-                            amount: d.amount,
-                            customerName: d.customer,
-                            dateTime: d.dateTime,
-                            distance: d.distance,
-                            rightSubline: d.rightSubline,
-                            bottomNote: d.bottomNote,
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                'Customer Ratings',
+                                style: headingStyle2(color: Colors.black),
+                              ),
+                              Obx(() {
+                                if (controller.isRatingLoading.value) {
+                                  return Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 8.h),
+                                    child: const LinearProgressIndicator(
+                                      minHeight: 3,
+                                    ),
+                                  );
+                                } else {
+                                  // Use rating from allStats if available, otherwise use riderRating
+                                  final allStats =
+                                      controller.allStats.value ?? {};
+                                  final rating =
+                                      (allStats['customer_rating'] ?? 0.0)
+                                          as num;
+                                  final ratingValue = rating.toDouble();
+                                  final finalRating = ratingValue > 0
+                                      ? ratingValue
+                                      : (controller.riderRating.value ?? 0.0);
+                                  final reviewCount =
+                                      controller.riderReviewCount.value ?? 0;
+
+                                  if (finalRating == 0 &&
+                                      reviewCount == 0 &&
+                                      controller.ratingError.value != null) {
+                                    return Padding(
+                                      padding: EdgeInsets.only(bottom: 8.h),
+                                      child: Text(
+                                        'No ratings yet',
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 13.sp,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    );
+                                  }
+
+                                  return RatingCard(
+                                    rating: finalRating,
+                                    totalRatings: reviewCount > 0
+                                        ? (reviewCount == 1
+                                              ? '1 Rating'
+                                              : '$reviewCount Ratings')
+                                        : '0 Ratings',
+                                    reviewCount: reviewCount,
+                                  );
+                                }
+                              }),
+                              TierCard(benefits: '₹16,000-18,500/month'),
+                              Padding(
+                                padding: EdgeInsets.only(
+                                  left: 4.w,
+                                  bottom: 8.h,
+                                  top: 8.h,
+                                ),
+                                child: Text(
+                                  'Past Deliveries',
+                                  style: headingStyle2(color: Colors.black),
+                                ),
+                              ),
+                              ListView.builder(
+                                itemCount: controller.deliveries.length,
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemBuilder: (context, index) {
+                                  final d = controller.deliveries[index];
+                                  return DeliveryCard(
+                                    box: cardBox,
+                                    orderId: d.id,
+                                    status: d.status,
+                                    amount: d.amount,
+                                    customerName: d.customer,
+                                    dateTime: d.dateTime,
+                                    distance: d.distance,
+                                    rightSubline: d.rightSubline,
+                                    bottomNote: d.bottomNote,
+                                  );
+                                },
+                              ),
+                              SizedBox(height: 24.h),
+                            ],
                           );
                         },
                       ),
-                      SizedBox(height: 24.h),
                     ],
                   ),
                 );

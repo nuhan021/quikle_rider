@@ -5,7 +5,7 @@ import 'package:get/route_manager.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_combioned_controller.dart';
 import 'package:quikle_rider/features/all_orders/models/combine_ordermodel.dart';
-import 'package:quikle_rider/features/messages/presentation/conversations_list.dart';
+
 import 'package:quikle_rider/features/messages/presentation/massage_screen.dart';
 
 class DeliveryProgressCard extends StatelessWidget {
@@ -40,6 +40,7 @@ class DeliveryProgressCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text("#${order.orderId}", style: headingStyle2(color: Colors.black)),
           _ProgressHeader(
             completedSteps: completedSteps,
             totalSteps: totalSteps,
@@ -278,13 +279,7 @@ class _PickupPointItem extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 4.h),
-                  Text(
-                    pickupPoint.statusText,
-                    style: getTextStyle(
-                      fontSize: 12,
-                      color: const Color(0xFF9B9B9B),
-                    ),
-                  ),
+                  
                 ],
               ),
             ),
@@ -297,7 +292,7 @@ class _PickupPointItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(4.r),
           ),
           child: Text(
-            pickupPoint.statusString,
+            pickupPoint.statusText,
             style: getTextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -458,7 +453,7 @@ class _DeliveryInfoSection extends StatelessWidget {
                     shape: OvalBorder(),
                   ),
                   child: ClipOval(
-                    child: Image.asset(
+                    child: Image.network(
                       order.customerImage,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
@@ -487,7 +482,7 @@ class _DeliveryInfoSection extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '123 Main St, Bangkok',
+                        order.deliveryAddress,
                         style: getTextStyle(
                           fontSize: 14,
                           color: const Color(0xFF7C7C7C),
