@@ -33,7 +33,6 @@ class SplashController extends GetxController {
   void onInit() {
     super.onInit();
     _initVideo();
-    
   }
 
   Future<void> _initVideo() async {
@@ -78,7 +77,12 @@ class SplashController extends GetxController {
   }
 
   void _handleNavigation() {
-    if (StorageService.accessToken != null ) {
+    final bool hasToken = StorageService.accessToken != null;
+    final bool isVerified = profileController.isVerified.value == true;
+    final bool isDocumentUploaded =
+        profileController.isDocumentUploaded.value == true;
+
+    if (hasToken && isVerified && isDocumentUploaded) {
       Get.offAllNamed(AppRoute.getBottomNavBar());
       AppLoggerHelper.debug(
         "documnets uploaded ${profileController.isDocumentUploaded.value}",
@@ -86,18 +90,22 @@ class SplashController extends GetxController {
       AppLoggerHelper.debug(
         "Profile verified ${profileController.isVerified.value}",
       );
-
+      AppLoggerHelper.debug(
+        "is doocument uploaded ${profileController.isDocumentUploaded.value}",
+      );
       AppLoggerHelper.debug(
         "Navigating to Home ${profileController.isDocumentUploaded.value}",
       );
-    // } else if (StorageService.accessToken != null &&
-    //     profileController.isDocumentUploaded.value == false &&
-    //     profileController.isVerified.value == false) {
-    //   Get.offAllNamed(AppRoute.uploaddocuments);
-    // } else {
-     } else{
-      Get.offAllNamed(AppRoute.getLoginScreen());
+      return;
+    } else if (hasToken && isVerified ==false) {
+      Get.offAllNamed(AppRoute.uploaddocuments);
+    } else {
+      Get.offAllNamed(AppRoute.loginScreen);
     }
+    // if (hasToken) {
+    //   Get.offAllNamed(AppRoute.uploaddocuments);
+    //   return;
+    // }
   }
 
   @override

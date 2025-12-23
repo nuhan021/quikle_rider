@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/features/all_orders/data/services/order_services.dart';
 import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 
 class AllOrdersController extends GetxController {
   AllOrdersController({OrderServices? orderServices})
@@ -18,6 +19,7 @@ class AllOrdersController extends GetxController {
   RxInt selectedIndex = 0.obs;
   RxBool hasConnection = true.obs;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  Worker? _verificationWorker;
 
   final RxBool isOrdersLoading = false.obs;
   final RxString ordersError = ''.obs;
@@ -25,6 +27,7 @@ class AllOrdersController extends GetxController {
   final RxList<RiderOrder> combinedOrders = <RiderOrder>[].obs;
   final RxList<RiderOrder> singleOrders = <RiderOrder>[].obs;
   int? _pendingInitialTabIndex;
+  late final ProfileController _profileController;
 
   bool _isCombinedOrder(RiderOrder order) {
     final type = (order.deliveryType ?? '').toLowerCase().trim();
@@ -34,6 +37,14 @@ class AllOrdersController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _profileController = Get.isRegistered<ProfileController>()
+        ? Get.find<ProfileController>()
+        : Get.put(ProfileController());
+    _verificationWorker = ever<bool?>(_profileController.isVerified, (value) {
+      if (value == true && orders.isEmpty && !isOrdersLoading.value) {
+        fetchOrders();
+      }
+    });
     _initConnectivityMonitoring();
     fetchOrders();
   }
@@ -56,6 +67,15 @@ class AllOrdersController extends GetxController {
   }
 
   Future<void> fetchOrders({int skip = 0, int limit = 10}) async {
+    final isVerified = _profileController.isVerified.value == true;
+    if (!isVerified) {
+      ordersError.value = 'Your profile not verified.';
+      orders.clear();
+      combinedOrders.clear();
+      singleOrders.clear();
+      return;
+    }
+
     final accessToken = StorageService.accessToken;
     if (accessToken == null || accessToken.isEmpty) {
       ordersError.value = 'Missing access token. Please login again.';
@@ -138,6 +158,7 @@ class AllOrdersController extends GetxController {
   @override
   void onClose() {
     _connectivitySubscription?.cancel();
+    _verificationWorker?.dispose();
     super.onClose();
   }
 }

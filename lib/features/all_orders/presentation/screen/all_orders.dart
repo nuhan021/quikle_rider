@@ -18,6 +18,7 @@ class AllOrders extends StatefulWidget {
 class _AllOrdersState extends State<AllOrders>
     with SingleTickerProviderStateMixin {
   final AllOrdersController controller = Get.put(AllOrdersController());
+  
 
   @override
   void initState() {

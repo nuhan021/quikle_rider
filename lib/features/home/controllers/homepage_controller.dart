@@ -9,6 +9,7 @@ import 'package:quikle_rider/features/home/models/home_dashboard_models.dart';
 import 'package:quikle_rider/features/home/presentation/screen/goonline.dart';
 import 'package:quikle_rider/features/home/presentation/screen/gooffline.dart';
 import 'package:quikle_rider/custom_tab_bar/notifications.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 
 class HomepageController extends GetxController {
   HomepageController({HomeService? homeService})
@@ -22,11 +23,21 @@ class HomepageController extends GetxController {
   final assignments = <Assignment>[].obs;
   final _pendingActions = <String>{}.obs;
   final HomeService _homeService;
+  late final ProfileController _profileController;
 
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
   void onToggleSwitch() async {
     if (!isOnline.value) {
+      final isVerified = _profileController.isVerified.value == true;
+      if (!isVerified) {
+        _showStatusSnack(
+          title: 'Account not verified',
+          message: 'your accout not verified',
+          success: false,
+        );
+        return;
+      }
       final result = await Get.to(
         () => const GoOnlinePage(),
         opaque: false,
@@ -57,6 +68,9 @@ class HomepageController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _profileController = Get.isRegistered<ProfileController>()
+        ? Get.find<ProfileController>()
+        : Get.put(ProfileController());
     _initConnectivityMonitoring();
     fetchDashboardData();
   }

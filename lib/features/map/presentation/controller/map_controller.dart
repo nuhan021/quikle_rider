@@ -1,5 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -9,6 +11,9 @@ import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/map/presentation/model/delivery_model.dart';
 
 class MapController extends GetxController {
+  // Load the key from .env or --dart-define (same as TrackingController).
+  static final String _googleMapsApiKey =
+      dotenv.env['GOOGLE_MAP_API_KEY'] ?? '';
   static const LatLng _hardcodedLocation = LatLng(28.6139, 77.209);
   final RxBool isOnline = true.obs;
   final Rx<DeliveryModel?> currentDelivery = Rx<DeliveryModel?>(null);
@@ -21,8 +26,11 @@ class MapController extends GetxController {
   final RxString vendorPickupAddress = ''.obs;
   final Rxn<LatLng> selectedDestination = Rxn<LatLng>();
   final RxString selectedDestinationAddress = ''.obs;
+  final RxSet<Polyline> routePolylines = <Polyline>{}.obs;
   GoogleMapController? _mapController;
   String? _activeOrderId;
+  LatLng? _lastPolylineOrigin;
+  bool _isBuildingPolylines = false;
   LatLng get fallbackLocation => _hardcodedLocation;
   bool get hasUserLocation => currentPosition.value != null;
   bool get hasActiveRoute =>
@@ -98,17 +106,22 @@ class MapController extends GetxController {
   }
 
   Set<Polyline> get activePolylines {
-    if (!hasActiveRoute) return {};
-    return {
-      Polyline(
-        polylineId: const PolylineId('selected-route'),
-        points: _routePoints,
-        color: Colors.blueAccent,
-        width: 5,
-        startCap: Cap.roundCap,
-        endCap: Cap.roundCap,
-      ),
-    };
+    final polylines = <Polyline>{};
+    if (routePolylines.isNotEmpty) {
+      polylines.addAll(routePolylines);
+    } else if (hasActiveRoute) {
+      polylines.add(
+        Polyline(
+          polylineId: const PolylineId('selected-route'),
+          points: _routePoints,
+          color: Colors.blueAccent,
+          width: 5,
+          startCap: Cap.roundCap,
+          endCap: Cap.roundCap,
+        ),
+      );
+    }
+    return polylines;
   }
 
   String get destinationInfoText {
@@ -228,6 +241,7 @@ class MapController extends GetxController {
     }
 
     _fitCameraToOrder();
+    _buildRoutePolylines();
   }
 
   Future<void> requestCurrentLocation() async {
@@ -247,15 +261,13 @@ class MapController extends GetxController {
         'MapController: Current location → lat=${_hardcodedLocation.latitude}, '
         'lng=${_hardcodedLocation.longitude}',
       );
-      if (!hasActiveOrder) {
-        _ensureVendorAndCustomerNearby(currentPosition.value!);
-      }
       await _updateAddressFromCoordinates();
       if (hasActiveOrder) {
         _fitCameraToOrder();
       } else {
         _moveCameraToCurrentLocation();
       }
+      await _buildRoutePolylines();
       if (selectedDestination.value != null) {
         _fitCameraToRoute();
       }
@@ -437,6 +449,79 @@ class MapController extends GetxController {
     super.onClose();
   }
 
+  Future<void> _buildRoutePolylines() async {
+    if (_isBuildingPolylines) return;
+    final origin = currentPosition.value;
+    final vendor = vendorPosition.value;
+    final customer = customerPosition.value;
+    if (origin == null || vendor == null || customer == null) return;
+
+    if (_lastPolylineOrigin != null) {
+      final diff = Geolocator.distanceBetween(
+        _lastPolylineOrigin!.latitude,
+        _lastPolylineOrigin!.longitude,
+        origin.latitude,
+        origin.longitude,
+      );
+      if (diff < 15) return;
+    }
+
+    final apiKey = _googleMapsApiKey;
+    if (apiKey.isEmpty) {
+      debugPrint(
+        'MapController: Missing Google Maps API key for polyline routes.',
+      );
+      return;
+    }
+
+    _isBuildingPolylines = true;
+    final polylinePoints = PolylinePoints(apiKey: apiKey);
+    final legs = [
+      (origin, vendor, 'current-to-vendor'),
+      (vendor, customer, 'vendor-to-customer'),
+    ];
+
+    routePolylines.clear();
+
+    try {
+      for (final leg in legs) {
+        final result = await polylinePoints.getRouteBetweenCoordinates(
+          request: PolylineRequest(
+            origin: PointLatLng(leg.$1.latitude, leg.$1.longitude),
+            destination: PointLatLng(leg.$2.latitude, leg.$2.longitude),
+            mode: TravelMode.driving,
+          ),
+        );
+
+        if (result.points.isEmpty) {
+          debugPrint(
+            'MapController: Polyline empty for ${leg.$3} (status: ${result.status}).',
+          );
+          continue;
+        }
+
+        final points = result.points
+            .map((point) => LatLng(point.latitude, point.longitude))
+            .toList();
+
+        routePolylines.add(
+          Polyline(
+            polylineId: PolylineId(leg.$3),
+            color: Colors.blue.shade700,
+            width: 6,
+            points: points,
+          ),
+        );
+      }
+      routePolylines.refresh();
+      _lastPolylineOrigin = origin;
+    } catch (error) {
+      debugPrint('MapController: Failed to build polylines - $error');
+    } finally {
+      _isBuildingPolylines = false;
+    }
+  }
+
   List<LatLng> get _routePoints {
     final start = currentPosition.value;
     final destination = selectedDestination.value;
@@ -564,6 +649,7 @@ class MapController extends GetxController {
       final first = locations.first;
       customerPosition.value = LatLng(first.latitude, first.longitude);
       _fitCameraToOrder();
+      _buildRoutePolylines();
     } catch (error) {
       debugPrint('MapController: Failed to geocode delivery address - $error');
     }
@@ -590,32 +676,6 @@ class MapController extends GetxController {
     } catch (error) {
       debugPrint('MapController: Failed to reverse-geocode vendor - $error');
     }
-  }
-
-  void _ensureVendorAndCustomerNearby(LatLng origin) {
-    vendorPosition.value ??= _offsetLatLng(
-      origin,
-      metersNorth: 140,
-      metersEast: 90,
-    );
-    customerPosition.value ??= _offsetLatLng(
-      origin,
-      metersNorth: -120,
-      metersEast: -80,
-    );
-  }
-
-  LatLng _offsetLatLng(
-    LatLng origin, {
-    required double metersNorth,
-    required double metersEast,
-  }) {
-    const metersPerDegreeLat = 111320.0;
-    final dLat = metersNorth / metersPerDegreeLat;
-    final metersPerDegreeLng =
-        metersPerDegreeLat * cos(origin.latitude * pi / 180);
-    final dLng = metersEast / metersPerDegreeLng;
-    return LatLng(origin.latitude + dLat, origin.longitude + dLng);
   }
 
 }

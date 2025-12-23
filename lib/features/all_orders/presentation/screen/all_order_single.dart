@@ -6,6 +6,7 @@ import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_controller.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_single.dart';
 import 'package:quikle_rider/features/all_orders/widgets/order_card.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 
 class AllOrdersSingle extends StatelessWidget {
   const AllOrdersSingle({super.key});
@@ -15,10 +16,28 @@ class AllOrdersSingle extends StatelessWidget {
     final OrderController controller = Get.put(OrderController());
     final AllOrdersController allOrdersController =
         Get.find<AllOrdersController>();
+    final ProfileController profileController =
+        Get.isRegistered<ProfileController>()
+            ? Get.find<ProfileController>()
+            : Get.put(ProfileController());
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: Obx(() {
+        final isVerified = profileController.isVerified.value == true;
+        if (!isVerified) {
+          return Center(
+            child: Text(
+              'Your profile not verified',
+              style: getTextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF7C7C7C),
+              ),
+            ),
+          );
+        }
+
         if (allOrdersController.isOrdersLoading.value &&
             allOrdersController.singleOrders.isEmpty) {
           return const Center(child: CircularProgressIndicator());

@@ -3,15 +3,20 @@ import 'package:get/get.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_controller.dart';
 import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/all_orders/models/single_oder_model.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 
 class OrderController extends GetxController {
   final Rxn<OrderModel> order = Rxn<OrderModel>();
   final Rxn<RiderOrder> apiOrder = Rxn<RiderOrder>();
   Worker? _ordersWorker;
+  late final ProfileController _profileController;
 
   @override
   void onInit() {
     super.onInit();
+    _profileController = Get.isRegistered<ProfileController>()
+        ? Get.find<ProfileController>()
+        : Get.put(ProfileController());
     if (Get.isRegistered<AllOrdersController>()) {
       final allOrdersController = Get.find<AllOrdersController>();
       _syncFromAllOrders(allOrdersController);
@@ -22,6 +27,13 @@ class OrderController extends GetxController {
   }
 
   void _syncFromAllOrders(AllOrdersController allOrdersController) {
+    final isVerified = _profileController.isVerified.value == true;
+    if (!isVerified) {
+      apiOrder.value = null;
+      order.value = null;
+      update();
+      return;
+    }
     final singles = allOrdersController.singleOrders;
     if (singles.isEmpty) {
       apiOrder.value = null;
