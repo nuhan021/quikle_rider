@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/services/firebase/firebase_service.dart';
 import 'package:quikle_rider/core/services/firebase/notification_service.dart';
@@ -259,7 +260,11 @@ class AuthController extends GetxController {
           'Logged in successfully. Access token: $accessToken',
         );
         if (resolvedUserId != null) {
-          await NotificationService.instance.sendInstantNotification(userId: resolvedUserId, title: "success", body: "Login");
+          await NotificationService.instance.sendInstantNotification(
+            userId: resolvedUserId,
+            title: "success",
+            body: "Login",
+          );
         }
         AppLoggerHelper.debug(
           'Logged in successfully. Refresh token: $refreshToken',
@@ -312,12 +317,19 @@ class AuthController extends GetxController {
       _resetOtpFields();
       _startResendTimer();
 
-      final userId = StorageService.userId;
-      if (response.isSuccess && userId != null) {
-        NotificationService.instance.sendInstantNotification(
-          userId: userId,
-          title: 'Hello Rider!',
-          body: 'Your OTP is ${response.responseData['message']}.',
+      if (response.isSuccess) {
+        FlutterLocalNotificationsPlugin().show(
+          0,
+          'OTP Sent',
+          'An OTP has been sent to ${response.responseData['message']}',
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              'otp_notification_channel',
+              'OTP Notification',
+              channelDescription: 'Channel for OTP notifications',
+              importance: Importance.high,
+            ),
+          ),
         );
       }
       return true;

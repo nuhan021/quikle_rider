@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -24,14 +23,11 @@ class MapController extends GetxController {
   final RxString selectedDestinationAddress = ''.obs;
   GoogleMapController? _mapController;
   String? _activeOrderId;
-
   LatLng get fallbackLocation => _hardcodedLocation;
-
   bool get hasUserLocation => currentPosition.value != null;
   bool get hasActiveRoute =>
       hasUserLocation && selectedDestination.value != null;
   bool get hasActiveOrder => _activeOrderId != null;
-
   Set<Marker> get mapMarkers {
     final markers = <Marker>{};
     final current = currentPosition.value;

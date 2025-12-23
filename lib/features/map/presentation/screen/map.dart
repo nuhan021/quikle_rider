@@ -199,19 +199,24 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Widget _buildHeader(DeliveryModel delivery) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Text('Order Details', style: headingStyle2(color: Colors.black87)),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+          padding: EdgeInsets.symmetric(vertical: 6.h),
           decoration: BoxDecoration(
             color: Colors.white10,
             borderRadius: BorderRadius.circular(15.r),
           ),
           child: Text(
+            maxLines: 2,
             delivery.estimatedTime,
-            style: getTextStyle(
+            style: TextStyle(
+              
+              overflow: TextOverflow.ellipsis,
+
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: Colors.black,
