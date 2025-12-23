@@ -6,18 +6,29 @@ import 'package:quikle_rider/features/all_orders/controllers/all_order_controlle
 import 'package:quikle_rider/features/all_orders/models/combine_ordermodel.dart';
 import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/all_orders/widgets/delevery_process_card.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 
 class AllOrdersCombined extends StatelessWidget {
   const AllOrdersCombined({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final AllOrdersController allOrdersController = Get.find<AllOrdersController>();
+    final AllOrdersController allOrdersController =
+        Get.find<AllOrdersController>();
     final CombinedOrderController controller = Get.put(CombinedOrderController());
+    final ProfileController profileController =
+        Get.isRegistered<ProfileController>()
+            ? Get.find<ProfileController>()
+            : Get.put(ProfileController());
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: Obx(() {
+        final isVerified = profileController.isVerified.value == true;
+        if (!isVerified) {
+          return const Center(child: Text('Your profile not verified'));
+        }
+
         if (allOrdersController.isOrdersLoading.value &&
             allOrdersController.combinedOrders.isEmpty) {
           return const Center(child: CircularProgressIndicator());

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/features/profile/data/services/profile_services.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/wallet/data/services/wallet_services.dart';
 import 'package:quikle_rider/features/wallet/models/leaderboard_standing.dart';
 import 'package:quikle_rider/features/wallet/models/rider_performance.dart';
@@ -40,6 +41,8 @@ class WalletController extends GetxController
   late TabController tabController;
   final WalletServices _walletServices;
   final ProfileServices _profileServices;
+  late final ProfileController _profileController;
+  Worker? _verificationWorker;
   final walletSummary = Rxn<WalletSummary>();
   final monthlyForecast = Rxn<WalletForecast>();
   final isWalletLoading = false.obs;
@@ -80,6 +83,7 @@ class WalletController extends GetxController
   final RxBool isAnnualStatsLoading = false.obs;
   final RxBool isBonusProgressLoading = false.obs;
   final RxBool isMonthlyForecastLoading = false.obs;
+  bool _hasLoadedWalletData = false;
   
   final RxnString allStatsError = RxnString();
   final RxnString weeklyStatsError = RxnString();
@@ -159,6 +163,9 @@ class WalletController extends GetxController
   @override
   void onInit() {
     super.onInit();
+    _profileController = Get.isRegistered<ProfileController>()
+        ? Get.find<ProfileController>()
+        : Get.put(ProfileController());
     tabController = TabController(length: 4, vsync: this);
     tabController.addListener(() {
       if (tabController.indexIsChanging) return;
@@ -166,6 +173,24 @@ class WalletController extends GetxController
       updateDataForPeriod(tabController.index);
     });
     
+    if (_isVerified) {
+      _loadWalletData();
+    } else {
+      _verificationWorker = ever<bool?>(_profileController.isVerified, (value) {
+        if (value == true) {
+          _loadWalletData();
+        }
+      });
+    }
+  }
+
+  bool get _isVerified => _profileController.isVerified.value == true;
+
+  void _loadWalletData() {
+    if (_hasLoadedWalletData) {
+      return;
+    }
+    _hasLoadedWalletData = true;
     // Fetch all stats on init
     fetchAllStats();
     updateDataForPeriod(0);
@@ -217,6 +242,9 @@ class WalletController extends GetxController
       _periodFilters[_selectedPeriodIndex.clamp(0, _periodFilters.length - 1)];
 
   Future<void> fetchWalletSummary({String? periodOverride}) async {
+    if (!_isVerified) {
+      return;
+    }
     final accessToken = StorageService.accessToken;
     final period = periodOverride ?? _currentPeriod;
     if (accessToken == null || accessToken.isEmpty) {
@@ -278,6 +306,9 @@ class WalletController extends GetxController
   }
 
   Future<void> fetchPerformanceData() async {
+    if (!_isVerified) {
+      return;
+    }
     final accessToken = StorageService.accessToken;
     if (accessToken == null || accessToken.isEmpty) {
       performanceError.value = 'Missing access token.';
@@ -311,6 +342,9 @@ class WalletController extends GetxController
   }
 
   Future<void> fetchLeaderboardData() async {
+    if (!_isVerified) {
+      return;
+    }
     final accessToken = StorageService.accessToken;
     if (accessToken == null || accessToken.isEmpty) {
       leaderboardError.value = 'Missing access token.';
@@ -344,6 +378,9 @@ class WalletController extends GetxController
   }
 
   Future<void> fetchRiderRating() async {
+    if (!_isVerified) {
+      return;
+    }
     final accessToken = StorageService.accessToken;
     if (accessToken == null || accessToken.isEmpty) {
       ratingError.value = 'Missing access token.';
@@ -388,6 +425,9 @@ class WalletController extends GetxController
   }
 
   Future<void> fetchCurrentBalance() async {
+    if (!_isVerified) {
+      return;
+    }
     final accessToken = StorageService.accessToken;
     if (accessToken == null || accessToken.isEmpty) {
       currentBalance.value = 0;
@@ -417,6 +457,9 @@ class WalletController extends GetxController
   }
 
   Future<void> fetchMonthlyForecast() async {
+    if (!_isVerified) {
+      return;
+    }
     final accessToken = StorageService.accessToken;
     if (accessToken == null || accessToken.isEmpty) {
       monthlyForecastError.value = 'Missing access token.';
@@ -462,6 +505,9 @@ class WalletController extends GetxController
     int limit = 20,
     bool append = false,
   }) async {
+    if (!_isVerified) {
+      return;
+    }
     final accessToken = StorageService.accessToken;
     if (accessToken == null || accessToken.isEmpty) {
       withdrawalHistory.clear();
@@ -544,6 +590,9 @@ class WalletController extends GetxController
   }
 
   Future<void> refreshCurrentPeriod() async {
+    if (!_isVerified) {
+      return;
+    }
     await Future.wait([
       fetchWalletSummary(periodOverride: _currentPeriod),
       fetchPerformanceData(),
@@ -655,6 +704,9 @@ class WalletController extends GetxController
 
   /// Fetch all rider stats
   Future<void> fetchAllStats() async {
+    if (!_isVerified) {
+      return;
+    }
     try {
       isAllStatsLoading.value = true;
       allStatsError.value = null;
@@ -686,6 +738,9 @@ class WalletController extends GetxController
 
   /// Fetch weekly rider stats
   Future<void> fetchWeeklyStats() async {
+    if (!_isVerified) {
+      return;
+    }
     try {
       isWeeklyStatsLoading.value = true;
       weeklyStatsError.value = null;
@@ -717,6 +772,9 @@ class WalletController extends GetxController
 
   /// Fetch monthly rider stats
   Future<void> fetchMonthlyStats() async {
+    if (!_isVerified) {
+      return;
+    }
     try {
       isMonthlyStatsLoading.value = true;
       monthlyStatsError.value = null;
@@ -748,6 +806,9 @@ class WalletController extends GetxController
 
   /// Fetch annual/yearly rider stats
   Future<void> fetchAnnualStats() async {
+    if (!_isVerified) {
+      return;
+    }
     try {
       isAnnualStatsLoading.value = true;
       annualStatsError.value = null;
@@ -778,6 +839,9 @@ class WalletController extends GetxController
   }
 
   Future<void> fetchBonusProgress() async {
+    if (!_isVerified) {
+      return;
+    }
     try {
       isBonusProgressLoading.value = true;
       bonusProgressError.value = null;
@@ -810,6 +874,7 @@ class WalletController extends GetxController
   @override
   void onClose() {
     tabController.dispose();
+    _verificationWorker?.dispose();
     super.onClose();
   }
 

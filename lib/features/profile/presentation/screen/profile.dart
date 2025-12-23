@@ -307,31 +307,73 @@ class ProfileScreen extends StatelessWidget {
     final ImageProvider avatarProvider = hasImage
         ? NetworkImage(imageUrl)
         : const AssetImage("assets/images/empty_profile.jpg");
+    final bool isVerified = _controller.isVerified.value == true;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 20),
       decoration: _profileCardDecoration(),
-      child: Column(
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          CircleAvatar(
-            radius: 45,
-            backgroundColor: Colors.grey.shade200,
-            backgroundImage: avatarProvider,
-          ),
-          SizedBox(height: 12.h),
-          Text(
-            displayName,
-            style: getTextStyle2(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
+          Positioned(
+            top: 0,
+            right: 16,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: isVerified
+                    ? const Color(0xFFE6F4EA)
+                    : const Color(0xFFFDECEC),
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isVerified ? Icons.verified : Icons.error_outline,
+                    size: 14,
+                    color: isVerified
+                        ? const Color(0xFF1E8E3E)
+                        : const Color(0xFFD93025),
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    isVerified ? "Verified" : "Not verified",
+                    style: getTextStyle2(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: isVerified
+                          ? const Color(0xFF1E8E3E)
+                          : const Color(0xFFD93025),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          SizedBox(height: 4.h),
-          Text(
-            displayEmail,
-            style: getTextStyle2(fontSize: 14, color: Colors.black54),
+          Column(
+            children: [
+              CircleAvatar(
+                radius: 45,
+                backgroundColor: Colors.grey.shade200,
+                backgroundImage: avatarProvider,
+              ),
+              SizedBox(height: 12.h),
+              Text(
+                displayName,
+                style: getTextStyle2(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                displayEmail,
+                style: getTextStyle2(fontSize: 14, color: Colors.black54),
+              ),
+            ],
           ),
         ],
       ),
@@ -571,9 +613,9 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             ElevatedButton(
-              onPressed: () async{
-               await StorageService.logoutUser();
-               Get.offAllNamed(AppRoute.loginScreen);
+              onPressed: () async {
+                await StorageService.logoutUser();
+                Get.offAllNamed(AppRoute.loginScreen);
               },
               style: ElevatedButton.styleFrom(
                 side: BorderSide.none,

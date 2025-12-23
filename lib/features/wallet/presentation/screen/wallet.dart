@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/add_paymentmethod.dart';
 import 'package:quikle_rider/features/wallet/controllers/wallet_controller.dart';
 import 'package:quikle_rider/features/wallet/widgets/balance_card.dart';
@@ -17,6 +18,10 @@ class WalletScreen extends GetView<WalletController> {
 
   @override
   Widget build(BuildContext context) {
+    final ProfileController profileController =
+        Get.isRegistered<ProfileController>()
+            ? Get.find<ProfileController>()
+            : Get.put(ProfileController());
     final cardBox = BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(12.r),
@@ -34,8 +39,13 @@ class WalletScreen extends GetView<WalletController> {
         backgroundColor: Colors.white,
         appBar: UnifiedProfileAppBar(isback: false, title: "Wallet"),
 
-        body: Column(
-          children: [
+        body: Obx(() {
+          final isVerified = profileController.isVerified.value == true;
+          if (!isVerified) {
+            return const Center(child: Text('Your profile not verified'));
+          }
+          return Column(
+            children: [
             // Segmented period selector
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -325,7 +335,8 @@ class WalletScreen extends GetView<WalletController> {
               }),
             ),
           ],
-        ),
+        );
+        }),
       ),
     );
   }

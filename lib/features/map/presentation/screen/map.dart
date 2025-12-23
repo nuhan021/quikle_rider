@@ -14,6 +14,7 @@ import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/map/presentation/controller/map_controller.dart';
 import 'package:quikle_rider/features/map/presentation/model/delivery_model.dart';
 import 'package:quikle_rider/features/map/presentation/widgets/map_shimmer.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -24,8 +25,11 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   late final MapController mapController;
+  late final ProfileController profileController;
   final OrderServices _orderServices = OrderServices();
   bool _isFetchingCurrentOrder = false;
+  bool _hasTriggeredVerifiedLoad = false;
+  Worker? _verificationWorker;
 
   @override
   void initState() {
@@ -33,19 +37,40 @@ class _MapScreenState extends State<MapScreen> {
     mapController = Get.isRegistered<MapController>()
         ? Get.find<MapController>()
         : Get.put(MapController());
-    debugPrint('MapScreen: opening, requesting current location...');
-    mapController.requestCurrentLocation();
-    _loadCurrentOrder();
+    profileController = Get.isRegistered<ProfileController>()
+        ? Get.find<ProfileController>()
+        : Get.put(ProfileController());
+    if (profileController.isVerified.value == true) {
+      _triggerVerifiedLoad();
+    } else {
+      _verificationWorker =
+          ever<bool?>(profileController.isVerified, (value) {
+        if (value == true && !_hasTriggeredVerifiedLoad) {
+          _triggerVerifiedLoad();
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
     mapController.detachMapController();
+    _verificationWorker?.dispose();
     super.dispose();
+  }
+
+  void _triggerVerifiedLoad() {
+    _hasTriggeredVerifiedLoad = true;
+    debugPrint('MapScreen: opening, requesting current location...');
+    mapController.requestCurrentLocation();
+    _loadCurrentOrder();
   }
 
   Future<void> _loadCurrentOrder() async {
     if (_isFetchingCurrentOrder) return;
+    if (profileController.isVerified.value != true) {
+      return;
+    }
     final args = Get.arguments;
     if (args is RiderOrder) {
       return;
@@ -87,45 +112,64 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final args = Get.arguments;
-    if (args is RiderOrder) {
-      mapController.applyOrderIfNeeded(args);
-    }
-
-    return GetX<MapController>(
-      init: mapController,
-      builder: (controller) {
-        final delivery = controller.currentDelivery.value;
-        return WillPopScope(
-          onWillPop: () async {
-            Get.back(); // Handle device back button
-            return false; // Prevent default pop
-          },
-          child: SafeArea(
-            child: Scaffold(
-              backgroundColor: Colors.white,
-              appBar: UnifiedProfileAppBar(
-                isback: false,
-                showActionButton: true,
-                title: "Map",
-                action: "Notification",
-                onActionPressed: () {},
-              ),
-              body: delivery == null
-                  ? const Center(child: CircularProgressIndicator())
-                  : SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          _buildMapArea(controller),
-                          _buildDeliveryInfo(context, controller, delivery),
-                        ],
-                      ),
-                    ),
+    return Obx(() {
+      final isVerified = profileController.isVerified.value == true;
+      if (!isVerified) {
+        return SafeArea(
+          child: Scaffold(
+            backgroundColor: Colors.white,
+            appBar: UnifiedProfileAppBar(
+              isback: false,
+              showActionButton: true,
+              title: "Map",
+              action: "Notification",
+              onActionPressed: () {},
             ),
+            body: const Center(child: Text('Your profile not verified')),
           ),
         );
-      },
-    );
+      }
+
+      final args = Get.arguments;
+      if (args is RiderOrder) {
+        mapController.applyOrderIfNeeded(args);
+      }
+
+      return GetX<MapController>(
+        init: mapController,
+        builder: (controller) {
+          final delivery = controller.currentDelivery.value;
+          return WillPopScope(
+            onWillPop: () async {
+              Get.back(); // Handle device back button
+              return false; // Prevent default pop
+            },
+            child: SafeArea(
+              child: Scaffold(
+                backgroundColor: Colors.white,
+                appBar: UnifiedProfileAppBar(
+                  isback: false,
+                  showActionButton: true,
+                  title: "Map",
+                  action: "Notification",
+                  onActionPressed: () {},
+                ),
+                body: delivery == null
+                    ? const Center(child: CircularProgressIndicator())
+                    : SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            _buildMapArea(controller),
+                            _buildDeliveryInfo(context, controller, delivery),
+                          ],
+                        ),
+                      ),
+              ),
+            ),
+          );
+        },
+      );
+    });
   }
 
   Widget _buildMapArea(MapController controller) {
@@ -149,7 +193,6 @@ class _MapScreenState extends State<MapScreen> {
         myLocationEnabled: true,
         myLocationButtonEnabled: true,
         zoomControlsEnabled: true,
-        onTap: controller.handleMapTap,
         gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
           Factory<OneSequenceGestureRecognizer>(() => EagerGestureRecognizer()),
         },

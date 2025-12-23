@@ -11,6 +11,8 @@ import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/kyc_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
+import 'package:quikle_rider/features/profile/presentation/widgets/common_button.dart';
+import 'package:quikle_rider/routes/app_routes.dart';
 
 class UploadDocumentsPage extends StatelessWidget {
   UploadDocumentsPage({super.key}) : _kycController = _ensureKycController();
@@ -53,6 +55,11 @@ class UploadDocumentsPage extends StatelessWidget {
                     .toList(),
                 SizedBox(height: 24.h),
                 _buildUploadButton(),
+                SizedBox(height: 24.h),
+                CustomButton(text: "Skip", onPressed: (){
+                     Get.offAllNamed(AppRoute.getBottomNavBar());
+
+                })
               ],
             ),
           );
