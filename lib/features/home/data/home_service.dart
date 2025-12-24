@@ -1,61 +1,94 @@
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
-import 'package:quikle_rider/core/services/location_services.dart';
 import 'package:quikle_rider/core/models/response_data.dart';
+import 'package:quikle_rider/core/services/location_services.dart';
+import 'package:quikle_rider/core/services/network_caller.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/constants/api_constants.dart';
-import 'package:quikle_rider/core/utils/logging/logger.dart';
 
 class HomeService {
-  HomeService({http.Client? client}) : _client = client ?? http.Client();
+  HomeService({NetworkCaller? networkCaller})
+      : _networkCaller = networkCaller ?? NetworkCaller();
 
-  final http.Client _client;
+  final NetworkCaller _networkCaller;
 
   Future<ResponseData> fetchUpcomingOrders({String? orderId}) async {
     final accessToken = StorageService.accessToken;
     final tokenType = StorageService.tokenType ?? 'Bearer';
 
     if (accessToken == null || accessToken.isEmpty) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 401,
-        errorMessage: 'Not authenticated',
-        responseData: null,
-      );
+      return _unauthenticatedResponse();
     }
 
-    try {
-      final path =
-          orderId == null ? '$baseurl/rider/orders/' : '$baseurl/rider/orders/$orderId/';
-      final uri = Uri.parse(path);
-      final response = await _client.get(
-        uri,
-        headers: {
-          'accept': 'application/json',
-          'Authorization': '$tokenType $accessToken',
-        },
-      );
+    final path =
+        orderId == null ? '$baseurl/rider/orders/' : '$baseurl/rider/orders/$orderId/';
+    return _networkCaller.getRequest(
+      path,
+      headers: {
+        'accept': 'application/json',
+        'Authorization': '$tokenType $accessToken',
+      },
+      defaultErrorMessage: 'Unable to fetch upcoming orders.',
+    );
+  }
 
-      AppLoggerHelper.debug('Upcoming orders → status ${response.statusCode}');
-      AppLoggerHelper.debug('Upcoming orders body → ${response.body}');
+  Future<ResponseData> fetchOfferedOrders({int skip = 0, int limit = 50}) async {
+    final accessToken = StorageService.accessToken;
+    final tokenType = StorageService.tokenType ?? 'Bearer';
 
-      final decodedBody = _decodeResponse(response.body);
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-      return ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
-        responseData: decodedBody,
-      );
-    } catch (error) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage: 'Unable to fetch upcoming orders.',
-        responseData: error.toString(),
-      );
+    if (accessToken == null || accessToken.isEmpty) {
+      return _unauthenticatedResponse();
     }
+
+    return _networkCaller.getRequest(
+      '$baseurl/rider/offered-orders/?skip=$skip&limit=$limit',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': '$tokenType $accessToken',
+      },
+      defaultErrorMessage: 'Unable to fetch offered orders.',
+    );
+  }
+
+  Future<ResponseData> acceptOfferedOrder({required String orderId}) async {
+    final accessToken = StorageService.accessToken;
+    final tokenType = StorageService.tokenType ?? 'Bearer';
+
+    if (accessToken == null || accessToken.isEmpty) {
+      return _unauthenticatedResponse();
+    }
+
+    return _networkCaller.postRequest(
+      '$baseurl/rider/orders/accept/$orderId/',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': '$tokenType $accessToken',
+      },
+      encodeJson: false,
+      defaultErrorMessage: 'Unable to accept order. Please try again.',
+    );
+  }
+
+  Future<ResponseData> rejectOfferedOrder({
+    required String orderId,
+    String reason = 'string',
+  }) async {
+    final accessToken = StorageService.accessToken;
+    final tokenType = StorageService.tokenType ?? 'Bearer';
+
+    if (accessToken == null || accessToken.isEmpty) {
+      return _unauthenticatedResponse();
+    }
+
+    return _networkCaller.postRequest(
+      '$baseurl/rider/orders/reject/$orderId/',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': '$tokenType $accessToken',
+      },
+      body: {'reason': reason},
+      encodeJson: false,
+      defaultErrorMessage: 'Unable to reject order. Please try again.',
+    );
   }
 
   Future<ResponseData> toggleOnlineStatus({required bool isOnline}) async {
@@ -63,72 +96,38 @@ class HomeService {
     final tokenType = StorageService.tokenType ?? 'Bearer';
 
     if (accessToken == null || accessToken.isEmpty) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 401,
-        errorMessage: 'Not authenticated',
-        responseData: null,
-      );
+      return _unauthenticatedResponse();
     }
 
-    try {
-      final uri = Uri.parse('$baseurl/rider/go-online-offline');
-    
-      final response = await _client.put(
-        uri,
-        headers: {
-          'accept': 'application/json',
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': '$tokenType $accessToken',
-        },
-        body: {'is_online': isOnline.toString()},
-      );
+    final responseData = await _networkCaller.putRequest(
+      '$baseurl/rider/go-online-offline',
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': '$tokenType $accessToken',
+      },
+      body: {'is_online': isOnline.toString()},
+      encodeJson: false,
+      defaultErrorMessage: 'Unable to update status.',
+    );
 
-      final decodedBody = _decodeResponse(response.body);
-      final isSuccess = response.statusCode >= 200 && response.statusCode < 300;
-      final responseData = ResponseData(
-        isSuccess: isSuccess,
-        statusCode: response.statusCode,
-        errorMessage: isSuccess ? '' : _extractErrorMessage(decodedBody),
-        responseData: decodedBody,
-      );
-
-      if (responseData.isSuccess) {
-        if (isOnline) {
-          await LocationServices.instance.connectAndStart();
-        } else {
-          await LocationServices.instance.disconnect();
-        }
+    if (responseData.isSuccess) {
+      if (isOnline) {
+        await LocationServices.instance.connectAndStart();
+      } else {
+        await LocationServices.instance.disconnect();
       }
-
-      return responseData;
-    } catch (error) {
-      return ResponseData(
-        isSuccess: false,
-        statusCode: 500,
-        errorMessage: 'Unable to update status.',
-        responseData: error.toString(),
-      );
     }
+
+    return responseData;
   }
 
-  dynamic _decodeResponse(String body) {
-    try {
-      return jsonDecode(body);
-    } catch (_) {
-      return body;
-    }
-  }
-
-  String _extractErrorMessage(dynamic decodedBody) {
-    if (decodedBody is Map<String, dynamic>) {
-      if (decodedBody['message'] is String) {
-        return decodedBody['message'] as String;
-      }
-      if (decodedBody['detail'] is String) {
-        return decodedBody['detail'] as String;
-      }
-    }
-    return 'Failed to update status. Please try again.';
+  ResponseData _unauthenticatedResponse() {
+    return ResponseData(
+      isSuccess: false,
+      statusCode: 401,
+      errorMessage: 'Not authenticated',
+      responseData: null,
+    );
   }
 }

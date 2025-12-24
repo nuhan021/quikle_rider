@@ -33,6 +33,7 @@ class IncomingAssignmentDialog extends StatelessWidget {
           isUrgent: assignment.isUrgent,
           isCombined: assignment.isCombined,
           status: assignment.status,
+          orderStatus: assignment.orderStatus,
           onAccept: onAccept,
           onReject: onReject,
         ),
