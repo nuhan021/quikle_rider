@@ -22,7 +22,7 @@ class HomeScreen extends GetView<HomepageController> {
             currentIndex: 0,
             title: 'Home',
             isOnline: controller.isOnline.value,
-            onToggle: controller.onToggleSwitch,
+            onToggle: controller.onToggleSwitchAndSyncToken,
           ),
           body: controller.hasConnection.value
               ? (controller.isOnline.value
