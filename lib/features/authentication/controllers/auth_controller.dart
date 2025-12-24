@@ -9,6 +9,7 @@ import 'package:quikle_rider/core/services/firebase/notification_service.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
 import 'package:quikle_rider/features/authentication/data/services/auth_servies.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/routes/app_routes.dart';
 
 class AuthController extends GetxController {
@@ -249,6 +250,10 @@ class AuthController extends GetxController {
           refreshToken: refreshToken,
           tokenType: tokenType,
         );
+        final profileController = Get.isRegistered<ProfileController>()
+            ? Get.find<ProfileController>()
+            : Get.put(ProfileController(), permanent: true);
+        await profileController.refreshForLogin(resetState: true);
         final resolvedUserId = await _postLoginSetup(
           accessToken: accessToken,
           refreshToken: refreshToken,

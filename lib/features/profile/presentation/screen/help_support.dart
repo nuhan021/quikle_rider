@@ -13,8 +13,10 @@ class HelpSupportPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Controller is initialized here. Get.put() ensures a single instance.
-    final controller = Get.put(ProfileController());
+    // Reuse the bound instance to avoid creating duplicates.
+    final controller = Get.isRegistered<ProfileController>()
+        ? Get.find<ProfileController>()
+        : Get.put(ProfileController(), permanent: true);
     controller.ensureSupportHistoryLoaded();
 
     return Scaffold(

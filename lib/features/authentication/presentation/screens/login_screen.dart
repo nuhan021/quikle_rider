@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
@@ -10,6 +11,13 @@ class LoginScreen extends GetView<AuthController> {
 
   @override
   Widget build(BuildContext context) {
+    if (controller.phoneController.text.isEmpty) {
+      controller.phoneController.text = '+91';
+      controller.phoneController.selection = TextSelection.collapsed(
+        offset: controller.phoneController.text.length,
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -89,9 +97,20 @@ class LoginScreen extends GetView<AuthController> {
                           autofocus: true,
                           keyboardType: TextInputType.phone,
                           textInputAction: TextInputAction.done,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(
+                              RegExp(r'[0-9+]'),
+                            ),
+                          ],
                           onTapOutside: (_) => FocusScope.of(context).unfocus(),
-                          onFieldSubmitted: (_) =>
-                              FocusScope.of(context).unfocus(),
+                          onFieldSubmitted: (_) => controller.navigateToOtp(),
+                          onChanged: (value) {
+                            if (!value.startsWith('+91')) {
+                              controller.phoneController.text = '+91';
+                              controller.phoneController.selection =
+                                  const TextSelection.collapsed(offset: 3);
+                            }
+                          },
                           style: getTextStyle(font: CustomFonts.inter),
                           decoration: InputDecoration(
                             hintText: "Enter Your Phone Number",
