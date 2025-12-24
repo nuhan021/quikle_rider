@@ -615,6 +615,7 @@ class ProfileScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 await StorageService.logoutUser();
+                _controller.clearForLogout();
                 Get.offAllNamed(AppRoute.loginScreen);
               },
               style: ElevatedButton.styleFrom(

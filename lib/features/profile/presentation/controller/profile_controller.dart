@@ -165,15 +165,101 @@ class ProfileController extends GetxController {
     errorMessage.value = null;
   }
 
+  void clearForLogout() {
+    isavaiabilityProfile.value = false;
+    isLoading.value = false;
+    isprofilecompleted.value = false;
+    errorMessage.value = null;
+    profile.value = null;
+    isUpdatingProfile.value = false;
+    profileUpdateError.value = null;
+    isUploadingDocuments.value = false;
+    documentUploadError.value = null;
+    isDocumentUploaded.value = null;
+    isDocumentStatusLoading.value = false;
+    documentStatusError.value = null;
+    isVerified.value = false ;
+    isVerificationLoading.value = false;
+    verificationError.value = null;
+    riderDocuments.value = null;
+    trainingVideos.clear();
+    trainingPdfs.clear();
+    isTrainingVideosLoading.value = false;
+    isTrainingPdfsLoading.value = false;
+    trainingVideosError.value = null;
+    trainingPdfsError.value = null;
+    _hasLoadedTrainingVideos = false;
+    _hasLoadedTrainingPdfs = false;
+
+    isCreatingVehicle.value = false;
+    vehicleCreationError.value = null;
+    vehicleList.clear();
+    isVehicleListLoading.value = false;
+    vehicleListError.value = null;
+    vehicleDetails.value = null;
+    selectedVehicleType.value = vehicleTypes.first;
+    vehicleFormKey.currentState?.reset();
+    licensePlateController.clear();
+    vehicleModelController.clear();
+    _hasRequestedVehicleList = false;
+
+    isSubmittingHelpSupport.value = false;
+    helpSupportError.value = null;
+    supportHistory.clear();
+    isSupportHistoryLoading.value = false;
+    supportHistoryError.value = null;
+    _hasLoadedSupportHistory = false;
+    selectedHelpIssueType.value = helpIssueTypes.first;
+    helpDescriptionController.clear();
+    helpAttachment.value = null;
+    helpAttachmentName.value = null;
+
+    isProfileCompletionLoading.value = false;
+    profileCompletionError.value = null;
+    profileCompletion.value = null;
+    referralDashboard.value = null;
+    isReferralDashboardLoading.value = false;
+    referralDashboardError.value = null;
+    referralQrImage.value = null;
+    isReferralQrLoading.value = false;
+    referralQrError.value = null;
+
+    startTime.value = TimeOfDay.now();
+    endTime.value = TimeOfDay.now();
+    isAvailable.value = false;
+    _hasAttemptedProfileFetch = false;
+  }
+
+  Future<void> refreshForLogin({bool resetState = false}) async {
+    if (resetState) {
+      clearForLogout();
+    } else {
+      resetProfileFetchState();
+    }
+
+    Future<void> safeFetch(
+      Future<void> Function() action,
+      String label,
+    ) async {
+      try {
+        await action();
+      } catch (error) {
+        AppLoggerHelper.error('Profile refresh failed ($label): $error');
+      }
+    }
+
+    await safeFetch(fetchProfile, 'profile');
+    await safeFetch(fetchAvailabilitySettings, 'availability');
+    await safeFetch(fetchProfileCompletion, 'completion');
+    await safeFetch(fetchDocumentUploadStatus, 'documents');
+    await safeFetch(fetchVerificationStatus, 'verification');
+  }
+
   // 🧭 Lifecycle hooks
   @override
   void onInit() {
     super.onInit();
-    fetchProfile();
-    fetchAvailabilitySettings();
-    fetchProfileCompletion();
-    fetchDocumentUploadStatus();
-    fetchVerificationStatus();
+    refreshForLogin();
   }
 
   @override
@@ -411,6 +497,13 @@ class ProfileController extends GetxController {
     } finally {
       isVerificationLoading.value = false;
     }
+  }
+
+  Future<void> waitForVerificationFetch() async {
+    if (isVerified.value != null) {
+      return;
+    }
+    await isVerified.stream.firstWhere((value) => value != null);
   }
 
   // 🧩 Profile completion progress

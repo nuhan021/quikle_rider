@@ -8,19 +8,17 @@ import 'package:quikle_rider/core/services/firebase/notification_service.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/firebase_options.dart';
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await StorageService.init();
   await dotenv.load(fileName: ".env");
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await FirebaseService.instance.init();
-   //Initialize notification
+  //Initialize notification
   await NotificationService.instance.init();
   await NotificationService.instance.requestPermission();
-  await StorageService.init();
 
-
- 
   runApp(const MyApp());
 }

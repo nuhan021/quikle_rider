@@ -84,7 +84,7 @@ class CreateAccount extends GetView<AuthController> {
                   SizedBox(height: 8.h),
                   _buildTextField(
                     controller: controller.fullNameController,
-                    hintText: "S. M. Mahedi Hasan",
+                    hintText: "Enter full Name",
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your full name';

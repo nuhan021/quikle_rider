@@ -23,13 +23,11 @@ class SplashController extends GetxController {
   final Duration playDuration = const Duration(seconds: 3);
   bool _ellipseMoved = false;
 
-  //put controller
-  final ProfileController profileController = Get.put(
-    ProfileController(),
-    permanent: true,
-  );
+  // Use the bound instance to avoid creating duplicates.
+  final ProfileController profileController = Get.isRegistered<ProfileController>()
+      ? Get.find<ProfileController>()
+      : Get.put(ProfileController(), permanent: true);
   final bool hasToken = StorageService.accessToken != null;
-  late final bool isVerified = profileController.isVerified.value == true;
   @override
   void onInit() {
     super.onInit();
@@ -77,13 +75,17 @@ class SplashController extends GetxController {
     }
   }
 
-  void _handleNavigation() {
+  Future<void> _handleNavigation() async{
     AppLoggerHelper.debug(
       "Profile verified ${profileController.isVerified.value}",
     );
+    if (hasToken && profileController.isVerified.value == null) {
+      await profileController.waitForVerificationFetch();
+    }
     final bool isDocumentUploaded =
         profileController.isDocumentUploaded.value == true;
 
+    final bool isVerified = profileController.isVerified.value == true;
     if (hasToken && isVerified && isDocumentUploaded) {
       Get.offAllNamed(AppRoute.getBottomNavBar());
       AppLoggerHelper.debug(
