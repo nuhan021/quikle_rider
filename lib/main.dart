@@ -8,6 +8,7 @@ import 'package:quikle_rider/core/services/firebase/notification_service.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/firebase_options.dart';
 
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");

@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyC-6w9TFkbTRzefAyR7uUidqVLG_AODC_w',
-    appId: '1:948140389448:android:9e624ce4b7408dfc89d47d',
+    appId: '1:948140389448:android:6604803a2a7fe9e989d47d',
     messagingSenderId: '948140389448',
     projectId: 'quiklerider-22552',
     storageBucket: 'quiklerider-22552.firebasestorage.app',
@@ -59,10 +59,10 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCBHh8pgXHxwcr6uUmNbiVNvNNbyzg97b8',
-    appId: '1:948140389448:ios:48d9f9377328d53d89d47d',
+    appId: '1:948140389448:ios:a8d2832fe04342e189d47d',
     messagingSenderId: '948140389448',
     projectId: 'quiklerider-22552',
     storageBucket: 'quiklerider-22552.firebasestorage.app',
-    iosBundleId: 'com.example.quikleRider',
+    iosBundleId: 'com.quikle.quikleRider',
   );
 }
