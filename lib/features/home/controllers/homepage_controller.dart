@@ -1,9 +1,15 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+
+import 'package:quikle_rider/core/services/firebase/firebase_service.dart';
+import 'package:quikle_rider/core/services/firebase/notification_service.dart';
+import 'package:quikle_rider/core/services/storage_service.dart';
+import 'package:quikle_rider/core/utils/logging/logger.dart';
 import 'package:quikle_rider/features/home/data/home_service.dart';
 import 'package:quikle_rider/features/home/models/home_dashboard_models.dart';
 import 'package:quikle_rider/features/home/presentation/screen/goonline.dart';
@@ -24,10 +30,12 @@ class HomepageController extends GetxController {
   final _pendingActions = <String>{}.obs;
   final HomeService _homeService;
   late final ProfileController _profileController;
+ 
+ 
 
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
-  void onToggleSwitch() async {
+  Future<void> onToggleSwitch() async {
     if (!isOnline.value) {
       final isVerified = _profileController.isVerified.value == true;
       if (!isVerified) {
@@ -57,6 +65,14 @@ class HomepageController extends GetxController {
       if (result == true) {
         await _changeOnlineStatus(false);
       }
+    }
+  }
+
+  Future<void> onToggleSwitchAndSyncToken() async {
+    final wasOnline = isOnline.value;
+    await onToggleSwitch();
+    if (!wasOnline && isOnline.value) {
+      await _syncFcmTokenForOnline();
     }
   }
 
@@ -255,6 +271,54 @@ class HomepageController extends GetxController {
         message: 'Unable to update status. Please try again.',
         success: false,
       );
+    }
+  }
+
+  Future<void> _syncFcmTokenForOnline() async {
+    try {
+      final userId = StorageService.userId;
+      final accessToken = StorageService.accessToken;
+      if (userId == null || accessToken == null || accessToken.isEmpty) {
+        AppLoggerHelper.debug('FCM sync skipped: missing user or token.');
+        return;
+      }
+
+      final refreshedToken = await FirebaseService.instance.refreshToken();
+      final cachedToken = StorageService.cachedFcmToken;
+      final token = refreshedToken?.isNotEmpty == true
+          ? refreshedToken
+          : cachedToken?.isNotEmpty == true
+              ? cachedToken
+              : await FirebaseService.instance.waitForToken();
+
+      if (token == null || token.isEmpty) {
+        AppLoggerHelper.debug('FCM sync skipped: token unavailable.');
+        return;
+      }
+
+      await StorageService.cacheFcmToken(token);
+      final tokenType = (StorageService.tokenType ?? '').trim();
+      final platform = Platform.isIOS
+          ? 'ios'
+          : Platform.isAndroid
+              ? 'android'
+              : Platform.operatingSystem;
+
+      final success = await NotificationService.instance.saveFcmToken(
+        userId: userId,
+        token: token,
+        platform: platform,
+        authorization:
+            '${tokenType.isEmpty ? 'Bearer' : tokenType} $accessToken',
+      );
+
+      AppLoggerHelper.debug(
+        success
+            ? 'FCM token synced on go-online.$userId'
+            : 'FCM token sync failed on go-online.',
+      );
+    } catch (error) {
+      AppLoggerHelper.debug('FCM sync failed on go-online: $error');
     }
   }
 

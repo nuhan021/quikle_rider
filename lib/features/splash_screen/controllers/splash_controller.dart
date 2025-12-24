@@ -28,7 +28,8 @@ class SplashController extends GetxController {
     ProfileController(),
     permanent: true,
   );
-
+  final bool hasToken = StorageService.accessToken != null;
+  late final bool isVerified = profileController.isVerified.value == true;
   @override
   void onInit() {
     super.onInit();
@@ -77,8 +78,9 @@ class SplashController extends GetxController {
   }
 
   void _handleNavigation() {
-    final bool hasToken = StorageService.accessToken != null;
-    final bool isVerified = profileController.isVerified.value == true;
+    AppLoggerHelper.debug(
+      "Profile verified ${profileController.isVerified.value}",
+    );
     final bool isDocumentUploaded =
         profileController.isDocumentUploaded.value == true;
 
@@ -97,7 +99,7 @@ class SplashController extends GetxController {
         "Navigating to Home ${profileController.isDocumentUploaded.value}",
       );
       return;
-    } else if (hasToken && isVerified ==false) {
+    } else if (hasToken && isVerified == false) {
       Get.offAllNamed(AppRoute.uploaddocuments);
     } else {
       Get.offAllNamed(AppRoute.loginScreen);
