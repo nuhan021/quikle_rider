@@ -16,6 +16,7 @@ class AssignmentCard extends StatelessWidget {
   final bool isUrgent;
   final bool isCombined;
   final String? deleverystatus;
+  final String? orderStatus;
   final AssignmentStatus? status;
   final bool showActions;
   final VoidCallback? onAccept;
@@ -33,6 +34,7 @@ class AssignmentCard extends StatelessWidget {
     this.breakdown,
     required this.isUrgent,
     required this.isCombined,
+    this.orderStatus,
     this.status,
     this.showActions = true,
     this.onAccept,
@@ -47,6 +49,10 @@ class AssignmentCard extends StatelessWidget {
     final List<String> breakdownLines = breakdown == null
         ? const []
         : breakdown!.split('\n');
+    final String? displayStatus =
+        orderStatus != null && orderStatus!.trim().isNotEmpty
+            ? orderStatus
+            : currentStatus?.label;
 
     Color? statusColor;
     if (currentStatus != null) {
@@ -131,7 +137,7 @@ class AssignmentCard extends StatelessWidget {
                   ),
                 ),
               ),
-              if (currentStatus != null) ...[
+              if (displayStatus != null) ...[
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                   decoration: BoxDecoration(
@@ -141,7 +147,7 @@ class AssignmentCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(4.r),
                   ),
                   child: Text(
-                    currentStatus.label,
+                    displayStatus,
                     style: TextStyle(
                       fontFamily: 'Inter',
                       fontSize: 12.sp,
@@ -310,6 +316,7 @@ class AssignmentCard extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: onAccept,
                       style: ElevatedButton.styleFrom(
+                        side: BorderSide.none,
                         backgroundColor: Colors.black,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(6.r),

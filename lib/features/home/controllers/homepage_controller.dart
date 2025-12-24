@@ -88,14 +88,19 @@ class HomepageController extends GetxController {
   }
 
   Future<List<Assignment>> _fetchUpcomingAssignments() async {
-    final response = await _homeService.fetchUpcomingOrders(orderId: "ORD_C87381CD");
+    final response = await _homeService.fetchOfferedOrders();
     if (!response.isSuccess) {
       throw response.errorMessage.isNotEmpty
           ? response.errorMessage
-          : 'Unable to load upcoming orders.';
+          : 'Unable to load offered orders.';
     }
 
-    return _mapAssignmentsResponse(response.responseData);
+    final mapped = _mapAssignmentsResponse(response.responseData);
+    
+    return mapped
+        .map((assignment) => assignment.copyWith(status: AssignmentStatus.pending))
+        .toList();
+        
   }
 
   List<HomeStat> _buildStats(List<Assignment> upcomingAssignments) {
@@ -157,8 +162,18 @@ class HomepageController extends GetxController {
     final result = await _performAssignmentAction(
       assignmentId: assignment.id,
       action: () async {
-        await Future.delayed(const Duration(milliseconds: 350));
-        return true;
+        final response =
+            await _homeService.acceptOfferedOrder(orderId: assignment.id);
+        if (!response.isSuccess) {
+          _showStatusSnack(
+            title: 'Accept failed',
+            message: response.errorMessage.isNotEmpty
+                ? response.errorMessage
+                : 'Unable to accept order. Please try again.',
+            success: false,
+          );
+        }
+        return response.isSuccess;
       },
     );
     if (result) {
@@ -171,8 +186,20 @@ class HomepageController extends GetxController {
     final result = await _performAssignmentAction(
       assignmentId: assignment.id,
       action: () async {
-        await Future.delayed(const Duration(milliseconds: 350));
-        return true;
+        final response = await _homeService.rejectOfferedOrder(
+          orderId: assignment.id,
+          reason: 'string',
+        );
+        if (!response.isSuccess) {
+          _showStatusSnack(
+            title: 'Reject failed',
+            message: response.errorMessage.isNotEmpty
+                ? response.errorMessage
+                : 'Unable to reject order. Please try again.',
+            success: false,
+          );
+        }
+        return response.isSuccess;
       },
     );
     if (result) {
@@ -328,4 +355,5 @@ class HomepageController extends GetxController {
 
     return [];
   }
+
 }

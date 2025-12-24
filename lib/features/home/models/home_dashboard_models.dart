@@ -76,6 +76,7 @@ class HomeStat {
 class Assignment {
   final String id;
   final String deleverystatus;
+  final String? orderStatus;
   final String customerName;
   final DateTime expectedArrival;
   final String address;
@@ -92,6 +93,7 @@ class Assignment {
 
   const Assignment({
     required this.deleverystatus,
+    this.orderStatus,
     required this.id,
     required this.customerName,
     required this.expectedArrival,
@@ -142,6 +144,8 @@ class Assignment {
 
   Assignment copyWith({
     String? id,
+    String? deleverystatus,
+    String? orderStatus,
     String? customerName,
     DateTime? expectedArrival,
     String? address,
@@ -157,7 +161,8 @@ class Assignment {
     String? tierLabel,
   }) {
     return Assignment(
-      deleverystatus: deleverystatus,
+      deleverystatus: deleverystatus ?? this.deleverystatus,
+      orderStatus: orderStatus ?? this.orderStatus,
       id: id ?? this.id,
       customerName: customerName ?? this.customerName,
       expectedArrival: expectedArrival ?? this.expectedArrival,
@@ -206,6 +211,8 @@ class Assignment {
     final normalizedType = orderType.toLowerCase().trim();
     final combinedFromType =
         normalizedType == 'combined' || normalizedType.contains('combined');
+    final apiStatusRaw = json['status']?.toString() ?? '';
+    final apiStatus = apiStatusRaw.trim().isEmpty ? null : apiStatusRaw;
     final metadata = json['metadata'];
     final shippingAddress = metadata is Map<String, dynamic>
         ? metadata['shipping_address'] as Map<String, dynamic>?
@@ -242,6 +249,7 @@ class Assignment {
       customerName: customerName,
       expectedArrival: expectedArrival,
       deleverystatus: orderType,
+      orderStatus: apiStatus,
       address: (json['delivery_address'] ?? json['address'] ?? address)
           .toString(),
       distanceInKm: distanceValue,
@@ -262,6 +270,7 @@ class Assignment {
       id: json['order_id'] as String,
       customerName: json['customer_name'] as String,
       deleverystatus: json['delivery_type'] as String? ?? 'Pending',
+      orderStatus: json['status'] as String?,
       expectedArrival: DateTime.parse(json['expected_arrival'] as String),
       address: json['address'] as String,
       distanceInKm: (json['distance_km'] as num).toDouble(),
@@ -284,6 +293,7 @@ class Assignment {
     return {
       'order_id': id,
       'customer_name': customerName,
+      'status': orderStatus,
       'expected_arrival': expectedArrival.toIso8601String(),
       'address': address,
       'distance_km': distanceInKm,

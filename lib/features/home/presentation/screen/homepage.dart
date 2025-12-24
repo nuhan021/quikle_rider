@@ -187,6 +187,7 @@ class HomeScreen extends GetView<HomepageController> {
                         isUrgent: assignment.isUrgent,
                         isCombined: assignment.isCombined,
                         status: assignment.status,
+                        orderStatus: assignment.orderStatus,
                         showActions: isPending,
                         onAccept: isPending
                             ? () async {
