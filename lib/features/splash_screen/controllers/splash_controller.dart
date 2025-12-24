@@ -75,10 +75,13 @@ class SplashController extends GetxController {
     }
   }
 
-  void _handleNavigation() {
+  Future<void> _handleNavigation() async{
     AppLoggerHelper.debug(
       "Profile verified ${profileController.isVerified.value}",
     );
+    if (hasToken && profileController.isVerified.value == null) {
+      await profileController.waitForVerificationFetch();
+    }
     final bool isDocumentUploaded =
         profileController.isDocumentUploaded.value == true;
 

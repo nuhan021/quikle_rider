@@ -178,7 +178,7 @@ class ProfileController extends GetxController {
     isDocumentUploaded.value = null;
     isDocumentStatusLoading.value = false;
     documentStatusError.value = null;
-    isVerified.value = null;
+    isVerified.value = false ;
     isVerificationLoading.value = false;
     verificationError.value = null;
     riderDocuments.value = null;
@@ -497,6 +497,13 @@ class ProfileController extends GetxController {
     } finally {
       isVerificationLoading.value = false;
     }
+  }
+
+  Future<void> waitForVerificationFetch() async {
+    if (isVerified.value != null) {
+      return;
+    }
+    await isVerified.stream.firstWhere((value) => value != null);
   }
 
   // 🧩 Profile completion progress
