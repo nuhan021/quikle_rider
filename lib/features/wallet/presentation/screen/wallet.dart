@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/core/widgets/connection_lost.dart';
+import 'package:quikle_rider/features/home/controllers/homepage_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/add_paymentmethod.dart';
 import 'package:quikle_rider/features/wallet/controllers/wallet_controller.dart';
@@ -22,6 +24,7 @@ class WalletScreen extends GetView<WalletController> {
         Get.isRegistered<ProfileController>()
             ? Get.find<ProfileController>()
             : Get.put(ProfileController());
+             final HomepageController _homeController = Get.find<HomepageController>();
     final cardBox = BoxDecoration(
       color: Colors.white,
       borderRadius: BorderRadius.circular(12.r),
@@ -41,6 +44,9 @@ class WalletScreen extends GetView<WalletController> {
 
         body: Obx(() {
           final isVerified = profileController.isVerified.value == true;
+          if(_homeController.hasConnection.value == false){
+            return const ConnectionLost();
+          }
           if (!isVerified) {
             return const Center(child: Text('Your profile not verified'));
           }

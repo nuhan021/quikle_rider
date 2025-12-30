@@ -1,11 +1,10 @@
-import 'dart:async';
 import 'dart:io';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import 'package:quikle_rider/core/services/network/internet_services.dart';
 import 'package:quikle_rider/core/services/firebase/firebase_service.dart';
 import 'package:quikle_rider/core/services/firebase/notification_service.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
@@ -18,22 +17,23 @@ import 'package:quikle_rider/custom_tab_bar/notifications.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 
 class HomepageController extends GetxController {
-  HomepageController({HomeService? homeService})
-      : _homeService = homeService ?? HomeService();
+  HomepageController({
+    HomeService? homeService,
+    InternetServices? internetServices,
+  })  : _homeService = homeService ?? HomeService(),
+        _internetServices = internetServices ?? InternetServices();
 
   var isOnline = false.obs;
   var isLoading = false.obs;
-  final hasConnection = true.obs;
   final errorMessage = RxnString();
   final stats = <HomeStat>[].obs;
   final assignments = <Assignment>[].obs;
   final _pendingActions = <String>{}.obs;
   final HomeService _homeService;
+  final InternetServices _internetServices;
   late final ProfileController _profileController;
  
- 
-
-  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  RxBool get hasConnection => _internetServices.hasConnection;
 
   Future<void> onToggleSwitch() async {
     if (!isOnline.value) {
@@ -87,7 +87,7 @@ class HomepageController extends GetxController {
     _profileController = Get.isRegistered<ProfileController>()
         ? Get.find<ProfileController>()
         : Get.put(ProfileController());
-    _initConnectivityMonitoring();
+    _internetServices.startMonitoring(onReconnect: _handleReconnect);
     fetchDashboardData();
   }
 
@@ -350,25 +350,8 @@ class HomepageController extends GetxController {
     );
   }
 
-  void _initConnectivityMonitoring() {
-    final connectivity = Connectivity();
-    _connectivitySubscription = connectivity.onConnectivityChanged.listen(
-      _updateConnectionStatus,
-    );
-    connectivity
-        .checkConnectivity()
-        .then(_updateConnectionStatus)
-        .catchError((_) => hasConnection.value = true);
-  }
-
-  void _updateConnectionStatus(List<ConnectivityResult> results) {
-    final isConnected = results.any(
-      (result) => result != ConnectivityResult.none,
-    );
-    final previousState = hasConnection.value;
-    hasConnection.value = isConnected;
-
-    if (isConnected && !previousState && stats.isEmpty && !isLoading.value) {
+  void _handleReconnect() {
+    if (stats.isEmpty && !isLoading.value) {
       fetchDashboardData();
     }
   }
@@ -385,7 +368,7 @@ class HomepageController extends GetxController {
 
   @override
   void onClose() {
-    _connectivitySubscription?.cancel();
+    _internetServices.dispose();
     super.onClose();
   }
 

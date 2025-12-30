@@ -9,8 +9,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
+import 'package:quikle_rider/core/widgets/connection_lost.dart';
 import 'package:quikle_rider/features/all_orders/data/services/order_services.dart';
 import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
+import 'package:quikle_rider/features/home/controllers/homepage_controller.dart';
 import 'package:quikle_rider/features/map/presentation/controller/map_controller.dart';
 import 'package:quikle_rider/features/map/presentation/model/delivery_model.dart';
 import 'package:quikle_rider/features/map/presentation/widgets/map_shimmer.dart';
@@ -30,6 +32,7 @@ class _MapScreenState extends State<MapScreen> {
   bool _isFetchingCurrentOrder = false;
   bool _hasTriggeredVerifiedLoad = false;
   Worker? _verificationWorker;
+  HomepageController homepageController = Get.find<HomepageController>();
 
   @override
   void initState() {
@@ -43,8 +46,7 @@ class _MapScreenState extends State<MapScreen> {
     if (profileController.isVerified.value == true) {
       _triggerVerifiedLoad();
     } else {
-      _verificationWorker =
-          ever<bool?>(profileController.isVerified, (value) {
+      _verificationWorker = ever<bool?>(profileController.isVerified, (value) {
         if (value == true && !_hasTriggeredVerifiedLoad) {
           _triggerVerifiedLoad();
         }
@@ -100,9 +102,7 @@ class _MapScreenState extends State<MapScreen> {
         }
       }
 
-      debugPrint(
-        'MapScreen: no current orders available or failed response.',
-      );
+      debugPrint('MapScreen: no current orders available or failed response.');
     } catch (error) {
       debugPrint('MapScreen: failed to load current order - $error');
     } finally {
@@ -114,6 +114,9 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return Obx(() {
       final isVerified = profileController.isVerified.value == true;
+      if (homepageController.hasConnection.value == false) {
+        return ConnectionLost();
+      }
       if (!isVerified) {
         return SafeArea(
           child: Scaffold(
@@ -257,7 +260,6 @@ class _MapScreenState extends State<MapScreen> {
             maxLines: 2,
             delivery.estimatedTime,
             style: TextStyle(
-              
               overflow: TextOverflow.ellipsis,
 
               fontSize: 14,

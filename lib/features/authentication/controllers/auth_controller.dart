@@ -14,6 +14,7 @@ import 'package:quikle_rider/routes/app_routes.dart';
 class AuthController extends GetxController {
   static const int _otpLength = 6;
   final AuthServies _authServices = AuthServies();
+  final ProfileController profileController = Get.find();
 
   final phoneController = TextEditingController();
   final phoneFocusNode = FocusNode();
@@ -274,7 +275,10 @@ class AuthController extends GetxController {
           'Logged in successfully. Refresh token: $refreshToken',
         );
         AppLoggerHelper.debug('Logged in successfully. Token type: $tokenType');
-
+        profileController.fetchVerificationStatus();
+        AppLoggerHelper.debug(
+          "Profile value is ${profileController.isVerified.value}",
+        );
         Get.offAllNamed(AppRoute.getWelcomeScreen());
 
         Get.snackbar(
@@ -325,7 +329,7 @@ class AuthController extends GetxController {
         FlutterLocalNotificationsPlugin().show(
           0,
           'OTP Sent',
-          'An OTP has been sent to ${response.responseData['message']}',
+          '${response.responseData['message']}',
           NotificationDetails(
             android: AndroidNotificationDetails(
               'otp_notification_channel',
