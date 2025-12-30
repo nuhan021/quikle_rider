@@ -7,6 +7,8 @@ import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
+import 'package:quikle_rider/core/widgets/connection_lost.dart';
+import 'package:quikle_rider/features/home/controllers/homepage_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/add_paymentmethod.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/availability_settings.dart';
@@ -31,6 +33,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   late final ProfileController _controller;
+  final HomepageController _homeController = Get.find<HomepageController>();
 
   @override
   Widget build(BuildContext context) {
@@ -44,148 +47,153 @@ class ProfileScreen extends StatelessWidget {
           action: "Notification",
           onActionPressed: () {},
         ),
-        body: SingleChildScrollView(
-          padding: EdgeInsets.all(20.w),
-          child: Column(
-            children: [
-              /// Profile Header
-              _buildProfileHeader(),
-              SizedBox(height: 16.h),
-              _buildCompletionSection(),
+        body: Obx(
+          () => _homeController.hasConnection.value == false
+              ? ConnectionLost()
+              : SingleChildScrollView(
+                  padding: EdgeInsets.all(20.w),
+                  child: Column(
+                    children: [
+                      /// Profile Header
+                      _buildProfileHeader(),
+                      SizedBox(height: 16.h),
+                      _buildCompletionSection(),
 
-              // Menu Items Container
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 10.h),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      spreadRadius: 0,
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
+                      // Menu Items Container
+                      Container(
+                        padding: EdgeInsets.symmetric(vertical: 10.h),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              spreadRadius: 0,
+                              blurRadius: 10,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            _buildMenuItem(
+                              imagepath: "assets/icons/profileicon.png",
+                              title: 'My Profile',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => MyProfilePage(),
+                                ),
+                              ),
+                            ),
+                            _buildDivider(),
+                            _buildMenuItem(
+                              imagepath: "assets/icons/vehicle.png",
+                              title: 'Vehicle Information',
+                              onTap: () => Get.to(() => VehicleListPage()),
+                            ),
+                            _buildDivider(),
+                            _buildMenuItem(
+                              imagepath: "assets/icons/location.png",
+                              title: 'Delivery Zone',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DeliveryZonePage(),
+                                ),
+                              ),
+                            ),
+                            _buildDivider(),
+                            _buildMenuItem(
+                              imagepath: "assets/icons/withdraw.png",
+                              title: 'Withdraw',
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const AddPaymentMethodPage(),
+                                  ),
+                                );
+                              },
+                            ),
+                            _buildDivider(),
+                            _buildMenuItem(
+                              imagepath: "assets/icons/avaiability.png",
+                              title: 'Availability Settings',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const AvailabilitySettingsPage(),
+                                ),
+                              ),
+                            ),
+                            _buildDivider(),
+                            _buildMenuItem(
+                              imagepath: "assets/icons/notification.png",
+                              title: 'Notification Settings',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const NotificationSettingsPage(),
+                                ),
+                              ),
+                            ),
+                            _buildDivider(),
+                            _buildMenuItem(
+                              imagepath: "assets/icons/language.png",
+                              title: 'Language Settings',
+                              onTap: () {
+                                _showLanguageDialog(context);
+                              },
+                            ),
+                            _buildDivider(),
+                            _buildMenuItem(
+                              imagepath: "assets/icons/customer-support.png",
+                              title: 'Help & Support',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HelpSupportPage(),
+                                ),
+                              ),
+                            ),
+                            _buildDivider(),
+                            _buildMenuItem(
+                              imagepath: "assets/icons/user-avatar.png",
+                              title: 'Referral Program',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ReferralProgramPage(),
+                                ),
+                              ),
+                            ),
+                            _buildDivider(),
+                            _buildMenuItem(
+                              imagepath: "assets/icons/service.png",
+                              title: 'Training Center',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => TrainingCenterPage(),
+                                ),
+                              ),
+                            ),
+                            _buildMenuItem(
+                              imagepath: "assets/icons/signout.png",
+                              title: 'Sign out',
+                              onTap: () => _showSignOutDialog(context),
+                              isSignOut: true,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                child: Column(
-                  children: [
-                    _buildMenuItem(
-                      imagepath: "assets/icons/profileicon.png",
-                      title: 'My Profile',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MyProfilePage(),
-                        ),
-                      ),
-                    ),
-                    _buildDivider(),
-                    _buildMenuItem(
-                      imagepath: "assets/icons/vehicle.png",
-                      title: 'Vehicle Information',
-                      onTap: () => Get.to(() => VehicleListPage()),
-                    ),
-                    _buildDivider(),
-                    _buildMenuItem(
-                      imagepath: "assets/icons/location.png",
-                      title: 'Delivery Zone',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DeliveryZonePage(),
-                        ),
-                      ),
-                    ),
-                    _buildDivider(),
-                    _buildMenuItem(
-                      imagepath: "assets/icons/withdraw.png",
-                      title: 'Withdraw',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const AddPaymentMethodPage(),
-                          ),
-                        );
-                      },
-                    ),
-                    _buildDivider(),
-                    _buildMenuItem(
-                      imagepath: "assets/icons/avaiability.png",
-                      title: 'Availability Settings',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const AvailabilitySettingsPage(),
-                        ),
-                      ),
-                    ),
-                    _buildDivider(),
-                    _buildMenuItem(
-                      imagepath: "assets/icons/notification.png",
-                      title: 'Notification Settings',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              const NotificationSettingsPage(),
-                        ),
-                      ),
-                    ),
-                    _buildDivider(),
-                    _buildMenuItem(
-                      imagepath: "assets/icons/language.png",
-                      title: 'Language Settings',
-                      onTap: () {
-                        _showLanguageDialog(context);
-                      },
-                    ),
-                    _buildDivider(),
-                    _buildMenuItem(
-                      imagepath: "assets/icons/customer-support.png",
-                      title: 'Help & Support',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const HelpSupportPage(),
-                        ),
-                      ),
-                    ),
-                    _buildDivider(),
-                    _buildMenuItem(
-                      imagepath: "assets/icons/user-avatar.png",
-                      title: 'Referral Program',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ReferralProgramPage(),
-                        ),
-                      ),
-                    ),
-                    _buildDivider(),
-                    _buildMenuItem(
-                      imagepath: "assets/icons/service.png",
-                      title: 'Training Center',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => TrainingCenterPage(),
-                        ),
-                      ),
-                    ),
-                    _buildMenuItem(
-                      imagepath: "assets/icons/signout.png",
-                      title: 'Sign out',
-                      onTap: () => _showSignOutDialog(context),
-                      isSignOut: true,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

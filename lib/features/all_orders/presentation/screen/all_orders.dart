@@ -3,9 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
+import 'package:quikle_rider/core/services/network/internet_services.dart';
 import 'package:quikle_rider/core/widgets/connection_lost.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_controller.dart';
 import 'package:quikle_rider/features/all_orders/presentation/screen/all_order_single.dart';
+import 'package:quikle_rider/features/home/controllers/homepage_controller.dart';
 import 'all_orders_combined.dart';
 
 class AllOrders extends StatefulWidget {
@@ -18,6 +20,7 @@ class AllOrders extends StatefulWidget {
 class _AllOrdersState extends State<AllOrders>
     with SingleTickerProviderStateMixin {
   final AllOrdersController controller = Get.put(AllOrdersController());
+  final HomepageController homepageController = Get.find();
   
 
   @override
@@ -34,6 +37,7 @@ class _AllOrdersState extends State<AllOrders>
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Obx(
@@ -45,9 +49,11 @@ class _AllOrdersState extends State<AllOrders>
             showActionButton: true,
             title: "All Oders",
             action: "Notification",
-            onActionPressed: () {},
+            onActionPressed: () {
+
+            },
           ),
-          body: controller.hasConnection.value
+          body: homepageController.hasConnection.value
               ? Padding(
                   padding: EdgeInsets.only(top: 16.h, left: 16.w, right: 16.w),
                   child: Column(
