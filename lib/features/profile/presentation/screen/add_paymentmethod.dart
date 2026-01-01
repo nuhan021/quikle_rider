@@ -8,6 +8,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/withdraw_controller.dart';
 import 'package:quikle_rider/features/wallet/controllers/wallet_controller.dart';
 
@@ -20,12 +21,16 @@ class AddPaymentMethodPage extends StatefulWidget {
 
 class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
   late final WithdrawController _withdrawController;
+  late final ProfileController _profileController;
   final WalletController controller = Get.find<WalletController>();
 
   @override
   void initState() {
     super.initState();
     _withdrawController = Get.put(WithdrawController());
+    _profileController = Get.isRegistered<ProfileController>()
+        ? Get.find<ProfileController>()
+        : Get.put(ProfileController(), permanent: true);
     controller.fetchWithdrawalHistory();
   }
 
@@ -142,10 +147,12 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
 
           Obx(() {
             final isSubmitting = _withdrawController.isSubmitting.value;
+            final isVerified = _profileController.isVerified.value == true;
+            final isDisabled = isSubmitting || !isVerified;
             return SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: isSubmitting ? null : _submitBankDetails,
+                onPressed: isDisabled ? null : _submitBankDetails,
                 style: ElevatedButton.styleFrom(
                   side: BorderSide.none,
                   backgroundColor: Colors.black,
@@ -164,9 +171,23 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
                           color: Colors.white,
                         ),
                       )
-                    : const Text(
-                        'Save Changes',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (!isVerified) ...[
+                            const Icon(
+                              Icons.lock_outline,
+                              size: 18,
+                              color: Colors.white70,
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          const Text(
+                            'Save Changes',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ],
                       ),
               ),
             );

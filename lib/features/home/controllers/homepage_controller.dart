@@ -15,6 +15,7 @@ import 'package:quikle_rider/features/home/presentation/screen/goonline.dart';
 import 'package:quikle_rider/features/home/presentation/screen/gooffline.dart';
 import 'package:quikle_rider/custom_tab_bar/notifications.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
+import 'package:quikle_rider/routes/app_routes.dart';
 
 class HomepageController extends GetxController {
   HomepageController({
@@ -39,10 +40,31 @@ class HomepageController extends GetxController {
     if (!isOnline.value) {
       final isVerified = _profileController.isVerified.value == true;
       if (!isVerified) {
-        _showStatusSnack(
-          title: 'Account not verified',
-          message: 'your accout not verified',
-          success: false,
+        Get.snackbar(
+          'Get your account verified to receive orders',
+          '',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.redAccent,
+          colorText: Colors.white,
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 5),
+          mainButton: TextButton(
+            onPressed: () => Get.toNamed(AppRoute.uploaddocuments),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+            ),
+            child: const Text(
+              'Complete Verification',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
         );
         return;
       }
@@ -182,6 +204,8 @@ class HomepageController extends GetxController {
             await _homeService.acceptOfferedOrder(orderId: assignment.id);
         if (!response.isSuccess) {
           _showStatusSnack(
+            duration: 3,
+           
             title: 'Accept failed',
             message: response.errorMessage.isNotEmpty
                 ? response.errorMessage
@@ -208,6 +232,7 @@ class HomepageController extends GetxController {
         );
         if (!response.isSuccess) {
           _showStatusSnack(
+            duration: 3,
             title: 'Reject failed',
             message: response.errorMessage.isNotEmpty
                 ? response.errorMessage
@@ -252,12 +277,14 @@ class HomepageController extends GetxController {
         }
         final message = _extractStatusMessage(response.responseData, goOnline);
         _showStatusSnack(
+          duration: 3,
           title: 'Status updated',
           message: message,
           success: true,
         );
       } else {
         _showStatusSnack(
+          duration: 3,
           title: 'Update failed',
           message: response.errorMessage.isNotEmpty
               ? response.errorMessage
@@ -267,6 +294,7 @@ class HomepageController extends GetxController {
       }
     } catch (error) {
       _showStatusSnack(
+        duration: 3,
         title: 'Update failed',
         message: 'Unable to update status. Please try again.',
         success: false,
@@ -334,10 +362,12 @@ class HomepageController extends GetxController {
     return goOnline ? 'Rider is now online' : 'Rider is now offline';
   }
 
-  void _showStatusSnack({
+  void _showStatusSnack(
+   {
     required String title,
     required String message,
     required bool success,
+    required int duration,
   }) {
     Get.snackbar(
       title,
@@ -346,7 +376,7 @@ class HomepageController extends GetxController {
       backgroundColor: success ? Colors.green : Colors.redAccent,
       colorText: Colors.white,
       margin: const EdgeInsets.all(16),
-      duration: const Duration(seconds: 3),
+      duration:  Duration(seconds: duration),
     );
   }
 

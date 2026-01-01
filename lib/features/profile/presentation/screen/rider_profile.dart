@@ -23,6 +23,8 @@ class RiderProfile extends StatelessWidget {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 20),
+
+              
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -42,9 +44,8 @@ class RiderProfile extends StatelessWidget {
                   ),
                   SizedBox(height: 12),
                   Text(
-                    "Vikram Rajput",
+                    "Vikram =",
                     style: getTextStyle2(
-                      
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,

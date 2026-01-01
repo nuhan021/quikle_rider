@@ -207,8 +207,11 @@ class _AvailabilitySettingsPageState extends State<AvailabilitySettingsPage> {
                       child: Obx(() {
                         final isSaving =
                             _profileController.isavaiabilityProfile.value;
+                        final isVerified =
+                            _profileController.isVerified.value == true;
+                        final isDisabled = isSaving || !isVerified;
                         return ElevatedButton(
-                          onPressed: isSaving
+                          onPressed: isDisabled
                               ? null
                               : () async {
                                   await _profileController
@@ -225,19 +228,33 @@ class _AvailabilitySettingsPageState extends State<AvailabilitySettingsPage> {
                             padding: const EdgeInsets.symmetric(vertical: 16),
                           ),
                           child: isSaving
-                              ?  Center(
-                            child: LoadingAnimationWidget.inkDrop(
-                              color: AppColors.greenbutton,
-                              size: 30.w,
-                            ),
-                          )
-                              : const Text(
-                                  'Save',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white,
+                              ? Center(
+                                  child: LoadingAnimationWidget.inkDrop(
+                                    color: AppColors.greenbutton,
+                                    size: 30.w,
                                   ),
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (!isVerified) ...[
+                                      const Icon(
+                                        Icons.lock_outline,
+                                        size: 18,
+                                        color: Colors.white70,
+                                      ),
+                                      const SizedBox(width: 8),
+                                    ],
+                                    const Text(
+                                      'Save',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                         );
                       }),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
@@ -97,11 +98,19 @@ class CreateAccount extends GetView<AuthController> {
                   SizedBox(height: 8.h),
                   _buildTextField(
                     controller: controller.accountPhoneController,
-                    hintText: "(+880) 123-4567",
+                    hintText: "XXXXXX",
                     keyboardType: TextInputType.phone,
+                    prefixText: "+91 ",
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(10),
+                    ],
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your phone number';
+                      }
+                      if (value.length != 10) {
+                        return 'Please enter a 10-digit phone number';
                       }
                       return null;
                     },
@@ -135,72 +144,95 @@ class CreateAccount extends GetView<AuthController> {
                   SizedBox(height: 30.h),
                   SizedBox(
                     width: double.infinity,
-
-                    child: ElevatedButton(
-                      onPressed: () => controller.createAccount(context),
-                      style: ElevatedButton.styleFrom(
-                        side: BorderSide.none,
-                        backgroundColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
+                    child: Obx(
+                      () => ElevatedButton(
+                        onPressed: controller.termsAccepted.value
+                            ? () => controller.createAccount(context)
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          side: BorderSide.none,
+                          backgroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          elevation: 0,
                         ),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        "Create Account",
-                        style: getTextStyle(
-                          font: CustomFonts.manrope,
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFFFFB800),
+                        child: Text(
+                          "Create Account",
+                          style: getTextStyle(
+                            font: CustomFonts.manrope,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: const Color(0xFFFFB800),
+                          ),
                         ),
                       ),
                     ),
                   ),
                   SizedBox(height: 20.h),
-                  Center(
-                    child: RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: "By creating an account, you agree to our ",
-                            style: getTextStyle(
-                              font: CustomFonts.inter,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.grey[600],
+                  Obx(
+                    () => Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          height: 22.h,
+                          width: 22.w,
+                          child: Checkbox(
+                            value: controller.termsAccepted.value,
+                            onChanged: (value) {
+                              controller.termsAccepted.value = value ?? false;
+                            },
+                            activeColor: Colors.black,
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        Expanded(
+                          child: RichText(
+                            textAlign: TextAlign.left,
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text:
+                                      "I agree to the ",
+                                  style: getTextStyle(
+                                    font: CustomFonts.inter,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: "Terms of Services",
+                                  style: getTextStyle(
+                                    font: CustomFonts.inter,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: " and ",
+                                  style: getTextStyle(
+                                    font: CustomFonts.inter,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: "Privacy Policy",
+                                  style: getTextStyle(
+                                    font: CustomFonts.inter,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                          TextSpan(
-                            text: "Terms of Services",
-                            style: getTextStyle(
-                              font: CustomFonts.inter,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                            ),
-                          ),
-                          TextSpan(
-                            text: " and ",
-                            style: getTextStyle(
-                              font: CustomFonts.inter,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                          TextSpan(
-                            text: "Privacy Policy",
-                            style: getTextStyle(
-                              font: CustomFonts.inter,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                   SizedBox(height: 30.h),
@@ -229,6 +261,8 @@ class CreateAccount extends GetView<AuthController> {
     required TextEditingController controller,
     required String hintText,
     TextInputType? keyboardType,
+    String? prefixText,
+    List<TextInputFormatter>? inputFormatters,
     String? Function(String?)? validator,
   }) {
     return SizedBox(
@@ -236,6 +270,7 @@ class CreateAccount extends GetView<AuthController> {
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
+        inputFormatters: inputFormatters,
         validator: validator,
         style: getTextStyle(
           font: CustomFonts.inter,
@@ -250,6 +285,13 @@ class CreateAccount extends GetView<AuthController> {
             fontSize: 16,
             color: Colors.grey[500],
           ),
+          prefixText: prefixText,
+          prefixStyle: getTextStyle(
+            font: CustomFonts.inter,
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+            color: Colors.black,
+          ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.r),
             borderSide: const BorderSide(color: Color(0xFF7C7C7C), width: 1.0),
@@ -261,6 +303,14 @@ class CreateAccount extends GetView<AuthController> {
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.r),
             borderSide: const BorderSide(color: Colors.black, width: 1.0),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.r),
+            borderSide: const BorderSide(color: Colors.red, width: 1.0),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.r),
+            borderSide: const BorderSide(color: Colors.red, width: 1.0),
           ),
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,

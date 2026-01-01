@@ -33,6 +33,13 @@ class KycController extends GetxController {
   final ProfileServices _profileServices;
   final ImagePicker _picker = ImagePicker();
   final ProfileController _profileController = Get.find<ProfileController>();
+  static const List<String> idProofTypes = [
+    'Aadhaar',
+    'PAN',
+    'Voter ID',
+  ];
+  final idProofType = idProofTypes.first.obs;
+  final idProofNumberController = TextEditingController();
 
   // Use a map to store the selected file and its individual upload progress
   final Map<DocumentType, DocumentUploadState> documentStates = {
@@ -46,7 +53,21 @@ class KycController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    ever(_profileController.riderDocuments, (_) => update());
+    ever(_profileController.riderDocuments, (_) {
+      final existingNid = riderDocuments?.nid;
+      if (existingNid != null &&
+          existingNid.isNotEmpty &&
+          idProofNumberController.text.trim().isEmpty) {
+        idProofNumberController.text = existingNid;
+      }
+      update();
+    });
+  }
+
+  @override
+  void onClose() {
+    idProofNumberController.dispose();
+    super.onClose();
   }
 
   String get documentUploadErrorText =>
@@ -59,6 +80,7 @@ class KycController extends GetxController {
 
   RiderDocumentsModel? get riderDocuments =>
       _profileController.riderDocuments.value;
+  ProfileController get profileController => _profileController;
 
   String? existingDocumentUrl(DocumentType type) {
     final documents = riderDocuments;
@@ -229,6 +251,8 @@ class KycController extends GetxController {
         drivingLicense: drivingLicense,
         vehicleRegistration: vehicleRegistration,
         vehicleInsurance: vehicleInsurance,
+        idProofType: idProofType.value,
+        idProofNumber: idProofNumberController.text.trim(),
       );
 
       if (response.isSuccess && response.responseData is Map<String, dynamic>) {
@@ -264,7 +288,7 @@ extension DocumentTypeMeta on DocumentType {
       case DocumentType.profileImage:
         return 'Profile Photo';
       case DocumentType.nationalId:
-        return 'National ID';
+        return 'ID Proof (Any 1): Aadhaar / PAN / Voter ID';
       case DocumentType.drivingLicense:
         return 'Driving License';
       case DocumentType.vehicleRegistration:
@@ -279,7 +303,7 @@ extension DocumentTypeMeta on DocumentType {
       case DocumentType.profileImage:
         return 'Upload a clear headshot (Image)';
       case DocumentType.nationalId:
-        return 'Front side of your ID (Any file)';
+        return 'Upload your ID proof document (Any file)';
       case DocumentType.drivingLicense:
         return 'License copy or photo (Any file)';
       case DocumentType.vehicleRegistration:
