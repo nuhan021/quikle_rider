@@ -21,8 +21,8 @@ class HomepageController extends GetxController {
   HomepageController({
     HomeService? homeService,
     InternetServices? internetServices,
-  })  : _homeService = homeService ?? HomeService(),
-        _internetServices = internetServices ?? InternetServices();
+  }) : _homeService = homeService ?? HomeService(),
+       _internetServices = internetServices ?? InternetServices();
 
   var isOnline = false.obs;
   var isLoading = false.obs;
@@ -33,7 +33,7 @@ class HomepageController extends GetxController {
   final HomeService _homeService;
   final InternetServices _internetServices;
   late final ProfileController _profileController;
- 
+
   RxBool get hasConnection => _internetServices.hasConnection;
 
   Future<void> onToggleSwitch() async {
@@ -41,31 +41,62 @@ class HomepageController extends GetxController {
       final isVerified = _profileController.isVerified.value == true;
       if (!isVerified) {
         Get.snackbar(
-          'Get your account verified to receive orders',
           '',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.redAccent,
+          '',
           colorText: Colors.white,
+
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.black,
           margin: const EdgeInsets.all(16),
-          duration: const Duration(seconds: 5),
-          mainButton: TextButton(
-            onPressed: () => Get.toNamed(AppRoute.uploaddocuments),
-            style: TextButton.styleFrom(
-              backgroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
+          borderRadius: 14,
+          duration: const Duration(seconds: 4),
+          snackStyle: SnackStyle.FLOATING,
+
+          // 🔽 this reduces snackbar height
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+
+          messageText: Row(
+            children: [
+              const Icon(
+                Icons.verified_outlined,
+                color: Colors.amber,
+                size: 18, // slightly smaller
               ),
-            ),
-            child: const Text(
-              'Complete Verification',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.w600,
+              const SizedBox(width: 8),
+              const Expanded(
+                child: Text(
+                  'Get your account verified to receive orders',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ),
-            ),
+              TextButton(
+                onPressed: () => Get.toNamed(AppRoute.uploaddocuments),
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.amber,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ), // 🔽
+                  minimumSize: Size.zero, // important
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Verify',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ],
           ),
         );
+
         return;
       }
       final result = await Get.to(
@@ -134,11 +165,12 @@ class HomepageController extends GetxController {
     }
 
     final mapped = _mapAssignmentsResponse(response.responseData);
-    
+
     return mapped
-        .map((assignment) => assignment.copyWith(status: AssignmentStatus.pending))
+        .map(
+          (assignment) => assignment.copyWith(status: AssignmentStatus.pending),
+        )
         .toList();
-        
   }
 
   List<HomeStat> _buildStats(List<Assignment> upcomingAssignments) {
@@ -200,12 +232,13 @@ class HomepageController extends GetxController {
     final result = await _performAssignmentAction(
       assignmentId: assignment.id,
       action: () async {
-        final response =
-            await _homeService.acceptOfferedOrder(orderId: assignment.id);
+        final response = await _homeService.acceptOfferedOrder(
+          orderId: assignment.id,
+        );
         if (!response.isSuccess) {
           _showStatusSnack(
             duration: 3,
-           
+
             title: 'Accept failed',
             message: response.errorMessage.isNotEmpty
                 ? response.errorMessage
@@ -265,8 +298,9 @@ class HomepageController extends GetxController {
 
   Future<void> _changeOnlineStatus(bool goOnline) async {
     try {
-      final response =
-          await _homeService.toggleOnlineStatus(isOnline: goOnline);
+      final response = await _homeService.toggleOnlineStatus(
+        isOnline: goOnline,
+      );
       if (response.isSuccess) {
         isOnline.value = goOnline;
         if (goOnline) {
@@ -316,8 +350,8 @@ class HomepageController extends GetxController {
       final token = refreshedToken?.isNotEmpty == true
           ? refreshedToken
           : cachedToken?.isNotEmpty == true
-              ? cachedToken
-              : await FirebaseService.instance.waitForToken();
+          ? cachedToken
+          : await FirebaseService.instance.waitForToken();
 
       if (token == null || token.isEmpty) {
         AppLoggerHelper.debug('FCM sync skipped: token unavailable.');
@@ -329,8 +363,8 @@ class HomepageController extends GetxController {
       final platform = Platform.isIOS
           ? 'ios'
           : Platform.isAndroid
-              ? 'android'
-              : Platform.operatingSystem;
+          ? 'android'
+          : Platform.operatingSystem;
 
       final success = await NotificationService.instance.saveFcmToken(
         userId: userId,
@@ -362,8 +396,7 @@ class HomepageController extends GetxController {
     return goOnline ? 'Rider is now online' : 'Rider is now offline';
   }
 
-  void _showStatusSnack(
-   {
+  void _showStatusSnack({
     required String title,
     required String message,
     required bool success,
@@ -376,7 +409,7 @@ class HomepageController extends GetxController {
       backgroundColor: success ? Colors.green : Colors.redAccent,
       colorText: Colors.white,
       margin: const EdgeInsets.all(16),
-      duration:  Duration(seconds: duration),
+      duration: Duration(seconds: duration),
     );
   }
 
@@ -432,5 +465,4 @@ class HomepageController extends GetxController {
 
     return [];
   }
-
 }

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:quikle_rider/core/widgets/unverified/unverified.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_combioned_controller.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_controller.dart';
 import 'package:quikle_rider/features/all_orders/models/combine_ordermodel.dart';
 import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/all_orders/widgets/delevery_process_card.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
+import 'package:quikle_rider/routes/app_routes.dart';
 
 class AllOrdersCombined extends StatelessWidget {
   const AllOrdersCombined({super.key});
@@ -26,7 +28,17 @@ class AllOrdersCombined extends StatelessWidget {
       body: Obx(() {
         final isVerified = profileController.isVerified.value == true;
         if (!isVerified) {
-          return const Center(child: Text('Your profile not verified'));
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              
+              UnverifiedBanner(
+                onCompleteVerification: () {
+                  Get.toNamed(AppRoute.uploaddocuments);
+                },
+              ),
+            ],
+          );
         }
 
         if (allOrdersController.isOrdersLoading.value &&
