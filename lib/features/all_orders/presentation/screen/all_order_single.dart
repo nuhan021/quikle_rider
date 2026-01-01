@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
+import 'package:quikle_rider/core/widgets/unverified/unverified.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_controller.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_single.dart';
 import 'package:quikle_rider/features/all_orders/widgets/order_card.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
+import 'package:quikle_rider/routes/app_routes.dart';
 
 class AllOrdersSingle extends StatelessWidget {
   const AllOrdersSingle({super.key});
@@ -26,15 +28,16 @@ class AllOrdersSingle extends StatelessWidget {
       body: Obx(() {
         final isVerified = profileController.isVerified.value == true;
         if (!isVerified) {
-          return Center(
-            child: Text(
-              'Your profile not verified',
-              style: getTextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF7C7C7C),
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              
+              UnverifiedBanner(
+                onCompleteVerification: () {
+                  Get.toNamed(AppRoute.uploaddocuments);
+                },
               ),
-            ),
+            ],
           );
         }
 
