@@ -20,14 +20,23 @@ class UnverifiedBanner extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF0A0A0A), // deep black
+            Color(0xFF1C1C1C), // charcoal
+          ],
+        ),
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: Colors.black.withOpacity(0.08)),
+        border: Border.all(
+          color: Colors.amber.withOpacity(0.18),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 16.r,
-            offset: const Offset(0, 8),
+            color: Colors.black.withOpacity(0.6),
+            blurRadius: 18.r,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
@@ -42,7 +51,7 @@ class UnverifiedBanner extends StatelessWidget {
               fontFamily: 'Obviously',
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
-              color: Colors.black,
+              color: Colors.white,
             ),
           ),
           SizedBox(height: 6.h),
@@ -52,7 +61,7 @@ class UnverifiedBanner extends StatelessWidget {
               fontFamily: 'Inter',
               fontSize: 13.sp,
               height: 1.4,
-              color: Colors.black.withOpacity(0.6),
+              color: Colors.white.withOpacity(0.7),
             ),
           ),
           SizedBox(height: 16.h),
@@ -70,12 +79,12 @@ class UnverifiedBanner extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(8.w),
           decoration: BoxDecoration(
-            color: Colors.amber.withOpacity(0.18),
+            color: Colors.amber.withOpacity(0.22),
             borderRadius: BorderRadius.circular(12.r),
           ),
           child: Icon(
             Icons.verified_outlined,
-            color: Colors.amber.shade800,
+            color: Colors.amber,
             size: 20.sp,
           ),
         ),
@@ -83,7 +92,7 @@ class UnverifiedBanner extends StatelessWidget {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
           decoration: BoxDecoration(
-            color: Colors.amber.withOpacity(0.15),
+            color: Colors.amber.withOpacity(0.18),
             borderRadius: BorderRadius.circular(999.r),
           ),
           child: Text(
@@ -92,7 +101,7 @@ class UnverifiedBanner extends StatelessWidget {
               fontFamily: 'Inter',
               fontSize: 11.sp,
               fontWeight: FontWeight.w600,
-              color: Colors.amber.shade900,
+              color: Colors.amber.shade300,
               letterSpacing: 0.2,
             ),
           ),
@@ -113,8 +122,8 @@ class _CompleteVerificationButton extends StatelessWidget {
 
     final List<Color> gradientColors = enabled
         ? const [
-            Color(0xFFFFC107), // Amber
-            Color(0xFFFF8F00), // Dark amber
+            Color(0xFFFFC107), // amber
+            Color(0xFFFF8F00), // dark amber
           ]
         : const [
             Color(0x66FFC107),
