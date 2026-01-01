@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/widgets/connection_lost.dart';
+import 'package:quikle_rider/core/widgets/unverified/unverified.dart';
 import 'package:quikle_rider/features/home/controllers/homepage_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/add_paymentmethod.dart';
@@ -48,7 +49,18 @@ class WalletScreen extends GetView<WalletController> {
             return const ConnectionLost();
           }
           if (!isVerified) {
-            return const Center(child: Text('Your profile not verified'));
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding:  EdgeInsets.all(16.h),
+                  child: UnverifiedBanner(
+                    
+                    
+                  ),
+                ),
+              ],
+            );
           }
           return Column(
             children: [

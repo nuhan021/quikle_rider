@@ -17,11 +17,13 @@ class AllOrdersCombined extends StatelessWidget {
   Widget build(BuildContext context) {
     final AllOrdersController allOrdersController =
         Get.find<AllOrdersController>();
-    final CombinedOrderController controller = Get.put(CombinedOrderController());
+    final CombinedOrderController controller = Get.put(
+      CombinedOrderController(),
+    );
     final ProfileController profileController =
         Get.isRegistered<ProfileController>()
-            ? Get.find<ProfileController>()
-            : Get.put(ProfileController());
+        ? Get.find<ProfileController>()
+        : Get.put(ProfileController());
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -30,14 +32,7 @@ class AllOrdersCombined extends StatelessWidget {
         if (!isVerified) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              
-              UnverifiedBanner(
-                onCompleteVerification: () {
-                  Get.toNamed(AppRoute.uploaddocuments);
-                },
-              ),
-            ],
+            children: [UnverifiedBanner()],
           );
         }
 
@@ -68,10 +63,8 @@ class AllOrdersCombined extends StatelessWidget {
                       order: model,
                       controller: controller,
                       onCancel: () => _showCancelDialog(apiOrder),
-                      onViewDetails: () => Get.toNamed(
-                        '/mapScreen',
-                        arguments: apiOrder,
-                      ),
+                      onViewDetails: () =>
+                          Get.toNamed('/mapScreen', arguments: apiOrder),
                     ),
                     SizedBox(height: 24.h),
                   ],
@@ -91,10 +84,7 @@ class AllOrdersCombined extends StatelessWidget {
         title: const Text('Cancel Order'),
         content: Text('Are you sure you want to cancel ${order.id}?'),
         actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('No'),
-          ),
+          TextButton(onPressed: () => Get.back(), child: const Text('No')),
           ElevatedButton(
             onPressed: () {
               Get.back();

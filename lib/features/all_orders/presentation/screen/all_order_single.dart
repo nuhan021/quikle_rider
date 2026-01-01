@@ -33,9 +33,7 @@ class AllOrdersSingle extends StatelessWidget {
             children: [
               
               UnverifiedBanner(
-                onCompleteVerification: () {
-                  Get.toNamed(AppRoute.uploaddocuments);
-                },
+               
               ),
             ],
           );
