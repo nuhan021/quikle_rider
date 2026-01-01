@@ -10,6 +10,7 @@ import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/widgets/connection_lost.dart';
+import 'package:quikle_rider/core/widgets/unverified/unverified.dart';
 import 'package:quikle_rider/features/all_orders/data/services/order_services.dart';
 import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/home/controllers/homepage_controller.dart';
@@ -128,7 +129,18 @@ class _MapScreenState extends State<MapScreen> {
               action: "Notification",
               onActionPressed: () {},
             ),
-            body: const Center(child: Text('Your profile not verified')),
+            body: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding:  EdgeInsets.all(16.h),
+                  child: UnverifiedBanner(
+                    
+                    
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       }

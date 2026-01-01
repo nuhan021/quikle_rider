@@ -2,15 +2,18 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:quikle_rider/routes/app_routes.dart';
 
 class UnverifiedBanner extends StatelessWidget {
-  final VoidCallback? onCompleteVerification;
+
   final String title;
   final String subtitle;
 
   const UnverifiedBanner({
     super.key,
-    this.onCompleteVerification,
+  
     this.title = 'Account not verified',
     this.subtitle = 'Complete verification to unlock assignments and payouts.',
   });
@@ -60,7 +63,9 @@ class UnverifiedBanner extends StatelessWidget {
           ),
           SizedBox(height: 16.h),
           _CompleteVerificationButton(
-            onPressed: onCompleteVerification,
+            onPressed: (){
+              Get.toNamed(AppRoute.uploaddocuments);
+            },
           ),
         ],
       ),
