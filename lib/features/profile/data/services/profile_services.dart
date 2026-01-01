@@ -233,6 +233,8 @@ class ProfileServices {
     File? drivingLicense,
     File? vehicleRegistration,
     File? vehicleInsurance,
+    String? idProofType,
+    String? idProofNumber,
   }) async {
     final request = http.MultipartRequest(
       'PUT',
@@ -271,6 +273,12 @@ class ProfileServices {
     await addFile('dl', drivingLicense);
     await addFile('vr', vehicleRegistration);
     await addFile('vi', vehicleInsurance);
+    if (idProofType != null && idProofType.trim().isNotEmpty) {
+      request.fields['nid_type'] = idProofType.trim();
+    }
+    if (idProofNumber != null && idProofNumber.trim().isNotEmpty) {
+      request.fields['nid_number'] = idProofNumber.trim();
+    }
 
     // --- DEBUGGING START ---
     print('--- Sending Document Upload Request ---');
@@ -427,4 +435,3 @@ class ProfileServices {
 
 
 }
-

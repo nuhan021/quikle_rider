@@ -153,31 +153,64 @@ class MyProfilePage extends StatelessWidget {
                     color: Colors.black,
                   ),
                 ),
+
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const EditProfilePage(),
-                      ),
-                    );
+                    if (_controller.isVerified.value == true) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const EditProfilePage(),
+                        ),
+                      );
+                    } else {
+                      SnackBar(content: Text('You are not verified yet'));
+                      return;
+                    }
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                      horizontal: 18,
+                      vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: const Text(
-                      'Edit',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF434343), Color(0xFF000000)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.25),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _controller.isVerified.value == false
+                            ? Icon(
+                                Icons.lock_outline,
+                                color: Colors.white70,
+                                size: 18,
+                              )
+                            : SizedBox.shrink(),
+                        _controller.isVerified.value == false
+                            ? const SizedBox(width: 8)
+                            : SizedBox.shrink(),
+                        const Text(
+                          'Edit',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -234,7 +267,7 @@ class MyProfilePage extends StatelessWidget {
   Widget _buildUploadDocumentsRow(BuildContext context) {
     return InkWell(
       onTap: () {
-        Get.to( UploadDocumentsPage());
+        Get.to(UploadDocumentsPage());
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),

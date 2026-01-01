@@ -9,6 +9,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
+import 'package:quikle_rider/core/utils/constants/enums.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/kyc_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/widgets/common_button.dart';
@@ -56,10 +57,12 @@ class UploadDocumentsPage extends StatelessWidget {
                 SizedBox(height: 24.h),
                 _buildUploadButton(),
                 SizedBox(height: 24.h),
-                CustomButton(text: "Skip", onPressed: (){
-                     Get.offAllNamed(AppRoute.getBottomNavBar());
-
-                })
+                CustomButton(
+                  text: "Skip",
+                  onPressed: () {
+                    Get.offAllNamed(AppRoute.getBottomNavBar());
+                  },
+                ),
               ],
             ),
           );
@@ -83,59 +86,62 @@ class UploadDocumentsPage extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Image(height: 48.h, image: AssetImage("assets/images/logo.png")),
-          SizedBox(height: 12.h),
-          Text.rich(
-            TextSpan(
-              text: 'Profile & ',
-              style: getTextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-              children: [
-                TextSpan(
-                  text: 'Documents',
-                  style: getTextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
+      child: Container(
+        width: double.maxFinite,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Image(height: 48.h, image: AssetImage("assets/images/logo.png")),
+            SizedBox(height: 12.h),
+            Text.rich(
+              TextSpan(
+                text: 'Profile & ',
+                style: getTextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                children: [
+                  TextSpan(
+                    text: 'Documents',
+                    style: getTextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          SizedBox(height: 6.h),
-          Text(
-            'Verification required to start earning',
-            style: getTextStyle(fontSize: 14, color: Colors.grey[600]),
-          ),
-          SizedBox(height: 16.h),
-          Container(
-            padding: EdgeInsets.all(14.w),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(color: AppColors.primary),
+            SizedBox(height: 6.h),
+            Text(
+              'Verification required to start earning',
+              style: getTextStyle(fontSize: 14, color: Colors.grey[600]),
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(
-                  Icons.info_outline,
-                  color: AppColors.primary,
-                  size: 20,
-                ),
-                SizedBox(width: 10.w),
-                Expanded(
-                  child: Text(
-                    'All documents must be verified to access Gold tier benefits.',
-                    style: getTextStyle(fontSize: 13, color: Colors.grey[700]),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+            SizedBox(height: 16.h),
+            // Container(
+            //   padding: EdgeInsets.all(14.w),
+            //   decoration: BoxDecoration(
+            //     color: AppColors.primary.withOpacity(0.08),
+            //     borderRadius: BorderRadius.circular(16.r),
+            //     border: Border.all(color: AppColors.primary),
+            //   ),
+            //   child: Row(
+            //     crossAxisAlignment: CrossAxisAlignment.start,
+            //     children: [
+            //       const Icon(
+            //         Icons.info_outline,
+            //         color: AppColors.primary,
+            //         size: 20,
+            //       ),
+            //       SizedBox(width: 10.w),
+            //       Expanded(
+            //         child: Text(
+            //           'All documents must be verified to access Gold tier benefits.',
+            //           style: getTextStyle(fontSize: 13, color: Colors.grey[700]),
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
+          ],
+        ),
       ),
     );
   }
@@ -145,6 +151,7 @@ class UploadDocumentsPage extends StatelessWidget {
     final file = state.file;
     final progress = state.progress;
     final existingUrl = _kycController.existingDocumentUrl(type);
+    final status = _resolveStatus(type, file, existingUrl);
 
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
@@ -191,9 +198,13 @@ class UploadDocumentsPage extends StatelessWidget {
                   ],
                 ),
               ),
-              _statusChip('Pending'),
+              _statusChip(status),
             ],
           ),
+          if (type == DocumentType.nationalId) ...[
+            SizedBox(height: 12.h),
+            _buildIdProofFields(),
+          ],
           SizedBox(height: 16.h),
           _buildPreviewArea(type, file, existingUrl),
           if (progress > 0.0 && progress < 1.0) ...[
@@ -280,19 +291,19 @@ class UploadDocumentsPage extends StatelessWidget {
     );
   }
 
-  Widget _statusChip(String label) {
+  Widget _statusChip(_DocumentStatus status) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.15),
+        color: status.background,
         borderRadius: BorderRadius.circular(20.r),
       ),
       child: Text(
-        label,
+        status.label,
         style: getTextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w600,
-        ).copyWith(color: AppColors.primary),
+        ).copyWith(color: status.textColor),
       ),
     );
   }
@@ -378,6 +389,122 @@ class UploadDocumentsPage extends StatelessWidget {
       );
     });
   }
+
+  Widget _buildIdProofFields() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DropdownButtonFormField<String>(
+          dropdownColor: Colors.white,
+          value: _kycController.idProofType.value,
+          items: KycController.idProofTypes
+              .map(
+                (type) => DropdownMenuItem<String>(
+                  
+                  value: type,
+                  child: Text(type),
+                ),
+              )
+              .toList(),
+          onChanged: (value) {
+            if (value == null) return;
+            _kycController.idProofType.value = value;
+            _kycController.update();
+          },
+          decoration: _inputDecoration('ID Proof Type'),
+        ),
+        SizedBox(height: 12.h),
+        TextFormField(
+          controller: _kycController.idProofNumberController,
+          keyboardType: TextInputType.text,
+          decoration: _inputDecoration('ID Proof Number'),
+        ),
+      ],
+    );
+  }
+
+  InputDecoration _inputDecoration(String hintText) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: getTextStyle(
+        font: CustomFonts.inter,
+        fontSize: 14,
+        color: Colors.grey[500],
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.r),
+        borderSide: const BorderSide(color: Color(0xFF7C7C7C), width: 1.0),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.r),
+        borderSide: const BorderSide(color: Color(0xFF7C7C7C), width: 1.0),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12.r),
+        borderSide: const BorderSide(color: Colors.black, width: 1.0),
+      ),
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: 12.w,
+        vertical: 12.h,
+      ),
+    );
+  }
+
+  _DocumentStatus _resolveStatus(
+    DocumentType type,
+    File? file,
+    String? existingUrl,
+  ) {
+    final hasFile = file != null || (existingUrl?.isNotEmpty ?? false);
+    if (!hasFile) {
+      return const _DocumentStatus(
+        label: 'Not Uploaded',
+        background: Color(0xFFE0E0E0),
+        textColor: Color(0xFF616161),
+      );
+    }
+
+    final docVerified = _kycController.riderDocuments?.isVerified;
+    final isVerified =
+        docVerified ?? _kycController.profileController.isVerified.value;
+    if (isVerified == true) {
+      return const _DocumentStatus(
+        label: 'Approved',
+        background: Color(0xFFE6F4EA),
+        textColor: Color(0xFF2E7D32),
+      );
+    }
+
+    final verificationError =
+        _kycController.profileController.verificationError.value ?? '';
+    final isRejected = verificationError.toLowerCase().contains('rejected') ||
+        verificationError.toLowerCase().contains('declined');
+    if (isRejected) {
+      return const _DocumentStatus(
+        label: 'Rejected',
+        background: Color(0xFFFDECEA),
+        textColor: Color(0xFFC62828),
+      );
+    }
+
+    return const _DocumentStatus(
+      label: 'Submitted',
+      background: Color(0xFFFFF4E5),
+      textColor: Color(0xFFB26A00),
+    );
+  }
+}
+
+class _DocumentStatus {
+  const _DocumentStatus({
+    required this.label,
+    required this.background,
+    required this.textColor,
+  });
+
+  final String label;
+  final Color background;
+  final Color textColor;
 }
 
 Widget _buildFilePreview(File? file, String? existingUrl, DocumentType type) {
