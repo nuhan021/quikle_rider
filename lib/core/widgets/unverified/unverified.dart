@@ -32,13 +32,7 @@ class UnverifiedBanner extends StatelessWidget {
         border: Border.all(
           color: Colors.amber.withOpacity(0.18),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.6),
-            blurRadius: 18.r,
-            offset: const Offset(0, 10),
-          ),
-        ],
+        
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
