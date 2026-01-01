@@ -269,10 +269,12 @@ class HelpSupportPage extends StatelessWidget {
           // Submit
           Obx(() {
             final isSubmitting = controller.isSubmittingHelpSupport.value;
+            final isVerified = controller.isVerified.value == true;
+            final isDisabled = isSubmitting || !isVerified;
             return SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: isSubmitting
+                onPressed: isDisabled
                     ? null
                     : () => controller.submitHelpSupportForm(),
                 style: ElevatedButton.styleFrom(
@@ -294,13 +296,27 @@ class HelpSupportPage extends StatelessWidget {
                           ),
                         ),
                       )
-                    : const Text(
-                        'Submit Issue',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (!isVerified) ...[
+                            const Icon(
+                              Icons.lock_outline,
+                              size: 18,
+                              color: Colors.white70,
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          const Text(
+                            'Submit Issue',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
               ),
             );
