@@ -42,6 +42,7 @@ class AuthController extends GetxController {
   final drivingLicenseController = TextEditingController();
   final vehicleLicenseController = TextEditingController();
   final formKey = GlobalKey<FormState>();
+  final termsAccepted = false.obs;
 
   static const _resendDuration = 27;
   String? _pendingPhoneNumber;
@@ -155,11 +156,20 @@ class AuthController extends GetxController {
   }
 
   Future<void> createAccount(BuildContext context) async {
+    if (!termsAccepted.value) {
+      Get.snackbar(
+        'Terms Required',
+        'Please accept the terms and conditions to continue.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
     if (!(formKey.currentState?.validate() ?? false)) return;
 
     FocusScope.of(context).unfocus();
     final name = fullNameController.text.trim();
-    final phone = accountPhoneController.text.trim();
+    final phoneDigits = accountPhoneController.text.trim();
+    final phone = '+91$phoneDigits';
     final drivingLicense = drivingLicenseController.text.trim();
     final nid = vehicleLicenseController.text.trim();
 
@@ -173,7 +183,7 @@ class AuthController extends GetxController {
 
     final otpSent = await _requestOtp(
       phoneNumber: phone,
-      purpose: 'rider_signup',
+      purpose: 'signup',
     );
 
     if (otpSent) {
@@ -330,6 +340,7 @@ class AuthController extends GetxController {
           0,
           'OTP Sent',
           '${response.responseData['message']}',
+          
           NotificationDetails(
             android: AndroidNotificationDetails(
               'otp_notification_channel',
@@ -342,6 +353,7 @@ class AuthController extends GetxController {
       }
       return true;
     } else {
+      AppLoggerHelper.error("error ${response.errorMessage}");
       Get.snackbar(
         'Failed to send OTP',
         response.errorMessage.isNotEmpty
