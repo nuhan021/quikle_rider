@@ -54,52 +54,41 @@ class HomeScreen extends GetView<HomepageController> {
     );
   }
 
+  List<HomeStat> _fallbackStats() {
+    return const [
+      HomeStat(
+        id: 'upcoming',
+        title: 'Upcoming',
+        subtitle: 'Orders',
+        value: 0,
+      ),
+      HomeStat(
+        id: 'payout',
+        title: 'Payout',
+        subtitle: 'Potential',
+        value: 0,
+        unit: '₹',
+      ),
+      HomeStat(
+        id: 'rating',
+        title: 'Rating',
+        subtitle: 'Out of 5',
+        value: 0,
+      ),
+    ];
+  }
+
   Widget _buildOnlineView(BuildContext context) {
     return Obx(() {
       if (controller.isLoading.value) {
         return const Center(child: CircularProgressIndicator());
       }
 
-      if (controller.errorMessage.value != null) {
-        return Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24.w),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  controller.errorMessage.value!,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Obviously',
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.grey[700],
-                  ),
-                ),
-                SizedBox(height: 12.h),
-                SizedBox(
-                  // height: 40.h,
-                  child: ElevatedButton(
-                    onPressed: controller.fetchDashboardData,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(6.r),
-                      ),
-                    ),
-                    child: const Text('Retry'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      }
-
-      final stats = controller.stats;
-      final assignments = controller.assignments;
+      final hasError = controller.errorMessage.value != null;
+      final stats =
+          controller.stats.isEmpty ? _fallbackStats() : controller.stats;
+      final assignments =
+          hasError ? <Assignment>[] : controller.assignments;
 
       return SingleChildScrollView(
         child: Padding(
@@ -108,36 +97,16 @@ class HomeScreen extends GetView<HomepageController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: 16.h),
-              if (stats.isEmpty)
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(vertical: 24.h),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: Colors.grey[200]!),
-                  ),
-                  child: Text(
-                    'No stats available.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 14.sp,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                )
-              else
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: stats.take(3).map((stat) {
-                    return StatCard(
-                      title: stat.title,
-                      value: stat.displayValue,
-                      subtitle: stat.subtitle,
-                    );
-                  }).toList(),
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: stats.take(3).map((stat) {
+                  return StatCard(
+                    title: stat.title,
+                    value: stat.displayValue,
+                    subtitle: stat.subtitle,
+                  );
+                }).toList(),
+              ),
               SizedBox(height: 24.h),
               Text(
                 'Upcoming Assignments',
