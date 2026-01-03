@@ -183,7 +183,7 @@ class AuthController extends GetxController {
 
     final otpSent = await _requestOtp(
       phoneNumber: phone,
-      purpose: 'signup',
+      purpose: 'rider_signup',
     );
 
     if (otpSent) {

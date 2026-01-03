@@ -20,6 +20,7 @@ import 'package:quikle_rider/routes/app_routes.dart';
 class HomepageController extends GetxController {
   HomepageController({
     HomeService? homeService,
+    
     InternetServices? internetServices,
   }) : _homeService = homeService ?? HomeService(),
        _internetServices = internetServices ?? InternetServices();
@@ -126,6 +127,7 @@ class HomepageController extends GetxController {
     await onToggleSwitch();
     if (!wasOnline && isOnline.value) {
       await _syncFcmTokenForOnline();
+
     }
   }
 

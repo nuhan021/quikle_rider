@@ -17,6 +17,7 @@ class SplashController extends GetxController {
   final RxDouble ellipseTop = _ellipseTopIdle.obs;
   final RxBool showEllipse = false.obs;
   final RxBool showLogin = false.obs;
+  
 
   final Duration shrinkDelay = const Duration(milliseconds: 20);
   final Duration ellipseTriggerAt = const Duration(seconds: 2);
