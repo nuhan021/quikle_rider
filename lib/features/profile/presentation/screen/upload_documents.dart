@@ -54,9 +54,7 @@ class UploadDocumentsPage extends StatelessWidget {
                 SizedBox(height: 5.h),
                 TextButton(
                   onPressed: () => Get.offAllNamed(AppRoute.getBottomNavBar()),
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.black54,
-                  ),
+                  style: TextButton.styleFrom(foregroundColor: Colors.black54),
                   child: const Text('Skip for now'),
                 ),
               ],
@@ -100,8 +98,11 @@ class UploadDocumentsPage extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.primary, width: 1.4),
             ),
-            
-            child: const Icon(Icons.cloud_upload_outlined, color: AppColors.primary),
+
+            child: const Icon(
+              Icons.cloud_upload_outlined,
+              color: AppColors.primary,
+            ),
           ),
           SizedBox(width: 12.w),
           Expanded(
@@ -157,12 +158,23 @@ class UploadDocumentsPage extends StatelessWidget {
                     size: 35.w,
                   ),
                 )
-              : Text(
-                  buttonText,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      buttonText,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(width: 6.w),
+                    Icon(
+                      Icons.check_circle_outline_rounded,
+                      size: 20.sp,
+                      color: Colors.black,
+                    ),
+                  ],
                 ),
         ),
       );
