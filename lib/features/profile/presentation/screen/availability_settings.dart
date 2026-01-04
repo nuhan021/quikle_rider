@@ -208,7 +208,7 @@ class _AvailabilitySettingsPageState extends State<AvailabilitySettingsPage> {
                         final isSaving =
                             _profileController.isavaiabilityProfile.value;
                         final isVerified =
-                            _profileController.isVerified.value == true;
+                            _profileController.isVerifiedApproved;
                         final isDisabled = isSaving || !isVerified;
                         return ElevatedButton(
                           onPressed: isDisabled

@@ -44,11 +44,13 @@ class _MapScreenState extends State<MapScreen> {
     profileController = Get.isRegistered<ProfileController>()
         ? Get.find<ProfileController>()
         : Get.put(ProfileController());
-    if (profileController.isVerified.value == true) {
+    if (profileController.isVerifiedApproved) {
       _triggerVerifiedLoad();
     } else {
-      _verificationWorker = ever<bool?>(profileController.isVerified, (value) {
-        if (value == true && !_hasTriggeredVerifiedLoad) {
+      _verificationWorker =
+          ever<String?>(profileController.isVerified, (_) {
+        if (profileController.isVerifiedApproved &&
+            !_hasTriggeredVerifiedLoad) {
           _triggerVerifiedLoad();
         }
       });
@@ -71,7 +73,7 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _loadCurrentOrder() async {
     if (_isFetchingCurrentOrder) return;
-    if (profileController.isVerified.value != true) {
+    if (!profileController.isVerifiedApproved) {
       return;
     }
     final args = Get.arguments;
@@ -114,7 +116,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final isVerified = profileController.isVerified.value == true;
+      final isVerified = profileController.isVerifiedApproved;
       if (homepageController.hasConnection.value == false) {
         return ConnectionLost();
       }

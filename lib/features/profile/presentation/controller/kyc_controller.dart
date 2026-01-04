@@ -40,6 +40,8 @@ class KycController extends GetxController {
   ];
   final idProofType = idProofTypes.first.obs;
   final idProofNumberController = TextEditingController();
+  final drivingLicenseNumberController = TextEditingController();
+  final vehicleRegistrationNumberController = TextEditingController();
 
   // Use a map to store the selected file and its individual upload progress
   final Map<DocumentType, DocumentUploadState> documentStates = {
@@ -60,6 +62,24 @@ class KycController extends GetxController {
           idProofNumberController.text.trim().isEmpty) {
         idProofNumberController.text = existingNid;
       }
+      final existingIdType = riderDocuments?.nidType;
+      if (existingIdType != null &&
+          existingIdType.isNotEmpty &&
+          idProofTypes.contains(existingIdType)) {
+        idProofType.value = existingIdType;
+      }
+      final existingLicense = riderDocuments?.drivingLicense;
+      if (existingLicense != null &&
+          existingLicense.isNotEmpty &&
+          drivingLicenseNumberController.text.trim().isEmpty) {
+        drivingLicenseNumberController.text = existingLicense;
+      }
+      final existingReg = riderDocuments?.vehicleRegistrationNumber;
+      if (existingReg != null &&
+          existingReg.isNotEmpty &&
+          vehicleRegistrationNumberController.text.trim().isEmpty) {
+        vehicleRegistrationNumberController.text = existingReg;
+      }
       update();
     });
   }
@@ -67,6 +87,8 @@ class KycController extends GetxController {
   @override
   void onClose() {
     idProofNumberController.dispose();
+    drivingLicenseNumberController.dispose();
+    vehicleRegistrationNumberController.dispose();
     super.onClose();
   }
 
@@ -251,8 +273,11 @@ class KycController extends GetxController {
         drivingLicense: drivingLicense,
         vehicleRegistration: vehicleRegistration,
         vehicleInsurance: vehicleInsurance,
-        idProofType: idProofType.value,
-        idProofNumber: idProofNumberController.text.trim(),
+        idType: idProofType.value,
+        nidNumber: idProofNumberController.text.trim(),
+        drivingLicenseNumber: drivingLicenseNumberController.text.trim(),
+        vehicleRegistrationNumber:
+            vehicleRegistrationNumberController.text.trim(),
       );
 
       if (response.isSuccess && response.responseData is Map<String, dynamic>) {

@@ -269,7 +269,7 @@ class HelpSupportPage extends StatelessWidget {
           // Submit
           Obx(() {
             final isSubmitting = controller.isSubmittingHelpSupport.value;
-            final isVerified = controller.isVerified.value == true;
+            final isVerified = controller.isVerifiedApproved;
             final isDisabled = isSubmitting || !isVerified;
             return SizedBox(
               width: double.infinity,

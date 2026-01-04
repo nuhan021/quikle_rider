@@ -11,6 +11,8 @@ class RiderDocumentsModel {
   final String? updatedAt;
   final String? drivingLicense;
   final String? nid;
+  final String? nidType;
+  final String? vehicleRegistrationNumber;
 
   const RiderDocumentsModel({
     this.id,
@@ -25,6 +27,8 @@ class RiderDocumentsModel {
     this.updatedAt,
     this.drivingLicense,
     this.nid,
+    this.nidType,
+    this.vehicleRegistrationNumber,
   });
 
   factory RiderDocumentsModel.fromJson(Map<String, dynamic> json) {
@@ -43,6 +47,9 @@ class RiderDocumentsModel {
       updatedAt: json['updated_at']?.toString(),
       drivingLicense: json['driving_license']?.toString(),
       nid: json['nid']?.toString(),
+      nidType: json['nid_type']?.toString(),
+      vehicleRegistrationNumber:
+          json['vehicle_registration_number']?.toString(),
     );
   }
 
@@ -60,6 +67,8 @@ class RiderDocumentsModel {
       'updated_at': updatedAt,
       'driving_license': drivingLicense,
       'nid': nid,
+      'nid_type': nidType,
+      'vehicle_registration_number': vehicleRegistrationNumber,
     };
   }
 }

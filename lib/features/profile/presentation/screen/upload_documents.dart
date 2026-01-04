@@ -12,7 +12,6 @@ import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/core/utils/constants/enums.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/kyc_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
-import 'package:quikle_rider/features/profile/presentation/widgets/common_button.dart';
 import 'package:quikle_rider/routes/app_routes.dart';
 
 class UploadDocumentsPage extends StatelessWidget {
@@ -32,36 +31,29 @@ class UploadDocumentsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: AppColors.background,
       appBar: const UnifiedProfileAppBar(title: 'Profile & Documents'),
       body: GetBuilder<KycController>(
         builder: (_) {
           return SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildHeader(),
-                SizedBox(height: 24.h),
-                Text(
-                  'Required Documents',
-                  style: getTextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
                 SizedBox(height: 16.h),
                 ...DocumentType.values
                     .map((type) => _buildDocumentCard(type))
                     .toList(),
-                SizedBox(height: 24.h),
+                SizedBox(height: 20.h),
                 _buildUploadButton(),
-                SizedBox(height: 24.h),
-                CustomButton(
-                  text: "Skip",
-                  onPressed: () {
-                    Get.offAllNamed(AppRoute.getBottomNavBar());
-                  },
+                SizedBox(height: 12.h),
+                TextButton(
+                  onPressed: () => Get.offAllNamed(AppRoute.getBottomNavBar()),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.black54,
+                  ),
+                  child: const Text('Skip for now'),
                 ),
               ],
             ),
@@ -73,10 +65,11 @@ class UploadDocumentsPage extends StatelessWidget {
 
   Widget _buildHeader() {
     return Container(
-      padding: EdgeInsets.all(20.w),
+      width: double.infinity,
+      padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24.r),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: Colors.grey[200]!),
         boxShadow: [
           BoxShadow(
@@ -86,62 +79,39 @@ class UploadDocumentsPage extends StatelessWidget {
           ),
         ],
       ),
-      child: Container(
-        width: double.maxFinite,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Image(height: 48.h, image: AssetImage("assets/images/logo.png")),
-            SizedBox(height: 12.h),
-            Text.rich(
-              TextSpan(
-                text: 'Profile & ',
-                style: getTextStyle(fontSize: 20, fontWeight: FontWeight.w700),
-                children: [
-                  TextSpan(
-                    text: 'Documents',
-                    style: getTextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
-                    ),
+      child: Row(
+        children: [
+          Container(
+            height: 52.w,
+            width: 52.w,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.12),
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.primary, width: 1.4),
+            ),
+            child: const Icon(Icons.folder_open, color: Colors.black),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Upload Documents',
+                  style: getTextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
                   ),
-                ],
-              ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  'Complete verification to start accepting orders.',
+                  style: getTextStyle(fontSize: 13, color: Colors.grey[600]),
+                ),
+              ],
             ),
-            SizedBox(height: 6.h),
-            Text(
-              'Verification required to start earning',
-              style: getTextStyle(fontSize: 14, color: Colors.grey[600]),
-            ),
-            SizedBox(height: 16.h),
-            // Container(
-            //   padding: EdgeInsets.all(14.w),
-            //   decoration: BoxDecoration(
-            //     color: AppColors.primary.withOpacity(0.08),
-            //     borderRadius: BorderRadius.circular(16.r),
-            //     border: Border.all(color: AppColors.primary),
-            //   ),
-            //   child: Row(
-            //     crossAxisAlignment: CrossAxisAlignment.start,
-            //     children: [
-            //       const Icon(
-            //         Icons.info_outline,
-            //         color: AppColors.primary,
-            //         size: 20,
-            //       ),
-            //       SizedBox(width: 10.w),
-            //       Expanded(
-            //         child: Text(
-            //           'All documents must be verified to access Gold tier benefits.',
-            //           style: getTextStyle(fontSize: 13, color: Colors.grey[700]),
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -158,7 +128,7 @@ class UploadDocumentsPage extends StatelessWidget {
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18.r),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: Colors.grey[200]!),
         boxShadow: [
           BoxShadow(
@@ -179,113 +149,81 @@ class UploadDocumentsPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      type.label,
+                      _sectionTitle(type),
                       style: getTextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    if (type == DocumentType.drivingLicense) ...[
-                      SizedBox(height: 4.h),
-                      Text(
-                        'Expires: 2028-03-15',
-                        style: getTextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ),
               _statusChip(status),
             ],
           ),
-          if (type == DocumentType.nationalId) ...[
+          SizedBox(height: 14.h),
+          if (type == DocumentType.profileImage) ...[
+            _buildProfilePhotoRow(file, existingUrl),
             SizedBox(height: 12.h),
-            _buildIdProofFields(),
-          ],
-          SizedBox(height: 16.h),
-          _buildPreviewArea(type, file, existingUrl),
-          if (progress > 0.0 && progress < 1.0) ...[
-            SizedBox(height: 12.h),
-            LinearProgressIndicator(
-              value: progress,
-              backgroundColor: Colors.grey.shade200,
-              color: AppColors.primary,
-              minHeight: 6.h,
+            _buildPrimaryButton(
+              label: 'Upload Photo',
+              icon: Icons.upload_rounded,
+              onPressed: () => _kycController.pickDocument(type),
             ),
-            SizedBox(height: 4.h),
-            Text(
-              '${(progress * 100).toInt()}% uploading...',
-              style: getTextStyle(fontSize: 11, color: Colors.grey[600]),
+          ] else ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: type == DocumentType.nationalId
+                      ? _buildIdProofFields()
+                      : type == DocumentType.drivingLicense
+                          ? _buildDrivingLicenseFields()
+                          : type == DocumentType.vehicleRegistration
+                              ? _buildVehicleRegistrationFields()
+                              : _buildHintBlock(type),
+                ),
+                SizedBox(width: 12.w),
+                _buildUploadTile(type, file, existingUrl),
+              ],
             ),
-          ],
-          SizedBox(height: 16.h),
-          if (type == DocumentType.profileImage)
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _kycController.pickDocument(type),
-                style: ElevatedButton.styleFrom(
-                  side: BorderSide.none,
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.upload_rounded, color: Colors.white),
-                    SizedBox(width: 8.w),
-                    const Text('Upload Photo'),
-                  ],
-                ),
+            if (progress > 0.0 && progress < 1.0) ...[
+              SizedBox(height: 12.h),
+              LinearProgressIndicator(
+                value: progress,
+                backgroundColor: Colors.grey.shade200,
+                color: AppColors.primary,
+                minHeight: 5.h,
               ),
-            )
-          else
+              SizedBox(height: 4.h),
+              Text(
+                '${(progress * 100).toInt()}% uploading...',
+                style: getTextStyle(fontSize: 11, color: Colors.grey[600]),
+              ),
+            ],
+            SizedBox(height: 12.h),
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
-                    onPressed: () => existingUrl,
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
-                      side: BorderSide(color: Colors.grey[300]!),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
-                    ),
-                    child: const Text(
-                      'View',
-                      style: TextStyle(
-                        color: AppColors.backgroundDark,
-                        fontSize: 14,
-                      ),
-                    ),
+                  child: _buildSecondaryButton(
+                    label: 'View',
+                    onPressed: _canViewDocument(file, existingUrl)
+                        ? () => _openPreview(type, file, existingUrl)
+                        : null,
                   ),
                 ),
                 SizedBox(width: 12.w),
                 Expanded(
-                  child: ElevatedButton(
+                  child: _buildPrimaryButton(
+                    label: _canViewDocument(file, existingUrl)
+                        ? 'Re-upload'
+                        : 'Upload',
                     onPressed: () => _kycController.pickDocument(type),
-                    style: ElevatedButton.styleFrom(
-                      side: BorderSide.none,
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 14.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
-                    ),
-                    child: const Text('Re-upload'),
                   ),
                 ),
               ],
             ),
+          ],
         ],
       ),
     );
@@ -308,54 +246,13 @@ class UploadDocumentsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildPreviewArea(DocumentType type, File? file, String? existingUrl) {
-    if (type.isImageType) {
-      ImageProvider? imageProvider;
-      if (file != null) {
-        imageProvider = FileImage(file);
-      } else if (existingUrl != null && existingUrl.isNotEmpty) {
-        imageProvider = NetworkImage(existingUrl);
-      }
-
-      return Container(
-        padding: EdgeInsets.symmetric(vertical: 24.h),
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.grey[50],
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: Colors.grey[200]!),
-        ),
-        child: CircleAvatar(
-          radius: 40.w,
-          backgroundColor: AppColors.primary.withOpacity(0.15),
-          backgroundImage: imageProvider,
-          child: imageProvider == null
-              ? Icon(Icons.cloud_upload_outlined, size: 32.sp)
-              : null,
-        ),
-      );
-    }
-
-    final preview = _buildFilePreview(file, existingUrl, type);
-    return Container(
-      height: 120.h,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: preview,
-    );
-  }
-
   Widget _buildUploadButton() {
     return Obx(() {
       final isLoading = _kycController.isUploadingDocuments.value;
       final filesToUploadCount = _kycController.selectedFilesCount;
       final buttonText = filesToUploadCount > 0
-          ? 'Save $filesToUploadCount Document${filesToUploadCount > 1 ? 's' : ''}'
-          : 'Save Documents';
+          ? 'Save & Submit (${filesToUploadCount} file${filesToUploadCount > 1 ? 's' : ''})'
+          : 'Save & Submit for Verification';
 
       return SizedBox(
         width: double.infinity,
@@ -363,18 +260,18 @@ class UploadDocumentsPage extends StatelessWidget {
           onPressed: isLoading ? null : _kycController.handleUpload,
           style: ElevatedButton.styleFrom(
             side: BorderSide.none,
-            backgroundColor: Colors.black,
-            foregroundColor: Colors.white,
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.black,
             padding: EdgeInsets.symmetric(vertical: 16.h),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.w),
             ),
-            elevation: 8,
+            elevation: 0,
           ),
           child: isLoading
               ? Center(
                   child: LoadingAnimationWidget.inkDrop(
-                    color: AppColors.beakYellow,
+                    color: Colors.black,
                     size: 35.w,
                   ),
                 )
@@ -419,6 +316,38 @@ class UploadDocumentsPage extends StatelessWidget {
           keyboardType: TextInputType.text,
           decoration: _inputDecoration('ID Proof Number'),
         ),
+        SizedBox(height: 12.h),
+        _buildHintBlock(DocumentType.nationalId),
+      ],
+    );
+  }
+
+  Widget _buildDrivingLicenseFields() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          controller: _kycController.drivingLicenseNumberController,
+          keyboardType: TextInputType.text,
+          decoration: _inputDecoration('Driving License Number'),
+        ),
+        SizedBox(height: 12.h),
+        _buildHintBlock(DocumentType.drivingLicense),
+      ],
+    );
+  }
+
+  Widget _buildVehicleRegistrationFields() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          controller: _kycController.vehicleRegistrationNumberController,
+          keyboardType: TextInputType.text,
+          decoration: _inputDecoration('Vehicle Registration Number'),
+        ),
+        SizedBox(height: 12.h),
+        _buildHintBlock(DocumentType.vehicleRegistration),
       ],
     );
   }
@@ -428,16 +357,18 @@ class UploadDocumentsPage extends StatelessWidget {
       hintText: hintText,
       hintStyle: getTextStyle(
         font: CustomFonts.inter,
-        fontSize: 14,
+        fontSize: 13,
         color: Colors.grey[500],
       ),
+      filled: true,
+      fillColor: Colors.white,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12.r),
-        borderSide: const BorderSide(color: Color(0xFF7C7C7C), width: 1.0),
+        borderSide: BorderSide(color: Colors.grey[300]!, width: 1.0),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12.r),
-        borderSide: const BorderSide(color: Color(0xFF7C7C7C), width: 1.0),
+        borderSide: BorderSide(color: Colors.grey[300]!, width: 1.0),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12.r),
@@ -445,9 +376,217 @@ class UploadDocumentsPage extends StatelessWidget {
       ),
       contentPadding: EdgeInsets.symmetric(
         horizontal: 12.w,
-        vertical: 12.h,
+        vertical: 10.h,
       ),
     );
+  }
+
+  String _sectionTitle(DocumentType type) {
+    switch (type) {
+      case DocumentType.profileImage:
+        return 'Profile Photo';
+      case DocumentType.nationalId:
+        return 'ID Proof';
+      case DocumentType.drivingLicense:
+        return 'Driving License';
+      case DocumentType.vehicleRegistration:
+        return 'Vehicle Registration';
+      case DocumentType.vehicleInsurance:
+        return 'Vehicle Insurance';
+    }
+  }
+
+  Widget _buildProfilePhotoRow(File? file, String? existingUrl) {
+    final imageProvider = _resolveImageProvider(file, existingUrl);
+    return Row(
+      children: [
+        Container(
+          height: 56.w,
+          width: 56.w,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.primary, width: 1.6),
+            color: AppColors.primary.withOpacity(0.12),
+          ),
+          child: CircleAvatar(
+            backgroundColor: Colors.transparent,
+            backgroundImage: imageProvider,
+            child: imageProvider == null
+                ? const Icon(Icons.photo_camera_outlined, color: Colors.black)
+                : null,
+          ),
+        ),
+        SizedBox(width: 12.w),
+        Expanded(
+          child: Text(
+            'Upload a clear face photo.',
+            style: getTextStyle(fontSize: 13, color: Colors.grey[600]),
+          ),
+        ),
+      ],
+    );
+  }
+
+  ImageProvider? _resolveImageProvider(File? file, String? existingUrl) {
+    if (file != null) return FileImage(file);
+    if (existingUrl != null && existingUrl.isNotEmpty) {
+      return NetworkImage(existingUrl);
+    }
+    return null;
+  }
+
+  Widget _buildHintBlock(DocumentType type) {
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Row(
+        children: [
+          Icon(type.icon, color: Colors.grey[600], size: 18.sp),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Text(
+              type.hint,
+              style: getTextStyle(fontSize: 12, color: Colors.grey[600]),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildUploadTile(DocumentType type, File? file, String? existingUrl) {
+    final hasFile =
+        file != null || (existingUrl != null && existingUrl.isNotEmpty);
+    final displayName = file != null
+        ? file.path.split('/').last
+        : (existingUrl != null && existingUrl.isNotEmpty
+              ? existingUrl.split('/').last
+              : 'No file');
+
+    return Container(
+      width: 100.w,
+      height: 100.w,
+      padding: EdgeInsets.all(8.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(
+          color: AppColors.primary.withOpacity(0.6),
+          width: 1.2,
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            hasFile ? Icons.insert_drive_file : Icons.cloud_upload_outlined,
+            color: hasFile ? Colors.black87 : Colors.grey[500],
+            size: 26.sp,
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            hasFile ? displayName : 'Upload',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: getTextStyle(
+              fontSize: 10,
+              color: hasFile ? Colors.black87 : Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPrimaryButton({
+    required String label,
+    required VoidCallback onPressed,
+    IconData? icon,
+  }) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.black,
+        padding: EdgeInsets.symmetric(vertical: 12.h),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.r),
+        ),
+        elevation: 0,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 18.sp),
+            SizedBox(width: 6.w),
+          ],
+          Text(
+            label,
+            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSecondaryButton({
+    required String label,
+    required VoidCallback? onPressed,
+  }) {
+    return OutlinedButton(
+      onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        padding: EdgeInsets.symmetric(vertical: 12.h),
+        side: BorderSide(color: Colors.grey[300]!),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10.r),
+        ),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: AppColors.backgroundDark,
+          fontSize: 14.sp,
+        ),
+      ),
+    );
+  }
+
+  bool _canViewDocument(File? file, String? existingUrl) {
+    return file != null || (existingUrl != null && existingUrl.isNotEmpty);
+  }
+
+  void _openPreview(DocumentType type, File? file, String? existingUrl) {
+    final isImage = type.isImageType;
+    if (isImage) {
+      final provider = _resolveImageProvider(file, existingUrl);
+      if (provider == null) return;
+      Get.dialog(
+        Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16.r),
+            child: Image(
+              image: provider,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+      );
+      return;
+    }
+    final name = file?.path.split('/').last ??
+        existingUrl?.split('/').last ??
+        'Document';
+    Get.snackbar('Document Ready', name);
   }
 
   _DocumentStatus _resolveStatus(
@@ -465,9 +604,8 @@ class UploadDocumentsPage extends StatelessWidget {
     }
 
     final docVerified = _kycController.riderDocuments?.isVerified;
-    final isVerified =
-        docVerified ?? _kycController.profileController.isVerified.value;
-    if (isVerified == true) {
+    final isVerified = docVerified ?? _kycController.profileController.isVerifiedApproved;
+    if (isVerified) {
       return const _DocumentStatus(
         label: 'Approved',
         background: Color(0xFFE6F4EA),
@@ -475,10 +613,8 @@ class UploadDocumentsPage extends StatelessWidget {
       );
     }
 
-    final verificationError =
-        _kycController.profileController.verificationError.value ?? '';
-    final isRejected = verificationError.toLowerCase().contains('rejected') ||
-        verificationError.toLowerCase().contains('declined');
+    final isRejected =
+        _kycController.profileController.isVerificationRejected;
     if (isRejected) {
       return const _DocumentStatus(
         label: 'Rejected',
@@ -505,43 +641,4 @@ class _DocumentStatus {
   final String label;
   final Color background;
   final Color textColor;
-}
-
-Widget _buildFilePreview(File? file, String? existingUrl, DocumentType type) {
-  final displayName = file != null
-      ? file.path.split('/').last
-      : (existingUrl != null && existingUrl.isNotEmpty
-            ? existingUrl.split('/').last
-            : 'No file selected');
-
-  final hasFile =
-      file != null || (existingUrl != null && existingUrl.isNotEmpty);
-
-  return Center(
-    child: Padding(
-      padding: EdgeInsets.all(8.w),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            hasFile ? Icons.insert_drive_file : type.icon,
-            size: 32.sp,
-            color: hasFile ? Colors.blue.shade700 : Colors.grey[400],
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            displayName,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 10.sp,
-              color: hasFile ? Colors.black87 : Colors.grey[500],
-              fontWeight: hasFile ? FontWeight.w500 : FontWeight.normal,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
 }

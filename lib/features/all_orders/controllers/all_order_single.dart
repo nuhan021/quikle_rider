@@ -27,7 +27,7 @@ class OrderController extends GetxController {
   }
 
   void _syncFromAllOrders(AllOrdersController allOrdersController) {
-    final isVerified = _profileController.isVerified.value == true;
+    final isVerified = _profileController.isVerifiedApproved;
     if (!isVerified) {
       apiOrder.value = null;
       order.value = null;

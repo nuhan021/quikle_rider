@@ -39,7 +39,7 @@ class HomepageController extends GetxController {
 
   Future<void> onToggleSwitch() async {
     if (!isOnline.value) {
-      final isVerified = _profileController.isVerified.value == true;
+      final isVerified = _profileController.isVerifiedApproved;
       if (!isVerified) {
         Get.snackbar(
           '',

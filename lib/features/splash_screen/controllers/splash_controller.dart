@@ -78,7 +78,7 @@ class SplashController extends GetxController {
 
   Future<void> _handleNavigation() async{
     AppLoggerHelper.debug(
-      "Profile verified ${profileController.isVerified.value}",
+      "Profile status ${profileController.isVerified.value}",
     );
     if (hasToken && profileController.isVerified.value == null) {
       await profileController.waitForVerificationFetch();
@@ -86,14 +86,14 @@ class SplashController extends GetxController {
     final bool isDocumentUploaded =
         profileController.isDocumentUploaded.value == true;
 
-    final bool isVerified = profileController.isVerified.value == true;
+    final bool isVerified = profileController.isVerifiedApproved;
     if (hasToken && isVerified && isDocumentUploaded) {
       Get.offAllNamed(AppRoute.getBottomNavBar());
       AppLoggerHelper.debug(
         "documnets uploaded ${profileController.isDocumentUploaded.value}",
       );
       AppLoggerHelper.debug(
-        "Profile verified ${profileController.isVerified.value}",
+        "Profile status ${profileController.isVerified.value}",
       );
       AppLoggerHelper.debug(
         "is doocument uploaded ${profileController.isDocumentUploaded.value}",

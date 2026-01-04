@@ -315,7 +315,25 @@ class ProfileScreen extends StatelessWidget {
     final ImageProvider avatarProvider = hasImage
         ? NetworkImage(imageUrl)
         : const AssetImage("assets/images/empty_profile.jpg");
-    final bool isVerified = _controller.isVerified.value == true;
+    final bool isVerified = _controller.isVerifiedApproved;
+    final bool isRejected = _controller.isVerificationRejected;
+    final bool isPending = _controller.isVerificationPending;
+    final String statusLabel = _controller.verificationStatusLabel;
+    final Color statusColor = isVerified
+        ? const Color(0xFF1E8E3E)
+        : isPending
+            ? const Color(0xFFB26A00)
+            : const Color(0xFFD93025);
+    final Color statusBackground = isVerified
+        ? const Color(0xFFE6F4EA)
+        : isPending
+            ? const Color(0xFFFFF4E5)
+            : const Color(0xFFFDECEC);
+    final IconData statusIcon = isVerified
+        ? Icons.verified
+        : isPending
+            ? Icons.schedule
+            : Icons.error_outline;
 
     return Container(
       width: double.infinity,
@@ -330,30 +348,24 @@ class ProfileScreen extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
               decoration: BoxDecoration(
-                color: isVerified
-                    ? const Color(0xFFE6F4EA)
-                    : const Color(0xFFFDECEC),
+                color: statusBackground,
                 borderRadius: BorderRadius.circular(20.r),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
-                    isVerified ? Icons.verified : Icons.error_outline,
+                    statusIcon,
                     size: 14,
-                    color: isVerified
-                        ? const Color(0xFF1E8E3E)
-                        : const Color(0xFFD93025),
+                    color: statusColor,
                   ),
                   SizedBox(width: 6.w),
                   Text(
-                    isVerified ? "Verified" : "Not verified",
+                    statusLabel,
                     style: getTextStyle2(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: isVerified
-                          ? const Color(0xFF1E8E3E)
-                          : const Color(0xFFD93025),
+                      color: statusColor,
                     ),
                   ),
                 ],

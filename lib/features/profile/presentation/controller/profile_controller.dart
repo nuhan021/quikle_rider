@@ -37,7 +37,7 @@ class ProfileController extends GetxController {
   final Rxn<bool> isDocumentUploaded = Rxn<bool>();
   final RxBool isDocumentStatusLoading = false.obs;
   final RxnString documentStatusError = RxnString();
-  final Rxn<bool> isVerified = Rxn<bool>();
+  final RxnString isVerified = RxnString();
   final RxBool isVerificationLoading = false.obs;
   final RxnString verificationError = RxnString();
   final Rxn<RiderDocumentsModel> riderDocuments = Rxn<RiderDocumentsModel>();
@@ -113,6 +113,46 @@ class ProfileController extends GetxController {
   }
   bool get hasAttemptedProfileFetch => _hasAttemptedProfileFetch;
 
+  static const Map<String, String> verificationStatusLabels = {
+    'not_verified': 'Not Verified',
+    'pending_approval': 'Pending Approval',
+    'verified': 'Verified',
+    'rejected': 'Rejected',
+  };
+
+  String get verificationStatusLabel {
+    final normalized = _normalizeVerificationStatus(isVerified.value);
+    if (normalized == null) return 'Not Verified';
+    return verificationStatusLabels[normalized] ?? normalized;
+  }
+
+  bool get isVerifiedApproved =>
+      _normalizeVerificationStatus(isVerified.value) == 'verified';
+
+  bool get isVerificationRejected =>
+      _normalizeVerificationStatus(isVerified.value) == 'rejected';
+
+  bool get isVerificationPending =>
+      _normalizeVerificationStatus(isVerified.value) == 'pending_approval';
+
+  String? _normalizeVerificationStatus(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) {
+      return value ? 'verified' : 'not_verified';
+    }
+    final raw = value.toString().trim();
+    if (raw.isEmpty) return null;
+    final normalized = raw
+        .toLowerCase()
+        .replaceAll(' ', '_')
+        .replaceAll('-', '_')
+        .replaceAll('__', '_');
+    if (verificationStatusLabels.containsKey(normalized)) {
+      return normalized;
+    }
+    return normalized;
+  }
+
   String get headerErrorText => errorMessage.value?.isNotEmpty == true
       ? errorMessage.value!
       : 'Unable to fetch profile.';
@@ -178,7 +218,7 @@ class ProfileController extends GetxController {
     isDocumentUploaded.value = null;
     isDocumentStatusLoading.value = false;
     documentStatusError.value = null;
-    isVerified.value = false ;
+    isVerified.value = null;
     isVerificationLoading.value = false;
     verificationError.value = null;
     riderDocuments.value = null;
@@ -472,18 +512,15 @@ class ProfileController extends GetxController {
 
       if (response.isSuccess) {
         final data = response.responseData;
-        bool? verified;
+        String? status;
         if (data is Map<String, dynamic>) {
-          final value = data['is_verified'];
-          if (value is bool) {
-            verified = value;
-          } else if (value is String) {
-            verified = value.toLowerCase() == 'true';
-          }
-        } else if (data is bool) {
-          verified = data;
+          final value =
+              data['verification_status'] ?? data['is_verified'];
+          status = _normalizeVerificationStatus(value);
+        } else if (data is String || data is bool) {
+          status = _normalizeVerificationStatus(data);
         }
-        isVerified.value = verified;
+        isVerified.value = status;
       } else {
         verificationError.value = response.errorMessage.isNotEmpty
             ? response.errorMessage
