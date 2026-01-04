@@ -76,10 +76,21 @@ class MyProfilePage extends StatelessWidget {
 
   Widget _buildHeader(ProfileModel profile) {
     final imageUrl = profile.profileImage;
-    final imageProvider = imageUrl != null && imageUrl.trim().isNotEmpty
-        ? NetworkImage(imageUrl)
-        : const AssetImage('assets/images/loginriderimage.png')
-              as ImageProvider;
+    final Widget avatar = imageUrl != null && imageUrl.trim().isNotEmpty
+        ? Image.network(
+            imageUrl.trim(),
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Image.asset(
+                'assets/images/quickle_black.png',
+                fit: BoxFit.cover,
+              );
+            },
+          )
+        : Image.asset(
+            'assets/images/loginriderimage.png',
+            fit: BoxFit.cover,
+          );
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -101,7 +112,13 @@ class MyProfilePage extends StatelessWidget {
           CircleAvatar(
             radius: 50,
             backgroundColor: Colors.grey.shade200,
-            backgroundImage: imageProvider,
+            child: ClipOval(
+              child: SizedBox(
+                width: 100,
+                height: 100,
+                child: avatar,
+              ),
+            ),
           ),
           SizedBox(height: 16.h),
           Text(

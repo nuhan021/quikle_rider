@@ -312,11 +312,22 @@ class ProfileScreen extends StatelessWidget {
     final displayEmail = email.trim().isNotEmpty
         ? email
         : 'Email not available';
-    final ImageProvider avatarProvider = hasImage
-        ? NetworkImage(imageUrl)
-        : const AssetImage("assets/images/empty_profile.jpg");
+    final Widget avatar = hasImage
+        ? Image.network(
+            imageUrl.trim(),
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Image.asset(
+                "assets/images/quickle_black.png",
+                fit: BoxFit.cover,
+              );
+            },
+          )
+        : Image.asset(
+            "assets/images/empty_profile.jpg",
+            fit: BoxFit.cover,
+          );
     final bool isVerified = _controller.isVerifiedApproved;
-    final bool isRejected = _controller.isVerificationRejected;
     final bool isPending = _controller.isVerificationPending;
     final String statusLabel = _controller.verificationStatusLabel;
     final Color statusColor = isVerified
@@ -343,8 +354,8 @@ class ProfileScreen extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           Positioned(
-            top: 0,
-            right: 16,
+            top: 0.h,
+            right: 10.w,
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
               decoration: BoxDecoration(
@@ -377,7 +388,13 @@ class ProfileScreen extends StatelessWidget {
               CircleAvatar(
                 radius: 45,
                 backgroundColor: Colors.grey.shade200,
-                backgroundImage: avatarProvider,
+                child: ClipOval(
+                  child: SizedBox(
+                    width: 90,
+                    height: 90,
+                    child: avatar,
+                  ),
+                ),
               ),
               SizedBox(height: 12.h),
               Text(
