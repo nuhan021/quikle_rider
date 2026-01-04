@@ -156,7 +156,7 @@ class MyProfilePage extends StatelessWidget {
 
                 GestureDetector(
                   onTap: () {
-                    if (_controller.isVerified.value == true) {
+                    if (_controller.isVerifiedApproved) {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -191,14 +191,14 @@ class MyProfilePage extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _controller.isVerified.value == false
+                        !_controller.isVerifiedApproved
                             ? Icon(
                                 Icons.lock_outline,
                                 color: Colors.white70,
                                 size: 18,
                               )
                             : SizedBox.shrink(),
-                        _controller.isVerified.value == false
+                        !_controller.isVerifiedApproved
                             ? const SizedBox(width: 8)
                             : SizedBox.shrink(),
                         const Text(

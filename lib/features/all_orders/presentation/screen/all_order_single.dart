@@ -26,7 +26,7 @@ class AllOrdersSingle extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: Obx(() {
-        final isVerified = profileController.isVerified.value == true;
+        final isVerified = profileController.isVerifiedApproved;
         if (!isVerified) {
           return Column(
             mainAxisAlignment: MainAxisAlignment.center,

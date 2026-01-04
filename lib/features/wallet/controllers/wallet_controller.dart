@@ -176,15 +176,16 @@ class WalletController extends GetxController
     if (_isVerified) {
       _loadWalletData();
     } else {
-      _verificationWorker = ever<bool?>(_profileController.isVerified, (value) {
-        if (value == true) {
+      _verificationWorker =
+          ever<String?>(_profileController.isVerified, (_) {
+        if (_isVerified) {
           _loadWalletData();
         }
       });
     }
   }
 
-  bool get _isVerified => _profileController.isVerified.value == true;
+  bool get _isVerified => _profileController.isVerifiedApproved;
 
   void _loadWalletData() {
     if (_hasLoadedWalletData) {

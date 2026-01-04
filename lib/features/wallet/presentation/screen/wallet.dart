@@ -44,7 +44,7 @@ class WalletScreen extends GetView<WalletController> {
         appBar: UnifiedProfileAppBar(isback: false, title: "Wallet"),
 
         body: Obx(() {
-          final isVerified = profileController.isVerified.value == true;
+          final isVerified = profileController.isVerifiedApproved;
           if(_homeController.hasConnection.value == false){
             return const ConnectionLost();
           }

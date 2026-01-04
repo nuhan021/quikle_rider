@@ -147,7 +147,7 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
 
           Obx(() {
             final isSubmitting = _withdrawController.isSubmitting.value;
-            final isVerified = _profileController.isVerified.value == true;
+            final isVerified = _profileController.isVerifiedApproved;
             final isDisabled = isSubmitting || !isVerified;
             return SizedBox(
               width: double.infinity,

@@ -233,8 +233,10 @@ class ProfileServices {
     File? drivingLicense,
     File? vehicleRegistration,
     File? vehicleInsurance,
-    String? idProofType,
-    String? idProofNumber,
+    String? idType,
+    String? nidNumber,
+    String? drivingLicenseNumber,
+    String? vehicleRegistrationNumber,
   }) async {
     final request = http.MultipartRequest(
       'PUT',
@@ -273,11 +275,19 @@ class ProfileServices {
     await addFile('dl', drivingLicense);
     await addFile('vr', vehicleRegistration);
     await addFile('vi', vehicleInsurance);
-    if (idProofType != null && idProofType.trim().isNotEmpty) {
-      request.fields['nid_type'] = idProofType.trim();
+    if (idType != null && idType.trim().isNotEmpty) {
+      request.fields['id_type'] = idType.trim();
     }
-    if (idProofNumber != null && idProofNumber.trim().isNotEmpty) {
-      request.fields['nid_number'] = idProofNumber.trim();
+    if (nidNumber != null && nidNumber.trim().isNotEmpty) {
+      request.fields['nid_num'] = nidNumber.trim();
+    }
+    if (drivingLicenseNumber != null &&
+        drivingLicenseNumber.trim().isNotEmpty) {
+      request.fields['dl_num'] = drivingLicenseNumber.trim();
+    }
+    if (vehicleRegistrationNumber != null &&
+        vehicleRegistrationNumber.trim().isNotEmpty) {
+      request.fields['vi_reg_num'] = vehicleRegistrationNumber.trim();
     }
 
     // --- DEBUGGING START ---

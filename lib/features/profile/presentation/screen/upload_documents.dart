@@ -177,7 +177,11 @@ class UploadDocumentsPage extends StatelessWidget {
                 Expanded(
                   child: type == DocumentType.nationalId
                       ? _buildIdProofFields()
-                      : _buildHintBlock(type),
+                      : type == DocumentType.drivingLicense
+                          ? _buildDrivingLicenseFields()
+                          : type == DocumentType.vehicleRegistration
+                              ? _buildVehicleRegistrationFields()
+                              : _buildHintBlock(type),
                 ),
                 SizedBox(width: 12.w),
                 _buildUploadTile(type, file, existingUrl),
@@ -312,6 +316,38 @@ class UploadDocumentsPage extends StatelessWidget {
           keyboardType: TextInputType.text,
           decoration: _inputDecoration('ID Proof Number'),
         ),
+        SizedBox(height: 12.h),
+        _buildHintBlock(DocumentType.nationalId),
+      ],
+    );
+  }
+
+  Widget _buildDrivingLicenseFields() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          controller: _kycController.drivingLicenseNumberController,
+          keyboardType: TextInputType.text,
+          decoration: _inputDecoration('Driving License Number'),
+        ),
+        SizedBox(height: 12.h),
+        _buildHintBlock(DocumentType.drivingLicense),
+      ],
+    );
+  }
+
+  Widget _buildVehicleRegistrationFields() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextFormField(
+          controller: _kycController.vehicleRegistrationNumberController,
+          keyboardType: TextInputType.text,
+          decoration: _inputDecoration('Vehicle Registration Number'),
+        ),
+        SizedBox(height: 12.h),
+        _buildHintBlock(DocumentType.vehicleRegistration),
       ],
     );
   }
@@ -568,9 +604,8 @@ class UploadDocumentsPage extends StatelessWidget {
     }
 
     final docVerified = _kycController.riderDocuments?.isVerified;
-    final isVerified =
-        docVerified ?? _kycController.profileController.isVerified.value;
-    if (isVerified == true) {
+    final isVerified = docVerified ?? _kycController.profileController.isVerifiedApproved;
+    if (isVerified) {
       return const _DocumentStatus(
         label: 'Approved',
         background: Color(0xFFE6F4EA),
@@ -578,10 +613,8 @@ class UploadDocumentsPage extends StatelessWidget {
       );
     }
 
-    final verificationError =
-        _kycController.profileController.verificationError.value ?? '';
-    final isRejected = verificationError.toLowerCase().contains('rejected') ||
-        verificationError.toLowerCase().contains('declined');
+    final isRejected =
+        _kycController.profileController.isVerificationRejected;
     if (isRejected) {
       return const _DocumentStatus(
         label: 'Rejected',

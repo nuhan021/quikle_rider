@@ -40,8 +40,11 @@ class AllOrdersController extends GetxController {
     _profileController = Get.isRegistered<ProfileController>()
         ? Get.find<ProfileController>()
         : Get.put(ProfileController());
-    _verificationWorker = ever<bool?>(_profileController.isVerified, (value) {
-      if (value == true && orders.isEmpty && !isOrdersLoading.value) {
+    _verificationWorker =
+        ever<String?>(_profileController.isVerified, (_) {
+      if (_profileController.isVerifiedApproved &&
+          orders.isEmpty &&
+          !isOrdersLoading.value) {
         fetchOrders();
       }
     });
@@ -67,7 +70,7 @@ class AllOrdersController extends GetxController {
   }
 
   Future<void> fetchOrders({int skip = 0, int limit = 10}) async {
-    final isVerified = _profileController.isVerified.value == true;
+    final isVerified = _profileController.isVerifiedApproved;
     if (!isVerified) {
       ordersError.value = 'Your profile not verified.';
       orders.clear();
