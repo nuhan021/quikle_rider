@@ -72,7 +72,7 @@ class UploadDocumentsPage extends StatelessWidget {
       width: double.infinity,
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.textWhite,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: Colors.grey[200]!),
         boxShadow: [
@@ -89,10 +89,18 @@ class UploadDocumentsPage extends StatelessWidget {
             height: 52.w,
             width: 52.w,
             decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withOpacity(0.1),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
               color: AppColors.primary.withOpacity(0.15),
               shape: BoxShape.circle,
               border: Border.all(color: AppColors.primary, width: 1.4),
             ),
+            
             child: const Icon(Icons.cloud_upload_outlined, color: AppColors.primary),
           ),
           SizedBox(width: 12.w),

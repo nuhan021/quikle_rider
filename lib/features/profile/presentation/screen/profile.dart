@@ -343,8 +343,8 @@ class ProfileScreen extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           Positioned(
-            top: 0,
-            right: 16,
+            top: 0.h,
+            right: 10.w,
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
               decoration: BoxDecoration(
