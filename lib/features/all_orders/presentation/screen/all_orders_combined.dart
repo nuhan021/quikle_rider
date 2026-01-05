@@ -6,7 +6,7 @@ import 'package:quikle_rider/features/all_orders/controllers/all_order_combioned
 import 'package:quikle_rider/features/all_orders/controllers/all_order_controller.dart';
 import 'package:quikle_rider/features/all_orders/models/combine_ordermodel.dart';
 import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
-import 'package:quikle_rider/features/all_orders/widgets/delevery_process_card.dart';
+import 'package:quikle_rider/features/all_orders/widgets/cards/delevery_process_card.dart';
 import 'package:quikle_rider/features/map/presentation/widgets/map_shimmer.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/routes/app_routes.dart';

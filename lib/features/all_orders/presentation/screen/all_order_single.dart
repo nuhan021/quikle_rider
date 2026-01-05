@@ -6,7 +6,7 @@ import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/widgets/unverified/unverified.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_controller.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_single.dart';
-import 'package:quikle_rider/features/all_orders/widgets/order_card.dart';
+import 'package:quikle_rider/features/all_orders/widgets/cards/order_card.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/routes/app_routes.dart';
 

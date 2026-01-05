@@ -5,7 +5,7 @@ import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/data/models/vehicle_model.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/vehicle_information.dart';
-import 'package:quikle_rider/features/profile/presentation/widgets/profile_list_shimmer_card.dart';
+import 'package:quikle_rider/features/profile/presentation/widgets/profile_components/profile_list_shimmer_card.dart';
 
 class VehicleListPage extends StatelessWidget {
   VehicleListPage({super.key});

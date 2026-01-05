@@ -9,12 +9,12 @@ import 'package:quikle_rider/features/home/controllers/homepage_controller.dart'
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/add_paymentmethod.dart';
 import 'package:quikle_rider/features/wallet/controllers/wallet_controller.dart';
-import 'package:quikle_rider/features/wallet/widgets/balance_card.dart';
-import 'package:quikle_rider/features/wallet/widgets/bonus_progress_card.dart';
-import 'package:quikle_rider/features/wallet/widgets/delevery_card.dart';
-import 'package:quikle_rider/features/wallet/widgets/monthly_earnings_forecast_card.dart';
-import 'package:quikle_rider/features/wallet/widgets/rating_card.dart';
-import 'package:quikle_rider/features/wallet/widgets/wallet_shimmer_list.dart';
+import 'package:quikle_rider/features/wallet/widgets/wallet_components/balance_card.dart';
+import 'package:quikle_rider/features/wallet/widgets/wallet_components/bonus_progress_card.dart';
+import 'package:quikle_rider/features/wallet/widgets/wallet_components/delevery_card.dart';
+import 'package:quikle_rider/features/wallet/widgets/wallet_components/monthly_earnings_forecast_card.dart';
+import 'package:quikle_rider/features/wallet/widgets/wallet_components/rating_card.dart';
+import 'package:quikle_rider/features/wallet/widgets/wallet_components/wallet_shimmer_list.dart';
 
 class WalletScreen extends GetView<WalletController> {
   const WalletScreen({super.key});

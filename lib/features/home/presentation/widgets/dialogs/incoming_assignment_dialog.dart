@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:quikle_rider/features/home/models/home_dashboard_models.dart';
-import 'package:quikle_rider/features/home/presentation/widgets/assignment_card.dart';
+import 'package:quikle_rider/features/home/presentation/widgets/cards/assignment_card.dart';
 
 class IncomingAssignmentDialog extends StatelessWidget {
   final Assignment assignment;
