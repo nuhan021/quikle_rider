@@ -37,4 +37,19 @@ class OrderServices {
       defaultErrorMessage: 'Unable to fetch current orders. Please try again.',
     );
   }
+
+  Future<ResponseData> fetchActiveOrders({
+    required String accessToken,
+    int offset = 0,
+    int limit = 10,
+  }) {
+    return _networkCaller.getRequest(
+      '$baseurl/rider/rider/active-orders/?limit=$limit&offset=$offset',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      defaultErrorMessage: 'Unable to fetch active orders. Please try again.',
+    );
+  }
 }

@@ -11,9 +11,11 @@ import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/widgets/connection_lost.dart';
 import 'package:quikle_rider/core/widgets/unverified/unverified.dart';
+import 'package:quikle_rider/custom_tab_bar/notifications.dart';
 import 'package:quikle_rider/features/all_orders/data/services/order_services.dart';
 import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/home/controllers/homepage_controller.dart';
+import 'package:quikle_rider/features/home/models/home_dashboard_models.dart';
 import 'package:quikle_rider/features/map/presentation/controller/map_controller.dart';
 import 'package:quikle_rider/features/map/presentation/model/delivery_model.dart';
 import 'package:quikle_rider/features/map/presentation/widgets/map_shimmer.dart';
@@ -47,8 +49,7 @@ class _MapScreenState extends State<MapScreen> {
     if (profileController.isVerifiedApproved) {
       _triggerVerifiedLoad();
     } else {
-      _verificationWorker =
-          ever<String?>(profileController.isVerified, (_) {
+      _verificationWorker = ever<String?>(profileController.isVerified, (_) {
         if (profileController.isVerifiedApproved &&
             !_hasTriggeredVerifiedLoad) {
           _triggerVerifiedLoad();
@@ -89,33 +90,40 @@ class _MapScreenState extends State<MapScreen> {
 
     _isFetchingCurrentOrder = true;
     try {
-      final response = await _orderServices.fetchoffer_order(
+      final response = await _orderServices.fetchActiveOrders(
         accessToken: accessToken,
       );
 
       if (response.isSuccess) {
         final data = response.responseData;
         if (data is List) {
-          final parsedOrders = data
-              .whereType<Map<String, dynamic>>()
-              .map(RiderOrder.fromJson)
-              .toList(growable: false);
-          if (parsedOrders.isNotEmpty) {
-            mapController.applyOrderIfNeeded(parsedOrders.first);
+          Map<String, dynamic>? firstOrder;
+          for (final entry in data) {
+            if (entry is Map<String, dynamic>) {
+              firstOrder = entry;
+              break;
+            }
+          }
+          if (firstOrder != null) {
+            final delivery = _deliveryFromActiveOrder(firstOrder);
+            mapController.applyDeliverySnapshot(
+              delivery,
+              orderId: delivery.orderId,
+            );
             return;
           }
         } else if (data is Map<String, dynamic>) {
-          final offers = data['offers'];
-          if (offers is List) {
-            Map<String, dynamic>? firstOffer;
-            for (final entry in offers) {
+          final orders = data['orders'];
+          if (orders is List) {
+            Map<String, dynamic>? firstOrder;
+            for (final entry in orders) {
               if (entry is Map<String, dynamic>) {
-                firstOffer = entry;
+                firstOrder = entry;
                 break;
               }
             }
-            if (firstOffer != null) {
-              final delivery = _deliveryFromOffer(firstOffer);
+            if (firstOrder != null) {
+              final delivery = _deliveryFromActiveOrder(firstOrder);
               mapController.applyDeliverySnapshot(
                 delivery,
                 orderId: delivery.orderId,
@@ -150,17 +158,17 @@ class _MapScreenState extends State<MapScreen> {
               showActionButton: true,
               title: "Map",
               action: "Notification",
-              onActionPressed: () {},
+              onActionPressed: () {
+                Get.to(NotificationsPage());
+              },
             ),
+
             body: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Padding(
-                  padding:  EdgeInsets.all(16.h),
-                  child: UnverifiedBanner(
-                    
-                    
-                  ),
+                  padding: EdgeInsets.all(16.h),
+                  child: UnverifiedBanner(),
                 ),
               ],
             ),
@@ -193,7 +201,7 @@ class _MapScreenState extends State<MapScreen> {
                   onActionPressed: () {},
                 ),
                 body: delivery == null
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: MapShimmer())
                     : SingleChildScrollView(
                         child: Column(
                           children: [
@@ -266,6 +274,8 @@ class _MapScreenState extends State<MapScreen> {
           _buildHeader(delivery),
           SizedBox(height: 10.h),
           _buildOrderMeta(delivery),
+          SizedBox(height: 8.h),
+          _buildOrderAttributes(delivery),
           SizedBox(height: 16.h),
           _buildPickupInfo(controller, delivery),
           SizedBox(height: 15.h),
@@ -330,6 +340,50 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  Widget _buildOrderAttributes(DeliveryModel delivery) {
+    final rows = <String>[];
+    final status = delivery.status?.trim() ?? '';
+    if (status.isNotEmpty) {
+      rows.add('Status: $status');
+    }
+    final deliveryType = delivery.deliveryType?.trim() ?? '';
+    if (deliveryType.isNotEmpty) {
+      rows.add('Type: $deliveryType');
+    }
+    final parentId = delivery.parentOrderId?.trim() ?? '';
+    if (parentId.isNotEmpty) {
+      rows.add('Parent ID: $parentId');
+    }
+    if (delivery.baseRate != null) {
+      rows.add(
+        'Base rate: ${_formatCurrency(delivery.baseRate, delivery.currency)}',
+      );
+    }
+    if (delivery.pickupDistanceKm != null) {
+      rows.add(
+        'Pickup distance: ${delivery.pickupDistanceKm!.toStringAsFixed(1)} km',
+      );
+    }
+
+    if (rows.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final row in rows)
+          Padding(
+            padding: EdgeInsets.only(bottom: 4.h),
+            child: Text(
+              row,
+              style: getTextStyle(fontSize: 12, color: Colors.grey[700]),
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildPickupInfo(MapController controller, DeliveryModel delivery) {
     final pickupAddress = controller.vendorPickupAddress.value.trim();
     return Container(
@@ -365,7 +419,10 @@ class _MapScreenState extends State<MapScreen> {
                       pickupAddress.isNotEmpty
                           ? pickupAddress
                           : 'Pickup location not available',
-                      style: getTextStyle(fontSize: 13, color: Colors.grey[600]),
+                      style: getTextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[600],
+                      ),
                     ),
                   ],
                 ),
@@ -474,12 +531,18 @@ class _MapScreenState extends State<MapScreen> {
             children: items.isNotEmpty
                 ? [
                     for (var i = 0; i < items.length; i++)
-                      _buildDeliveryItem(items[i], isLast: i == items.length - 1),
+                      _buildDeliveryItem(
+                        items[i],
+                        isLast: i == items.length - 1,
+                      ),
                   ]
                 : [
                     Text(
                       'No items available for this order.',
-                      style: getTextStyle(fontSize: 13, color: Colors.grey[600]),
+                      style: getTextStyle(
+                        fontSize: 13,
+                        color: Colors.grey[600],
+                      ),
                     ),
                   ],
           ),
@@ -535,18 +598,15 @@ class _MapScreenState extends State<MapScreen> {
     return '$currency${amount.toStringAsFixed(2)}';
   }
 
-  DeliveryModel _deliveryFromOffer(Map<String, dynamic> offer) {
-    final orderId = offer['order_id']?.toString() ?? '';
-    final customerName = offer['customer_name']?.toString().trim() ?? '';
-    final customerPhone = offer['customer_phone']?.toString().trim() ?? '';
-    final totalAmount = _parseDouble(offer['total']);
-    final orderInfo = offer['order_info'] is List
-        ? (offer['order_info'] as List).whereType<Map<String, dynamic>>().toList()
-        : <Map<String, dynamic>>[];
-    final firstInfo = orderInfo.isNotEmpty ? orderInfo.first : null;
-    final restaurantName = firstInfo?['vendor_name']?.toString().trim() ?? '';
+  DeliveryModel _deliveryFromActiveOrder(Map<String, dynamic> order) {
+    final orderId = order['order_id']?.toString() ?? '';
+    final customerName = order['customer_name']?.toString().trim() ?? '';
+    final customerPhone = order['customer_phone']?.toString().trim() ?? '';
+    final totalAmount = _parseDouble(order['total']);
+    final baseRate = _parseDouble(order['base_rate']);
+    final pickupDistance = _parseDouble(order['pickup_distance_km']);
     final items = <DeliveryItem>[];
-    final rawItems = firstInfo?['items'];
+    final rawItems = order['items'];
     if (rawItems is List) {
       for (final item in rawItems.whereType<Map<String, dynamic>>()) {
         final title = item['title']?.toString().trim();
@@ -564,13 +624,18 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     return DeliveryModel(
-      orderId: orderId.isNotEmpty ? orderId : offer['offer_id']?.toString() ?? '',
+      orderId: orderId,
+      parentOrderId: order['parent_order_id']?.toString(),
+      status: order['status']?.toString(),
+      deliveryType: order['delivery_type']?.toString(),
+      baseRate: baseRate,
+      pickupDistanceKm: pickupDistance,
       customerName: customerName.isNotEmpty ? customerName : 'Customer',
       customerPhone: customerPhone,
       customerAddress: '',
       deliveryAddress: '',
       estimatedTime: '',
-      restaurantName: restaurantName.isNotEmpty ? restaurantName : 'Vendor',
+      restaurantName: 'Vendor',
       customerAvatar: 'assets/images/avatar.png',
       items: items,
       totalAmount: totalAmount,

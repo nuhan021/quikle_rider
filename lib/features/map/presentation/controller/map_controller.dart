@@ -171,30 +171,7 @@ class MapController extends GetxController {
       _applyOrder(args);
       return;
     }
-
-    currentDelivery.value = const DeliveryModel(
-      orderId: 'ORDER-000',
-      customerName: 'Aanya Desai',
-      customerAddress: '123 Main St, Bangkok',
-      deliveryAddress: '789 River Rd, Apartment 3B, Riverside Mohakhali',
-      estimatedTime: '09:45',
-      restaurantName: 'Sushi Express',
-      customerAvatar: 'assets/images/avatar.png',
-      items: [
-        DeliveryItem(
-          name: 'Dragon Roll Set',
-          description: '8 pieces, extra wasabi',
-          image: 'assets/images/foodimage.png',
-          quantity: 1,
-        ),
-        DeliveryItem(
-          name: 'Miso Soup',
-          description: 'Regular size',
-          image: 'assets/images/foodimage.png',
-          quantity: 1,
-        ),
-      ],
-    );
+    currentDelivery.value = null;
   }
 
   void _applyOrder(RiderOrder order) {

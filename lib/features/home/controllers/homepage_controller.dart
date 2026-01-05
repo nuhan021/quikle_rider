@@ -20,7 +20,7 @@ import 'package:quikle_rider/routes/app_routes.dart';
 class HomepageController extends GetxController {
   HomepageController({
     HomeService? homeService,
-    
+
     InternetServices? internetServices,
   }) : _homeService = homeService ?? HomeService(),
        _internetServices = internetServices ?? InternetServices();
@@ -127,7 +127,6 @@ class HomepageController extends GetxController {
     await onToggleSwitch();
     if (!wasOnline && isOnline.value) {
       await _syncFcmTokenForOnline();
-
     }
   }
 
@@ -263,7 +262,7 @@ class HomepageController extends GetxController {
       action: () async {
         final response = await _homeService.rejectOfferedOrder(
           orderId: assignment.id,
-          reason: 'string',
+          reason: 'Order Rejected',
         );
         if (!response.isSuccess) {
           _showStatusSnack(
