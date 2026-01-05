@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/common/styles/global_text_style.dart';
+import '../../../../../core/common/styles/global_text_style.dart';
 
 class ProfileField extends StatelessWidget {
   final String label;

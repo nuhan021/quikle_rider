@@ -7,7 +7,7 @@ import 'package:quikle_rider/features/wallet/data/services/wallet_services.dart'
 import 'package:quikle_rider/features/wallet/models/leaderboard_standing.dart';
 import 'package:quikle_rider/features/wallet/models/rider_performance.dart';
 import 'package:quikle_rider/features/wallet/models/wallet_summary.dart';
-import 'package:quikle_rider/features/wallet/widgets/delevery_card.dart';
+import 'package:quikle_rider/features/wallet/widgets/wallet_components/delevery_card.dart';
 
 // This model was inside the wallet screen, moving it here and making it public
 class DeliveryItem {

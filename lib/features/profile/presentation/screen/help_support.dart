@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/features/profile/data/models/help_support_request.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
-import 'package:quikle_rider/features/profile/presentation/widgets/profile_list_shimmer_card.dart';
+import 'package:quikle_rider/features/profile/presentation/widgets/profile_components/profile_list_shimmer_card.dart';
 
 class HelpSupportPage extends StatelessWidget {
   const HelpSupportPage({Key? key}) : super(key: key);

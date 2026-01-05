@@ -5,9 +5,9 @@ import 'package:quikle_rider/core/widgets/connection_lost.dart';
 import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
 import 'package:quikle_rider/features/home/controllers/homepage_controller.dart';
 import 'package:quikle_rider/features/home/models/home_dashboard_models.dart';
-import 'package:quikle_rider/features/home/presentation/widgets/alert_dialog.dart';
-import 'package:quikle_rider/features/home/presentation/widgets/assignment_card.dart';
-import 'package:quikle_rider/features/home/presentation/widgets/stat_card.dart';
+import 'package:quikle_rider/features/home/presentation/widgets/dialogs/alert_dialog.dart';
+import 'package:quikle_rider/features/home/presentation/widgets/cards/assignment_card.dart';
+import 'package:quikle_rider/features/home/presentation/widgets/cards/stat_card.dart';
 import 'package:quikle_rider/features/map/presentation/widgets/map_shimmer.dart';
 
 class HomeScreen extends GetView<HomepageController> {
@@ -27,8 +27,8 @@ class HomeScreen extends GetView<HomepageController> {
           ),
           body: controller.hasConnection.value
               ? (controller.isOnline.value
-                  ? _buildOnlineView(context)
-                  : _buildOfflineView())
+                    ? _buildOnlineView(context)
+                    : _buildOfflineView())
               : const ConnectionLost(),
         ),
       ),
@@ -57,12 +57,7 @@ class HomeScreen extends GetView<HomepageController> {
 
   List<HomeStat> _fallbackStats() {
     return const [
-      HomeStat(
-        id: 'upcoming',
-        title: 'Upcoming',
-        subtitle: 'Orders',
-        value: 0,
-      ),
+      HomeStat(id: 'upcoming', title: 'Upcoming', subtitle: 'Orders', value: 0),
       HomeStat(
         id: 'payout',
         title: 'Payout',
@@ -70,12 +65,7 @@ class HomeScreen extends GetView<HomepageController> {
         value: 0,
         unit: '₹',
       ),
-      HomeStat(
-        id: 'rating',
-        title: 'Rating',
-        subtitle: 'Out of 5',
-        value: 0,
-      ),
+      HomeStat(id: 'rating', title: 'Rating', subtitle: 'Out of 5', value: 0),
     ];
   }
 
@@ -86,10 +76,10 @@ class HomeScreen extends GetView<HomepageController> {
       }
 
       final hasError = controller.errorMessage.value != null;
-      final stats =
-          controller.stats.isEmpty ? _fallbackStats() : controller.stats;
-      final assignments =
-          hasError ? <Assignment>[] : controller.assignments;
+      final stats = controller.stats.isEmpty
+          ? _fallbackStats()
+          : controller.stats;
+      final assignments = hasError ? <Assignment>[] : controller.assignments;
 
       return SingleChildScrollView(
         child: Padding(
