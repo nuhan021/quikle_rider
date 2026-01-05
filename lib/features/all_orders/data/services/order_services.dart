@@ -23,13 +23,13 @@ class OrderServices {
     );
   }
 
-  Future<ResponseData> fetchcurrent_order({
+  Future<ResponseData> fetchoffer_order({
     required String accessToken,
-    int skip = 0,
+    int offset = 0,
     int limit = 10,
   }) {
     return _networkCaller.getRequest(
-      '$baseurl/rider/current-orders/?skip=$skip&limit=$limit',
+      '$baseurl/rider/rider-offered-orders/?limit=$limit&offset=$offset',
       headers: {
         'accept': 'application/json',
         'Authorization': 'Bearer $accessToken',

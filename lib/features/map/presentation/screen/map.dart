@@ -89,19 +89,40 @@ class _MapScreenState extends State<MapScreen> {
 
     _isFetchingCurrentOrder = true;
     try {
-      final response = await _orderServices.fetchcurrent_order(
+      final response = await _orderServices.fetchoffer_order(
         accessToken: accessToken,
       );
 
-      if (response.isSuccess && response.responseData is List) {
-        final list = response.responseData as List;
-        final parsedOrders = list
-            .whereType<Map<String, dynamic>>()
-            .map(RiderOrder.fromJson)
-            .toList(growable: false);
-        if (parsedOrders.isNotEmpty) {
-          mapController.applyOrderIfNeeded(parsedOrders.first);
-          return;
+      if (response.isSuccess) {
+        final data = response.responseData;
+        if (data is List) {
+          final parsedOrders = data
+              .whereType<Map<String, dynamic>>()
+              .map(RiderOrder.fromJson)
+              .toList(growable: false);
+          if (parsedOrders.isNotEmpty) {
+            mapController.applyOrderIfNeeded(parsedOrders.first);
+            return;
+          }
+        } else if (data is Map<String, dynamic>) {
+          final offers = data['offers'];
+          if (offers is List) {
+            Map<String, dynamic>? firstOffer;
+            for (final entry in offers) {
+              if (entry is Map<String, dynamic>) {
+                firstOffer = entry;
+                break;
+              }
+            }
+            if (firstOffer != null) {
+              final delivery = _deliveryFromOffer(firstOffer);
+              mapController.applyDeliverySnapshot(
+                delivery,
+                orderId: delivery.orderId,
+              );
+              return;
+            }
+          }
         }
       }
 
@@ -243,12 +264,12 @@ class _MapScreenState extends State<MapScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(delivery),
-          SizedBox(height: 15.h),
+          SizedBox(height: 10.h),
+          _buildOrderMeta(delivery),
+          SizedBox(height: 16.h),
           _buildPickupInfo(controller, delivery),
           SizedBox(height: 15.h),
           _buildCustomerInfo(delivery, controller),
-          SizedBox(height: 15.h),
-          _buildDeliveryAddress(delivery),
           SizedBox(height: 20.h),
           _buildItemsSection(delivery),
           SizedBox(height: 20.h),
@@ -259,26 +280,49 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Widget _buildHeader(DeliveryModel delivery) {
+    final totalLabel = _formatCurrency(delivery.totalAmount, delivery.currency);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Text('Order Details', style: headingStyle2(color: Colors.black87)),
+        SizedBox(height: 6.h),
+        Text(
+          totalLabel,
+          style: getTextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.w700,
+            color: Colors.black87,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOrderMeta(DeliveryModel delivery) {
+    final eta = delivery.estimatedTime.trim().isEmpty
+        ? 'ETA pending'
+        : 'ETA to pickup: ${delivery.estimatedTime}';
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            'Order ID: ${delivery.orderId.isNotEmpty ? delivery.orderId : '--'}',
+            style: getTextStyle(fontSize: 13, color: Colors.grey[700]),
+          ),
+        ),
         Container(
-          padding: EdgeInsets.symmetric(vertical: 6.h),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
           decoration: BoxDecoration(
-            color: Colors.white10,
-            borderRadius: BorderRadius.circular(15.r),
+            color: Colors.orange[100],
+            borderRadius: BorderRadius.circular(16.r),
           ),
           child: Text(
-            maxLines: 2,
-            delivery.estimatedTime,
-            style: TextStyle(
-              overflow: TextOverflow.ellipsis,
-
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Colors.black,
+            eta,
+            style: getTextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.orange[800],
             ),
           ),
         ),
@@ -288,172 +332,65 @@ class _MapScreenState extends State<MapScreen> {
 
   Widget _buildPickupInfo(MapController controller, DeliveryModel delivery) {
     final pickupAddress = controller.vendorPickupAddress.value.trim();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Pickup', style: headingStyle2(color: Colors.black87)),
-        SizedBox(height: 8.h),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(Icons.store, color: Colors.grey[600], size: 16.sp),
-            SizedBox(width: 8.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    delivery.restaurantName,
-                    style: getTextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.grey[800],
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Pickup', style: headingStyle2(color: Colors.black87)),
+          SizedBox(height: 8.h),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(Icons.store, color: Colors.grey[700], size: 18.sp),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      delivery.restaurantName,
+                      style: getTextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey[800],
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    pickupAddress.isNotEmpty
-                        ? pickupAddress
-                        : 'Pickup location not available',
-                    style: getTextStyle(fontSize: 13, color: Colors.grey[600]),
-                  ),
-                ],
+                    SizedBox(height: 2.h),
+                    Text(
+                      pickupAddress.isNotEmpty
+                          ? pickupAddress
+                          : 'Pickup location not available',
+                      style: getTextStyle(fontSize: 13, color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildCustomerInfo(DeliveryModel delivery, MapController controller) {
-    return Row(
-      children: [
-        CircleAvatar(
-          radius: 25.r,
-          backgroundImage: AssetImage(delivery.customerAvatar),
-          backgroundColor: Colors.grey[300],
-        ),
-        SizedBox(width: 15.w),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                delivery.customerName,
-                style: getTextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-              Text(
-                delivery.customerAddress,
-                style: getTextStyle(fontSize: 14, color: Colors.grey[600]),
-              ),
-            ],
-          ),
-        ),
-        Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(10.w),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: GestureDetector(
-                onTap: controller.messageCustomer,
-                child: Image.asset(
-                  'assets/images/message.png',
-                  width: 20.sp,
-                  height: 20.sp,
-                ),
-              ),
-            ),
-            SizedBox(width: 10.w),
-            Container(
-              padding: EdgeInsets.all(10.w),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: GestureDetector(
-                onTap: controller.callCustomer,
-                child: Image.asset(
-                  'assets/images/call.png',
-                  width: 20.sp,
-                  height: 20.sp,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDeliveryAddress(DeliveryModel delivery) {
-    return Row(
-      children: [
-        Icon(Icons.location_on, color: Colors.grey[600], size: 16.sp),
-        SizedBox(width: 5.w),
-        Expanded(
-          child: Text(
-            delivery.deliveryAddress,
-            style: getTextStyle(fontSize: 14, color: Colors.grey[600]),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildItemsSection(DeliveryModel delivery) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Items to Deliver', style: headingStyle2(color: Colors.black87)),
-        SizedBox(height: 10.h),
-        Text(
-          delivery.restaurantName,
-          style: getTextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: Colors.grey[700],
-          ),
-        ),
-        SizedBox(height: 15.h),
-        Container(
-          padding: EdgeInsets.all(15.w),
-          decoration: BoxDecoration(
-            color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(10.r),
-          ),
-          child: Column(
-            children: delivery.items
-                .map((item) => _buildDeliveryItem(delivery, item))
-                .toList(),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDeliveryItem(DeliveryModel delivery, DeliveryItem item) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: delivery.items.last == item ? 0 : 10.h),
+    final address = delivery.customerAddress.trim();
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12.r),
+      ),
       child: Row(
         children: [
-          Container(
-            width: 40.w,
-            height: 40.h,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.r),
-              image: DecorationImage(
-                image: AssetImage(item.image),
-                fit: BoxFit.cover,
-              ),
-            ),
+          CircleAvatar(
+            radius: 22.r,
+            backgroundImage: AssetImage(delivery.customerAvatar),
+            backgroundColor: Colors.grey[300],
           ),
           SizedBox(width: 12.w),
           Expanded(
@@ -461,23 +398,197 @@ class _MapScreenState extends State<MapScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${item.name} X ${item.quantity}',
+                  delivery.customerName,
+                  style: getTextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
+                ),
+                if (delivery.customerPhone.trim().isNotEmpty)
+                  Text(
+                    delivery.customerPhone,
+                    style: getTextStyle(fontSize: 13, color: Colors.grey[600]),
+                  ),
+                Text(
+                  address.isNotEmpty ? address : 'Delivery address unavailable',
+                  style: getTextStyle(fontSize: 13, color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey[300]!),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: GestureDetector(
+                  onTap: controller.messageCustomer,
+                  child: Image.asset(
+                    'assets/images/message.png',
+                    width: 18.sp,
+                    height: 18.sp,
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey[300]!),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: GestureDetector(
+                  onTap: controller.callCustomer,
+                  child: Image.asset(
+                    'assets/images/call.png',
+                    width: 18.sp,
+                    height: 18.sp,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildItemsSection(DeliveryModel delivery) {
+    final items = delivery.items;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Items to Deliver', style: headingStyle2(color: Colors.black87)),
+        SizedBox(height: 10.h),
+        Container(
+          padding: EdgeInsets.all(15.w),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(10.r),
+          ),
+          child: Column(
+            children: items.isNotEmpty
+                ? [
+                    for (var i = 0; i < items.length; i++)
+                      _buildDeliveryItem(items[i], isLast: i == items.length - 1),
+                  ]
+                : [
+                    Text(
+                      'No items available for this order.',
+                      style: getTextStyle(fontSize: 13, color: Colors.grey[600]),
+                    ),
+                  ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDeliveryItem(DeliveryItem item, {required bool isLast}) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: isLast ? 0 : 10.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '•',
+            style: getTextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: Colors.grey[700],
+            ),
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${item.quantity} x ${item.name}',
                   style: getTextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: Colors.black87,
                   ),
                 ),
-                Text(
-                  item.description,
-                  style: getTextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
+                if (item.description.isNotEmpty)
+                  Text(
+                    item.description,
+                    style: getTextStyle(fontSize: 12, color: Colors.grey[600]),
+                  ),
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  String _formatCurrency(double? amount, String currency) {
+    if (amount == null) {
+      return '$currency--';
+    }
+    return '$currency${amount.toStringAsFixed(2)}';
+  }
+
+  DeliveryModel _deliveryFromOffer(Map<String, dynamic> offer) {
+    final orderId = offer['order_id']?.toString() ?? '';
+    final customerName = offer['customer_name']?.toString().trim() ?? '';
+    final customerPhone = offer['customer_phone']?.toString().trim() ?? '';
+    final totalAmount = _parseDouble(offer['total']);
+    final orderInfo = offer['order_info'] is List
+        ? (offer['order_info'] as List).whereType<Map<String, dynamic>>().toList()
+        : <Map<String, dynamic>>[];
+    final firstInfo = orderInfo.isNotEmpty ? orderInfo.first : null;
+    final restaurantName = firstInfo?['vendor_name']?.toString().trim() ?? '';
+    final items = <DeliveryItem>[];
+    final rawItems = firstInfo?['items'];
+    if (rawItems is List) {
+      for (final item in rawItems.whereType<Map<String, dynamic>>()) {
+        final title = item['title']?.toString().trim();
+        final quantity = _parseInt(item['quantity']) ?? 1;
+        final price = item['price']?.toString();
+        items.add(
+          DeliveryItem(
+            name: title?.isNotEmpty == true ? title! : 'Item',
+            description: price != null && price.isNotEmpty ? '₹$price' : '',
+            image: 'assets/images/foodimage.png',
+            quantity: quantity,
+          ),
+        );
+      }
+    }
+
+    return DeliveryModel(
+      orderId: orderId.isNotEmpty ? orderId : offer['offer_id']?.toString() ?? '',
+      customerName: customerName.isNotEmpty ? customerName : 'Customer',
+      customerPhone: customerPhone,
+      customerAddress: '',
+      deliveryAddress: '',
+      estimatedTime: '',
+      restaurantName: restaurantName.isNotEmpty ? restaurantName : 'Vendor',
+      customerAvatar: 'assets/images/avatar.png',
+      items: items,
+      totalAmount: totalAmount,
+      currency: '₹',
+    );
+  }
+
+  double? _parseDouble(Object? value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    return double.tryParse(value.toString());
+  }
+
+  int? _parseInt(Object? value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    return int.tryParse(value.toString());
   }
 
   Widget _buildActionButtons(BuildContext context, MapController controller) {

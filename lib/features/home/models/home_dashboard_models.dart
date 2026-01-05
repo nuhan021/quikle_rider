@@ -184,10 +184,14 @@ class Assignment {
     final etaMinutes = (json['eta_minutes'] as num?)?.toInt();
     final now = DateTime.now();
     final estimatedDeliveryRaw = json['estimated_delivery'] as String?;
+    final offeredAtRaw = json['offered_at'] as String?;
     final estimatedDelivery = estimatedDeliveryRaw == null
         ? null
         : DateTime.tryParse(estimatedDeliveryRaw);
+    final offeredAt =
+        offeredAtRaw == null ? null : DateTime.tryParse(offeredAtRaw);
     final expectedArrival = estimatedDelivery ??
+        offeredAt ??
         (etaMinutes == null
             ? now.add(const Duration(minutes: 45))
             : now.add(Duration(minutes: etaMinutes)));
@@ -204,8 +208,13 @@ class Assignment {
           basePayValue + distancePayValue,
     );
 
-    final rawId = (json['id'] ?? json['order_id'] ?? '—').toString();
-    final orderId = rawId.isEmpty ? '—' : rawId;
+    final rawId =
+        (json['order_id'] ?? json['offer_id'] ?? json['id'] ?? '—').toString();
+    // final orderId = rawId.isEmpty ? '—' : rawId;
+    
+
+    final orderid = json['order_id']?.toString() ?? '';
+    final id = orderid  ;
     final orderType =
         (json['delivery_type'] ?? json['order_type'] ?? 'Delivery').toString();
     final normalizedType = orderType.toLowerCase().trim();
@@ -227,6 +236,12 @@ class Assignment {
                 ? 'Customer #${json['customer_id']}'
                 : 'Customer'))
         .toString();
+    final orderInfo = json['order_info'];
+    final vendorName = orderInfo is List && orderInfo.isNotEmpty
+        ? (orderInfo.first is Map<String, dynamic>
+            ? orderInfo.first['vendor_name']?.toString()
+            : null)
+        : null;
     final addressLine1 = shippingAddress?['address_line1']?.toString() ?? '';
     final addressLine2 = shippingAddress?['address_line2']?.toString() ?? '';
     final city = shippingAddress?['city']?.toString() ?? '';
@@ -239,13 +254,15 @@ class Assignment {
       state,
       postal,
     ].where((part) => part.trim().isNotEmpty).toList();
-    final fallbackAddress =
-        'Vendor ${vendorInfo?['vendor_id'] ?? '-'} → Customer ${json['customer_id'] ?? '-'}';
+    final vendorLabel = vendorName ??
+        vendorInfo?['vendor_id']?.toString() ??
+        'Vendor';
+    final fallbackAddress = '$vendorLabel → $customerName';
     final address =
         addressParts.isEmpty ? fallbackAddress : addressParts.join(', ');
 
     return Assignment(
-      id: orderId,
+      id: id,
       customerName: customerName,
       expectedArrival: expectedArrival,
       deleverystatus: orderType,

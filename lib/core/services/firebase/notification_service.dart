@@ -17,15 +17,17 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   final http.Client _httpClient = http.Client();
   final Uri _saveTokenUri = Uri.parse('$baseurl/rider/save_token/');
-  final Uri _sendNotificationUri = Uri.parse('$baseurl/rider/send_notification/');
+  final Uri _sendNotificationUri = Uri.parse(
+    '$baseurl/rider/send_notification/',
+  );
 
   final AndroidNotificationChannel _defaultChannel =
       const AndroidNotificationChannel(
-    'quikle_default_channel',
-    'Delivery Updates',
-    description: 'General updates and alerts for riders',
-    importance: Importance.high,
-  );
+        'quikle_default_channel',
+        'Delivery Updates',
+        description: 'General updates and alerts for riders',
+        importance: Importance.high,
+      );
 
   NotificationTapCallback? _onNotificationTap;
   bool _isInitialized = false;
@@ -62,7 +64,8 @@ class NotificationService {
 
     await _plugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
+          AndroidFlutterLocalNotificationsPlugin
+        >()
         ?.createNotificationChannel(_defaultChannel);
 
     _isInitialized = true;
@@ -71,17 +74,15 @@ class NotificationService {
   Future<void> requestPermission() async {
     final androidPlugin = _plugin
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     await androidPlugin?.requestNotificationsPermission();
 
     final iosPlugin = _plugin
         .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>();
-    await iosPlugin?.requestPermissions(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
+          IOSFlutterLocalNotificationsPlugin
+        >();
+    await iosPlugin?.requestPermissions(alert: true, badge: true, sound: true);
   }
 
   Future<void> show({
@@ -111,13 +112,7 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    await _plugin.show(
-      id,
-      title,
-      body,
-      notificationDetails,
-      payload: payload,
-    );
+    await _plugin.show(id, title, body, notificationDetails, payload: payload);
   }
 
   Future<void> cancel(int id) => _plugin.cancel(id);
@@ -132,34 +127,43 @@ class NotificationService {
     int retryCount = 0,
   }) async {
     try {
-      AppLoggerHelper.debug('Attempting to save FCM token for user: $userId (Attempt ${retryCount + 1}/$_maxRetryAttempts)');
-      
-      final response = await _httpClient.post(
-        _saveTokenUri,
-        headers: {
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': authorization,
-        },
-        body: jsonEncode({
-          'user_id': userId,
-          'token': token,
-          'platform': platform,
-        }),
-      ).timeout(
-        const Duration(seconds: _tokenSaveTimeoutSeconds),
-        onTimeout: () => throw TimeoutException('FCM token save request timed out'),
+      AppLoggerHelper.debug(
+        'Attempting to save FCM token for user: $userId (Attempt ${retryCount + 1}/$_maxRetryAttempts)',
       );
-      
+
+      final response = await _httpClient
+          .post(
+            _saveTokenUri,
+            headers: {
+              'accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': authorization,
+            },
+            body: jsonEncode({
+              'user_id': userId,
+              'token': token,
+              'platform': platform,
+            }),
+          )
+          .timeout(
+            const Duration(seconds: _tokenSaveTimeoutSeconds),
+            onTimeout: () =>
+                throw TimeoutException('FCM token save request timed out'),
+          );
+
       AppLoggerHelper.debug('Response: ${response.body}');
-      
+
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        AppLoggerHelper.debug('✓ FCM Token successfully saved for user: $userId');
+        AppLoggerHelper.debug(
+          '✓ FCM Token successfully saved for user: $userId',
+        );
         return true;
       } else {
-        AppLoggerHelper.debug('✗ FCM Token save failed with status: ${response.statusCode}');
+        AppLoggerHelper.debug(
+          '✗ FCM Token save failed with status: ${response.statusCode}',
+        );
         AppLoggerHelper.debug('Response: ${response.body}');
-        
+
         // Retry on server errors
         if (response.statusCode >= 500 && retryCount < _maxRetryAttempts - 1) {
           AppLoggerHelper.debug('Retrying FCM token save...');
@@ -176,7 +180,7 @@ class NotificationService {
       }
     } on TimeoutException catch (e) {
       AppLoggerHelper.debug('⏱ FCM token save timeout: $e');
-      
+
       // Retry on timeout
       if (retryCount < _maxRetryAttempts - 1) {
         AppLoggerHelper.debug('Retrying after timeout...');
@@ -192,7 +196,7 @@ class NotificationService {
       return false;
     } catch (e) {
       AppLoggerHelper.debug('✗ Error saving FCM token: $e');
-      
+
       // Retry on network errors
       if (retryCount < _maxRetryAttempts - 1) {
         AppLoggerHelper.debug('Retrying due to error...');
@@ -216,26 +220,25 @@ class NotificationService {
     String? payload,
   }) async {
     try {
-      final response = await _httpClient.post(
-        _sendNotificationUri,
-        headers: const {
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'user_id': userId,
-          'title': title,
-          'body': body,
-        }),
-      ).timeout(
-        const Duration(seconds: 10),
-        onTimeout: () => throw TimeoutException('Send notification request timed out'),
-      );
-      
+      final response = await _httpClient
+          .post(
+            _sendNotificationUri,
+            headers: const {
+              'accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: jsonEncode({'user_id': userId, 'title': title, 'body': body}),
+          )
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () =>
+                throw TimeoutException('Send notification request timed out'),
+          );
+
       if (response.statusCode >= 200 && response.statusCode < 300) {
         AppLoggerHelper.debug('Notification sent to user: $userId');
         AppLoggerHelper.debug('Response: ${response.body}');
-        
+
         // Also show local notification in release mode
         await _showLocalNotification(
           title: title,
@@ -243,12 +246,14 @@ class NotificationService {
           payload: payload,
           isUrgent: true,
         );
-        
+
         return true;
       } else {
-        AppLoggerHelper.debug('Failed to send notification. Status: ${response.statusCode}');
+        AppLoggerHelper.debug(
+          'Failed to send notification. Status: ${response.statusCode}',
+        );
         AppLoggerHelper.debug('Response: ${response.body}');
-        
+
         // Show local notification as fallback
         await _showLocalNotification(
           title: title,
@@ -256,12 +261,12 @@ class NotificationService {
           payload: payload,
           isUrgent: true,
         );
-        
+
         return false;
       }
     } catch (e) {
       AppLoggerHelper.debug('Error sending notification: $e');
-      
+
       // Show local notification as fallback
       await _showLocalNotification(
         title: title,
@@ -269,7 +274,7 @@ class NotificationService {
         payload: payload,
         isUrgent: true,
       );
-      
+
       return false;
     }
   }
