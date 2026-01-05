@@ -10,7 +10,27 @@ class HomeService {
 
   final NetworkCaller _networkCaller;
 
-  Future<ResponseData> fetchUpcomingOrders({String? orderId}) async {
+  // Future<ResponseData> fetchUpcomingOrders({String? orderId}) async {
+  //   final accessToken = StorageService.accessToken;
+  //   final tokenType = StorageService.tokenType ?? 'Bearer';
+
+  //   if (accessToken == null || accessToken.isEmpty) {
+  //     return _unauthenticatedResponse();
+  //   }
+
+  //   final path =
+  //       orderId == null ? '$baseurl/rider/orders/' : '$baseurl/rider/orders/$orderId/';
+  //   return _networkCaller.getRequest(
+  //     path,
+  //     headers: {
+  //       'accept': 'application/json',
+  //       'Authorization': '$tokenType $accessToken',
+  //     },
+  //     defaultErrorMessage: 'Unable to fetch upcoming orders.',
+  //   );
+  // }
+
+  Future<ResponseData> fetchOfferedOrders({int offset = 0, int limit = 50}) async {
     final accessToken = StorageService.accessToken;
     final tokenType = StorageService.tokenType ?? 'Bearer';
 
@@ -18,28 +38,8 @@ class HomeService {
       return _unauthenticatedResponse();
     }
 
-    final path =
-        orderId == null ? '$baseurl/rider/orders/' : '$baseurl/rider/orders/$orderId/';
     return _networkCaller.getRequest(
-      path,
-      headers: {
-        'accept': 'application/json',
-        'Authorization': '$tokenType $accessToken',
-      },
-      defaultErrorMessage: 'Unable to fetch upcoming orders.',
-    );
-  }
-
-  Future<ResponseData> fetchOfferedOrders({int skip = 0, int limit = 50}) async {
-    final accessToken = StorageService.accessToken;
-    final tokenType = StorageService.tokenType ?? 'Bearer';
-
-    if (accessToken == null || accessToken.isEmpty) {
-      return _unauthenticatedResponse();
-    }
-
-    return _networkCaller.getRequest(
-      '$baseurl/rider/offered-orders/?skip=$skip&limit=$limit',
+      '$baseurl/rider/rider-offered-orders/?limit=$limit&offset=$offset',
       headers: {
         'accept': 'application/json',
         'Authorization': '$tokenType $accessToken',
@@ -57,7 +57,7 @@ class HomeService {
     }
 
     return _networkCaller.postRequest(
-      '$baseurl/rider/orders/accept/$orderId/',
+      '$baseurl/rider/riders/orders/$orderId/accept',
       headers: {
         'accept': 'application/json',
         'Authorization': '$tokenType $accessToken',
@@ -79,7 +79,7 @@ class HomeService {
     }
 
     return _networkCaller.postRequest(
-      '$baseurl/rider/orders/reject/$orderId/',
+      '$baseurl/rider/rider/reject/$orderId/',
       headers: {
         'accept': 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded',

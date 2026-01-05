@@ -127,7 +127,7 @@ class ProfileController extends GetxController {
   }
 
   bool get isVerifiedApproved =>
-      _normalizeVerificationStatus(isVerified.value) == 'verified';
+      _normalizeVerificationStatus(isVerified.value) == 'approved';
 
   bool get isVerificationRejected =>
       _normalizeVerificationStatus(isVerified.value) == 'rejected';

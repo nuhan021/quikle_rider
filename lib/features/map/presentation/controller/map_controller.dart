@@ -173,10 +173,11 @@ class MapController extends GetxController {
     }
 
     currentDelivery.value = const DeliveryModel(
+      orderId: 'ORDER-000',
       customerName: 'Aanya Desai',
       customerAddress: '123 Main St, Bangkok',
       deliveryAddress: '789 River Rd, Apartment 3B, Riverside Mohakhali',
-      estimatedTime: '09:45 min',
+      estimatedTime: '09:45',
       restaurantName: 'Sushi Express',
       customerAvatar: 'assets/images/avatar.png',
       items: [
@@ -211,6 +212,7 @@ class MapController extends GetxController {
         : (order.estimatedDelivery?.toIso8601String() ?? '');
 
     currentDelivery.value = DeliveryModel(
+      orderId: order.id,
       customerName: customerName.isNotEmpty ? customerName : 'Customer',
       customerAddress:
           deliveryAddress.isNotEmpty ? deliveryAddress : 'Delivery location',
@@ -219,6 +221,8 @@ class MapController extends GetxController {
       estimatedTime: estimated,
       restaurantName: restaurantName.isNotEmpty ? restaurantName : 'Vendor',
       customerAvatar: 'assets/images/avatar.png',
+      customerPhone: (shipping?.phoneNumber ?? '').trim(),
+      totalAmount: _parseDouble(order.total),
       items: const [],
     );
 
@@ -242,6 +246,24 @@ class MapController extends GetxController {
 
     _fitCameraToOrder();
     _buildRoutePolylines();
+  }
+
+  void applyDeliverySnapshot(DeliveryModel delivery, {String? orderId}) {
+    _activeOrderId = (orderId != null && orderId.isNotEmpty) ? orderId : null;
+    currentDelivery.value = delivery;
+    vendorPosition.value = null;
+    customerPosition.value = null;
+    vendorPickupAddress.value = '';
+    selectedDestination.value = null;
+    selectedDestinationAddress.value = '';
+    routePolylines.clear();
+  }
+
+  double? _parseDouble(Object? value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    return double.tryParse(value.toString());
   }
 
   Future<void> requestCurrentLocation() async {

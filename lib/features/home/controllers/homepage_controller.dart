@@ -462,6 +462,14 @@ class HomepageController extends GetxController {
             .toList();
       }
 
+      if (data['offers'] is List) {
+        final offers = data['offers'] as List<dynamic>;
+        return offers
+            .whereType<Map<String, dynamic>>()
+            .map(Assignment.fromUpcomingOrderJson)
+            .toList();
+      }
+
       return [Assignment.fromUpcomingOrderJson(data)];
     }
 

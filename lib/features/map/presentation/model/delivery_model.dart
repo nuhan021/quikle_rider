@@ -1,4 +1,5 @@
 class DeliveryModel {
+  final String orderId;
   final String customerName;
   final String customerAddress;
   final String deliveryAddress;
@@ -6,8 +7,12 @@ class DeliveryModel {
   final String restaurantName;
   final List<DeliveryItem> items;
   final String customerAvatar;
+  final String customerPhone;
+  final double? totalAmount;
+  final String currency;
 
   const DeliveryModel({
+    required this.orderId,
     required this.customerName,
     required this.customerAddress,
     required this.deliveryAddress,
@@ -15,9 +20,13 @@ class DeliveryModel {
     required this.restaurantName,
     required this.items,
     required this.customerAvatar,
+    this.customerPhone = '',
+    this.totalAmount,
+    this.currency = '₹',
   });
 
   DeliveryModel copyWith({
+    String? orderId,
     String? customerName,
     String? customerAddress,
     String? deliveryAddress,
@@ -25,8 +34,12 @@ class DeliveryModel {
     String? restaurantName,
     List<DeliveryItem>? items,
     String? customerAvatar,
+    String? customerPhone,
+    double? totalAmount,
+    String? currency,
   }) {
     return DeliveryModel(
+      orderId: orderId ?? this.orderId,
       customerName: customerName ?? this.customerName,
       customerAddress: customerAddress ?? this.customerAddress,
       deliveryAddress: deliveryAddress ?? this.deliveryAddress,
@@ -34,6 +47,9 @@ class DeliveryModel {
       restaurantName: restaurantName ?? this.restaurantName,
       items: items ?? this.items,
       customerAvatar: customerAvatar ?? this.customerAvatar,
+      customerPhone: customerPhone ?? this.customerPhone,
+      totalAmount: totalAmount ?? this.totalAmount,
+      currency: currency ?? this.currency,
     );
   }
 }
