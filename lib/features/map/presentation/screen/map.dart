@@ -291,11 +291,30 @@ class _MapScreenState extends State<MapScreen> {
 
   Widget _buildHeader(DeliveryModel delivery) {
     final totalLabel = _formatCurrency(delivery.totalAmount, delivery.currency);
+    final estimatedLabel = _formatEstimatedTimeLabel(delivery.estimatedTime);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Text('Order Details', style: headingStyle2(color: Colors.black87)),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Order Details',
+                style: headingStyle2(color: Colors.black87),
+              ),
+            ),
+            if (estimatedLabel.isNotEmpty)
+              Text(
+                estimatedLabel,
+                style: getTextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[700],
+                ),
+              ),
+          ],
+        ),
         SizedBox(height: 6.h),
         Text(
           totalLabel,
@@ -310,30 +329,12 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Widget _buildOrderMeta(DeliveryModel delivery) {
-    final eta = delivery.estimatedTime.trim().isEmpty
-        ? 'ETA pending'
-        : 'ETA to pickup: ${delivery.estimatedTime}';
     return Row(
       children: [
         Expanded(
           child: Text(
             'Order ID: ${delivery.orderId.isNotEmpty ? delivery.orderId : '--'}',
             style: getTextStyle(fontSize: 13, color: Colors.grey[700]),
-          ),
-        ),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-          decoration: BoxDecoration(
-            color: Colors.orange[100],
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-          child: Text(
-            eta,
-            style: getTextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Colors.orange[800],
-            ),
           ),
         ),
       ],
@@ -596,6 +597,42 @@ class _MapScreenState extends State<MapScreen> {
       return '$currency--';
     }
     return '$currency${amount.toStringAsFixed(2)}';
+  }
+
+  String _formatEstimatedTimeLabel(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) {
+      return 'ETA pending';
+    }
+    final formatted = _formatEstimatedTime(trimmed);
+    return formatted.isNotEmpty ? formatted : trimmed;
+  }
+
+  String _formatEstimatedTime(String raw) {
+    final parsed = DateTime.tryParse(raw);
+    if (parsed == null) {
+      return raw;
+    }
+    final local = parsed.toLocal();
+    final months = const [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    final hour = local.hour % 12 == 0 ? 12 : local.hour % 12;
+    final minute = local.minute.toString().padLeft(2, '0');
+    final meridiem = local.hour >= 12 ? 'PM' : 'AM';
+    return '${months[local.month - 1]} ${local.day}, ${local.year} • '
+        '$hour:$minute $meridiem';
   }
 
   DeliveryModel _deliveryFromActiveOrder(Map<String, dynamic> order) {
