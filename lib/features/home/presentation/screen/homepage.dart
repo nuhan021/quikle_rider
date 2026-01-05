@@ -8,6 +8,7 @@ import 'package:quikle_rider/features/home/models/home_dashboard_models.dart';
 import 'package:quikle_rider/features/home/presentation/widgets/alert_dialog.dart';
 import 'package:quikle_rider/features/home/presentation/widgets/assignment_card.dart';
 import 'package:quikle_rider/features/home/presentation/widgets/stat_card.dart';
+import 'package:quikle_rider/features/map/presentation/widgets/map_shimmer.dart';
 
 class HomeScreen extends GetView<HomepageController> {
   const HomeScreen({super.key});
@@ -81,7 +82,7 @@ class HomeScreen extends GetView<HomepageController> {
   Widget _buildOnlineView(BuildContext context) {
     return Obx(() {
       if (controller.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
+        return const Center(child: MapShimmer());
       }
 
       final hasError = controller.errorMessage.value != null;

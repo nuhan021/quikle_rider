@@ -10,6 +10,11 @@ class DeliveryModel {
   final String customerPhone;
   final double? totalAmount;
   final String currency;
+  final String? parentOrderId;
+  final String? status;
+  final String? deliveryType;
+  final double? baseRate;
+  final double? pickupDistanceKm;
 
   const DeliveryModel({
     required this.orderId,
@@ -23,6 +28,11 @@ class DeliveryModel {
     this.customerPhone = '',
     this.totalAmount,
     this.currency = '₹',
+    this.parentOrderId,
+    this.status,
+    this.deliveryType,
+    this.baseRate,
+    this.pickupDistanceKm,
   });
 
   DeliveryModel copyWith({
@@ -37,6 +47,11 @@ class DeliveryModel {
     String? customerPhone,
     double? totalAmount,
     String? currency,
+    String? parentOrderId,
+    String? status,
+    String? deliveryType,
+    double? baseRate,
+    double? pickupDistanceKm,
   }) {
     return DeliveryModel(
       orderId: orderId ?? this.orderId,
@@ -50,6 +65,11 @@ class DeliveryModel {
       customerPhone: customerPhone ?? this.customerPhone,
       totalAmount: totalAmount ?? this.totalAmount,
       currency: currency ?? this.currency,
+      parentOrderId: parentOrderId ?? this.parentOrderId,
+      status: status ?? this.status,
+      deliveryType: deliveryType ?? this.deliveryType,
+      baseRate: baseRate ?? this.baseRate,
+      pickupDistanceKm: pickupDistanceKm ?? this.pickupDistanceKm,
     );
   }
 }
