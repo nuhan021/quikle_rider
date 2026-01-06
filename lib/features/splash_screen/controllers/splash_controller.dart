@@ -17,6 +17,7 @@ class SplashController extends GetxController {
   final RxDouble ellipseTop = _ellipseTopIdle.obs;
   final RxBool showEllipse = false.obs;
   final RxBool showLogin = false.obs;
+  final RxBool isBootstrapping = false.obs;
   
 
   final Duration shrinkDelay = const Duration(milliseconds: 20);
@@ -70,9 +71,21 @@ class SplashController extends GetxController {
     if (v.isInitialized && v.position >= playDuration) {
       video.pause();
       AppLoggerHelper.debug('has token ${StorageService.tokenType}');
-      _handleNavigation();
+      _startBootstrapFlow();
 
       video.removeListener(_listenDuration);
+    }
+  }
+
+  Future<void> _startBootstrapFlow() async {
+    isBootstrapping.value = true;
+    try {
+      if (Get.currentRoute != AppRoute.getStartupShimmer()) {
+        Get.offAllNamed(AppRoute.getStartupShimmer());
+      }
+      await _handleNavigation();
+    } finally {
+      isBootstrapping.value = false;
     }
   }
 
@@ -88,7 +101,9 @@ class SplashController extends GetxController {
 
     final bool isVerified = profileController.isVerifiedApproved;
     if (hasToken && isVerified && isDocumentUploaded) {
-      Get.offAllNamed(AppRoute.getBottomNavBar());
+      if (Get.currentRoute != AppRoute.getBottomNavBar()) {
+        Get.offAllNamed(AppRoute.getBottomNavBar());
+      }
       AppLoggerHelper.debug(
         "documnets uploaded ${profileController.isDocumentUploaded.value}",
       );
@@ -103,7 +118,10 @@ class SplashController extends GetxController {
       );
       return;
     } else if (hasToken && isVerified == false) {
-      Get.offAllNamed(AppRoute.uploaddocuments);
+      Get.offAllNamed(
+        AppRoute.uploaddocuments,
+        arguments: const {'showBack': false},
+      );
     } else {
       Get.offAllNamed(AppRoute.loginScreen);
     }

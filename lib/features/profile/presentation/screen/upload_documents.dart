@@ -26,12 +26,17 @@ class UploadDocumentsPage extends StatelessWidget {
         ? Get.find<KycController>()
         : Get.put(KycController());
   }
+  
 
   @override
   Widget build(BuildContext context) {
+    final bool showBack = _resolveShowBack();
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: const UnifiedProfileAppBar(title: 'Profile & Documents'),
+      appBar: UnifiedProfileAppBar(
+        title: 'Profile & Documents',
+        isback: showBack,
+      ),
       body: GetBuilder<KycController>(
         builder: (_) {
           return SingleChildScrollView(
@@ -127,6 +132,17 @@ class UploadDocumentsPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  bool _resolveShowBack() {
+    final args = Get.arguments;
+    if (args is bool) {
+      return args;
+    }
+    if (args is Map && args['showBack'] is bool) {
+      return args['showBack'] as bool;
+    }
+    return true;
   }
 
   Widget _buildUploadButton() {
