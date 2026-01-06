@@ -52,4 +52,32 @@ class OrderServices {
       defaultErrorMessage: 'Unable to fetch active orders. Please try again.',
     );
   }
+
+  Future<ResponseData> markOrderOnWay({
+    required String accessToken,
+    required String orderId,
+  }) {
+    return _networkCaller.postRequest(
+      '$baseurl/rider/rider/mark-on-way/$orderId/',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      defaultErrorMessage: 'Unable to update order status. Please try again.',
+    );
+  }
+
+  Future<ResponseData> markOrderDelivered({
+    required String accessToken,
+    required String orderId,
+  }) {
+    return _networkCaller.postRequest(
+      '$baseurl/rider/mark-delivered/$orderId/',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      defaultErrorMessage: 'Unable to update order status. Please try again.',
+    );
+  }
 }

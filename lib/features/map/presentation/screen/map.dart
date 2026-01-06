@@ -12,6 +12,7 @@ import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/widgets/connection_lost.dart';
 import 'package:quikle_rider/core/widgets/unverified/unverified.dart';
 import 'package:quikle_rider/custom_tab_bar/notifications.dart';
+import 'package:quikle_rider/features/all_orders/controllers/all_order_controller.dart';
 import 'package:quikle_rider/features/all_orders/data/services/order_services.dart';
 import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/bottom_nav_bar/controller/bottom_nav_bar_controller.dart';
@@ -32,9 +33,11 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   late final MapController mapController;
   late final ProfileController profileController;
+  late final AllOrdersController _allOrdersController;
   final OrderServices _orderServices = OrderServices();
   bool _isFetchingCurrentOrder = false;
   bool _hasTriggeredVerifiedLoad = false;
+  bool _isUpdatingStatus = false;
   Worker? _verificationWorker;
   Worker? _navIndexWorker;
   BottomNavbarController? _bottomNavController;
@@ -49,6 +52,9 @@ class _MapScreenState extends State<MapScreen> {
     profileController = Get.isRegistered<ProfileController>()
         ? Get.find<ProfileController>()
         : Get.put(ProfileController());
+    _allOrdersController = Get.isRegistered<AllOrdersController>()
+        ? Get.find<AllOrdersController>()
+        : Get.put(AllOrdersController());
     _bottomNavController = Get.isRegistered<BottomNavbarController>()
         ? Get.find<BottomNavbarController>()
         : null;
@@ -319,7 +325,7 @@ class _MapScreenState extends State<MapScreen> {
           SizedBox(height: 20.h),
           _buildItemsSection(delivery),
           SizedBox(height: 20.h),
-          _buildActionButtons(context, controller),
+          _buildActionButtons(delivery),
         ],
       ),
     );
@@ -729,12 +735,153 @@ class _MapScreenState extends State<MapScreen> {
     return int.tryParse(value.toString());
   }
 
-  Widget _buildActionButtons(BuildContext context, MapController controller) {
+  Future<void> _handleMarkOnWay(DeliveryModel delivery) async {
+    if (_isUpdatingStatus) return;
+    final orderId = delivery.orderId.trim();
+    if (orderId.isEmpty) {
+      _showStatusMessage('Missing order ID for status update.');
+      return;
+    }
+
+    setState(() {
+      _isUpdatingStatus = true;
+    });
+
+    final response = await _allOrdersController.markOrderOnWay(
+      orderId: orderId,
+    );
+
+    if (!mounted) return;
+
+    if (response.isSuccess) {
+      mapController.currentDelivery.value = delivery.copyWith(
+        status: 'ON_THE_WAY',
+      );
+      _showStatusMessage('Order marked as on the way.');
+    } else {
+      _showStatusMessage(
+        response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to update order status.',
+      );
+    }
+
+    if (mounted) {
+      setState(() {
+        _isUpdatingStatus = false;
+      });
+    }
+  }
+
+  Future<void> _handleMarkDelivered(DeliveryModel delivery) async {
+    if (_isUpdatingStatus) return;
+    final orderId = delivery.orderId.trim();
+    if (orderId.isEmpty) {
+      _showStatusMessage('Missing order ID for status update.');
+      return;
+    }
+
+    setState(() {
+      _isUpdatingStatus = true;
+    });
+
+    final response = await _allOrdersController.markOrderDelivered(
+      orderId: orderId,
+    );
+
+    if (!mounted) return;
+
+    if (response.isSuccess) {
+      mapController.currentDelivery.value = delivery.copyWith(
+        status: 'DELIVERED',
+      );
+      _showStatusMessage('Order marked as delivered.');
+    } else {
+      _showStatusMessage(
+        response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to update order status.',
+      );
+    }
+
+    if (mounted) {
+      setState(() {
+        _isUpdatingStatus = false;
+      });
+    }
+  }
+
+  void _showStatusMessage(String message) {
+    Get.snackbar(
+      '',
+      message,
+      titleText: const SizedBox.shrink(),
+      messageText: Text(
+        message,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+          fontFamily: 'Manrope',
+          height: 1.50,
+        ),
+      ),
+      backgroundColor: const Color(0xFF222222),
+      colorText: Colors.white,
+      snackPosition: SnackPosition.BOTTOM,
+    );
+  }
+
+  String _normalizeStatus(String? status) {
+    return status?.trim().toLowerCase() ?? '';
+  }
+
+  bool _isOnTheWayStatus(String status) {
+    return status == 'on_the_way' ||
+        status == 'on the way' ||
+        status == 'on-way' ||
+        status == 'on_way' ||
+        status == 'ontheway';
+  }
+
+  bool _isDeliveredStatus(String status) {
+    return status == 'delivered' || status == 'completed';
+  }
+
+  Widget _buildActionButtons(DeliveryModel delivery) {
+    final status = _normalizeStatus(delivery.status);
+    final isShipped = status == 'shipped';
+    final isOnWay = _isOnTheWayStatus(status);
+    final isDelivered = _isDeliveredStatus(status);
+    String actionLabel;
+    VoidCallback? actionHandler;
+    Color actionColor = Colors.black87;
+
+    if (_isUpdatingStatus) {
+      actionLabel = 'Updating...';
+      actionHandler = null;
+      actionColor = Colors.black54;
+    } else if (isShipped) {
+      actionLabel = 'On the way';
+      actionHandler = () => _handleMarkOnWay(delivery);
+    } else if (isOnWay) {
+      actionLabel = 'Mark as Delivered';
+      actionHandler = () => _handleMarkDelivered(delivery);
+    } else if (isDelivered) {
+      actionLabel = 'Delivered';
+      actionHandler = null;
+      actionColor = Colors.grey;
+    } else {
+      actionLabel = 'Awaiting Status';
+      actionHandler = null;
+      actionColor = Colors.grey;
+    }
+
     return Row(
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: controller.callCustomer,
+            onPressed:(){},
             icon: Image.asset(
               'assets/images/call.png',
               color: Colors.black87,
@@ -760,21 +907,9 @@ class _MapScreenState extends State<MapScreen> {
         SizedBox(width: 15.w),
         Expanded(
           child: ElevatedButton(
-            onPressed: () {
-              try {
-                Get.toNamed('/parcelDone'); // Navigate to ParcelDone
-              } catch (e) {
-                Get.snackbar(
-                  'Error',
-                  'Failed to navigate to ParcelDone: $e',
-                  snackPosition: SnackPosition.BOTTOM,
-                  backgroundColor: Colors.red,
-                  colorText: Colors.white,
-                );
-              }
-            },
+            onPressed: actionHandler,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black87,
+              backgroundColor: actionColor,
               padding: EdgeInsets.symmetric(vertical: 12.h),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8.r),
@@ -784,7 +919,7 @@ class _MapScreenState extends State<MapScreen> {
               overlayColor: Colors.transparent,
             ),
             child: Text(
-              'Mark as Delivered',
+              actionLabel,
               style: buttonTextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,

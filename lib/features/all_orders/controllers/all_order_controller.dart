@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:quikle_rider/core/models/response_data.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/features/all_orders/data/services/order_services.dart';
 import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
@@ -156,6 +157,40 @@ class AllOrdersController extends GetxController {
   void _updateConnectionStatus(List<ConnectivityResult> results) {
     hasConnection.value =
         results.any((result) => result != ConnectivityResult.none);
+  }
+
+  Future<ResponseData> markOrderOnWay({required String orderId}) async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null || accessToken.isEmpty) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 401,
+        errorMessage: 'Missing access token. Please login again.',
+        responseData: null,
+      );
+    }
+
+    return _orderServices.markOrderOnWay(
+      accessToken: accessToken,
+      orderId: orderId,
+    );
+  }
+
+  Future<ResponseData> markOrderDelivered({required String orderId}) async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null || accessToken.isEmpty) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 401,
+        errorMessage: 'Missing access token. Please login again.',
+        responseData: null,
+      );
+    }
+
+    return _orderServices.markOrderDelivered(
+      accessToken: accessToken,
+      orderId: orderId,
+    );
   }
 
   @override

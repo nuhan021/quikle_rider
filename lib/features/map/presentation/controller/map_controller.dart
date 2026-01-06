@@ -190,6 +190,11 @@ class MapController extends GetxController {
 
     currentDelivery.value = DeliveryModel(
       orderId: order.id,
+      parentOrderId: order.parentOrderId,
+      status: order.status,
+      deliveryType: order.deliveryType,
+      baseRate: _parseDouble(order.baseRate),
+      pickupDistanceKm: order.pickupDistanceKm,
       customerName: customerName.isNotEmpty ? customerName : 'Customer',
       customerAddress:
           deliveryAddress.isNotEmpty ? deliveryAddress : 'Delivery location',
