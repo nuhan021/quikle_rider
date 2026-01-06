@@ -772,7 +772,7 @@ class ProfileController extends GetxController {
   Future<bool> updateProfileData({
     required String name,
     required String email,
-    required String drivingLicense,
+
     required String nid,
   }) async {
     final accessToken = StorageService.accessToken;
@@ -789,7 +789,7 @@ class ProfileController extends GetxController {
         payload: {
           'name': name,
           'email': email,
-          'driving_license': drivingLicense,
+      
           'nid': nid,
         },
       );

@@ -15,44 +15,118 @@ class StartupShimmer extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ShimmerCard.rectangular(height: 20.h, width: 160.w),
-              SizedBox(height: 16.h),
-              ShimmerCard.rectangular(height: 52.h),
-              SizedBox(height: 24.h),
-              Expanded(
-                child: ListView.separated(
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: 4,
-                  separatorBuilder: (_, __) => SizedBox(height: 16.h),
-                  itemBuilder: (_, __) => Container(
-                    padding: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
-                          blurRadius: 12.r,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+              Row(
+                children: [
+                  Expanded(child: _StatCardShimmer(height: 78.h)),
+                  SizedBox(width: 12.w),
+                  Expanded(child: _StatCardShimmer(height: 78.h)),
+                  SizedBox(width: 12.w),
+                  Expanded(child: _StatCardShimmer(height: 78.h)),
+                ],
+              ),
+              SizedBox(height: 22.h),
+              ShimmerCard.rectangular(height: 18.h, width: 220.w),
+              SizedBox(height: 12.h),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 12.r,
+                      offset: const Offset(0, 4),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ShimmerCard.rectangular(height: 16.h, width: 140.w),
-                        SizedBox(height: 12.h),
-                        ShimmerCard.rectangular(height: 12.h, width: 200.w),
-                        SizedBox(height: 8.h),
-                        ShimmerCard.rectangular(height: 12.h, width: 120.w),
-                      ],
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    ShimmerCard.rectangular(height: 14.h, width: 220.w),
+                    SizedBox(height: 10.h),
+                    ShimmerCard.rectangular(height: 12.h, width: 180.w),
+                    SizedBox(height: 30.h),
+                    ShimmerCard.rectangular(height: 80.h, width: 180.w),
+                     SizedBox(height: 30.h),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ShimmerCard.rectangular(height: 80.h, width: 180.w),
                     ),
-                  ),
+                    
+
+                  ],
                 ),
               ),
+              SizedBox(height: 12.h),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 18.h),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 12.r,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    ShimmerCard.rectangular(height: 14.h, width: 220.w),
+                    SizedBox(height: 10.h),
+                    ShimmerCard.rectangular(height: 12.h, width: 180.w),
+                    SizedBox(height: 30.h),
+                    ShimmerCard.rectangular(height: 80.h, width: 180.w),
+                     SizedBox(height: 30.h),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ShimmerCard.rectangular(height: 80.h, width: 180.w),
+                    ),
+                    
+
+                  ],
+                ),
+              ),
+              
+                
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _StatCardShimmer extends StatelessWidget {
+  const _StatCardShimmer({required this.height});
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 12.r,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          ShimmerCard.rectangular(height: 10.h, width: 50.w),
+          ShimmerCard.rectangular(height: 18.h, width: 36.w),
+          ShimmerCard.rectangular(height: 10.h, width: 60.w),
+        ],
       ),
     );
   }
