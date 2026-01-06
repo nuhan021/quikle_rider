@@ -77,33 +77,37 @@ class LocationServices {
 
   void _startSendingLocation() {
     _sendTimer?.cancel();
-    _sendCurrentLocation();
+    sendCurrentLocation();
     _sendTimer = Timer.periodic(const Duration(seconds: 10), (_) {
-      _sendCurrentLocation();
+      sendCurrentLocation();
     });
     AppLoggerHelper.debug('Location service started (10s interval)');
  
   }
 
-  Future<void> _sendCurrentLocation() async {
+  Future<void> sendCurrentLocation() async {
     try {
       if (!isConnected) return;
 
-      // final hasPermission = await _ensurePermissions();
-      // if (!hasPermission) return;
+      final hasPermission = await _ensurePermissions();
+      if (!hasPermission) return;
 
-      // final position = await Geolocator.getCurrentPosition(
-      //   locationSettings: const LocationSettings(
-      //     accuracy: LocationAccuracy.high,
-      //   ),
-      // );
-      final locationData = {
-        "lat": _dummyLat,
-        "lng": _dummyLng,
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+      // final locationData = {
+      //   "lat": _dummyLat,
+      //   "lng": _dummyLng,
+      // };
+       final currentlocationdata = {
+        "lat": position.latitude,
+        "lng": position.longitude,
       };
       
-      _channel?.sink.add(jsonEncode(locationData));
-      AppLoggerHelper.debug('LocationServices: sent $locationData');
+      _channel?.sink.add(jsonEncode(currentlocationdata));
+      AppLoggerHelper.debug('LocationServices: sent $currentlocationdata');
     } catch (e) {
       AppLoggerHelper.debug('Unable to fetch location for websocket: $e');
     }

@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:quikle_rider/core/services/location_services.dart';
 
 import 'package:quikle_rider/core/services/network/internet_services.dart';
 import 'package:quikle_rider/core/services/firebase/firebase_service.dart';
@@ -36,6 +38,7 @@ class HomepageController extends GetxController {
   late final ProfileController _profileController;
 
   RxBool get hasConnection => _internetServices.hasConnection;
+  final LocationServices locationServices = LocationServices.instance;
 
   Future<void> onToggleSwitch() async {
     if (!isOnline.value) {
@@ -100,6 +103,7 @@ class HomepageController extends GetxController {
 
         return;
       }
+      isOnline.value = true;
       final result = await Get.to(
         () => const GoOnlinePage(),
         opaque: false,
@@ -107,7 +111,13 @@ class HomepageController extends GetxController {
         transition: Transition.fade,
       );
       if (result == true) {
-        await _changeOnlineStatus(true);
+        unawaited(_changeOnlineStatus(true));
+        await _refreshUpcomingAssignments();
+        locationServices.sendCurrentLocation();
+      } else {
+        isOnline.value = false;
+        stats.clear();
+        assignments.clear();
       }
     } else {
       final result = await Get.to(
@@ -117,16 +127,11 @@ class HomepageController extends GetxController {
         transition: Transition.fade,
       );
       if (result == true) {
-        await _changeOnlineStatus(false);
+        isOnline.value = false;
+        stats.clear();
+        assignments.clear();
+        unawaited(_changeOnlineStatus(false));
       }
-    }
-  }
-
-  Future<void> onToggleSwitchAndSyncToken() async {
-    final wasOnline = isOnline.value;
-    await onToggleSwitch();
-    if (!wasOnline && isOnline.value) {
-      await _syncFcmTokenForOnline();
     }
   }
 
@@ -143,10 +148,15 @@ class HomepageController extends GetxController {
         : Get.put(ProfileController());
     _internetServices.startMonitoring(onReconnect: _handleReconnect);
     fetchDashboardData();
+    _syncFcmToken();
   }
 
   Future<void> fetchDashboardData() async {
     await _refreshUpcomingAssignments(showLoader: true);
+  }
+
+  Future<void> refreshUpcomingAssignments() async {
+    await _refreshUpcomingAssignments();
   }
 
   Future<HomeDashboardData> _loadDashboardData() async {
@@ -252,6 +262,7 @@ class HomepageController extends GetxController {
     );
     if (result) {
       _setAssignmentStatus(assignment, AssignmentStatus.accepted);
+      await refreshUpcomingAssignments();
     }
     return result;
   }
@@ -305,22 +316,22 @@ class HomepageController extends GetxController {
       if (response.isSuccess) {
         isOnline.value = goOnline;
         if (goOnline) {
-          await _refreshUpcomingAssignments(showLoader: true);
+          unawaited(_refreshUpcomingAssignments());
         } else {
           stats.clear();
           assignments.clear();
         }
-        final message = _extractStatusMessage(response.responseData, goOnline);
-        _showStatusSnack(
-          duration: 3,
-          title: 'Status updated',
-          message: message,
-          success: true,
-        );
+        // final message = _extractStatusMessage(response.responseData, goOnline);
+        // _showStatusSnack(
+        //   duration: 1,
+        //   title: '',
+        //   message: message,
+        //   success: true,
+        // );
       } else {
         _showStatusSnack(
-          duration: 3,
-          title: 'Update failed',
+          duration: 1,
+          title: '',
           message: response.errorMessage.isNotEmpty
               ? response.errorMessage
               : 'Unable to update status. Please try again.',
@@ -329,15 +340,15 @@ class HomepageController extends GetxController {
       }
     } catch (error) {
       _showStatusSnack(
-        duration: 3,
-        title: 'Update failed',
+        duration: 1,
+        title: '',
         message: 'Unable to update status. Please try again.',
         success: false,
       );
     }
   }
 
-  Future<void> _syncFcmTokenForOnline() async {
+  Future<void> _syncFcmToken() async {
     try {
       final userId = StorageService.userId;
       final accessToken = StorageService.accessToken;
@@ -377,11 +388,11 @@ class HomepageController extends GetxController {
 
       AppLoggerHelper.debug(
         success
-            ? 'FCM token synced on go-online.$userId'
-            : 'FCM token sync failed on go-online.',
+            ? 'FCM token synced for user.$userId'
+            : 'FCM token sync failed.',
       );
     } catch (error) {
-      AppLoggerHelper.debug('FCM sync failed on go-online: $error');
+      AppLoggerHelper.debug('FCM sync failed: $error');
     }
   }
 

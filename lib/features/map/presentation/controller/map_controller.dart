@@ -236,6 +236,17 @@ class MapController extends GetxController {
     routePolylines.clear();
   }
 
+  void clearCurrentDelivery() {
+    _activeOrderId = null;
+    currentDelivery.value = null;
+    vendorPosition.value = null;
+    customerPosition.value = null;
+    vendorPickupAddress.value = '';
+    selectedDestination.value = null;
+    selectedDestinationAddress.value = '';
+    routePolylines.clear();
+  }
+
   double? _parseDouble(Object? value) {
     if (value == null) return null;
     if (value is double) return value;

@@ -14,6 +14,7 @@ import 'package:quikle_rider/core/widgets/unverified/unverified.dart';
 import 'package:quikle_rider/custom_tab_bar/notifications.dart';
 import 'package:quikle_rider/features/all_orders/data/services/order_services.dart';
 import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
+import 'package:quikle_rider/features/bottom_nav_bar/controller/bottom_nav_bar_controller.dart';
 import 'package:quikle_rider/features/home/controllers/homepage_controller.dart';
 import 'package:quikle_rider/features/home/models/home_dashboard_models.dart';
 import 'package:quikle_rider/features/map/presentation/controller/map_controller.dart';
@@ -35,6 +36,8 @@ class _MapScreenState extends State<MapScreen> {
   bool _isFetchingCurrentOrder = false;
   bool _hasTriggeredVerifiedLoad = false;
   Worker? _verificationWorker;
+  Worker? _navIndexWorker;
+  BottomNavbarController? _bottomNavController;
   HomepageController homepageController = Get.find<HomepageController>();
 
   @override
@@ -46,26 +49,59 @@ class _MapScreenState extends State<MapScreen> {
     profileController = Get.isRegistered<ProfileController>()
         ? Get.find<ProfileController>()
         : Get.put(ProfileController());
-    if (profileController.isVerifiedApproved) {
+    _bottomNavController = Get.isRegistered<BottomNavbarController>()
+        ? Get.find<BottomNavbarController>()
+        : null;
+    if (_bottomNavController != null) {
+      _navIndexWorker = ever<int>(
+        _bottomNavController!.selectedIndex,
+        _handleNavIndexChange,
+      );
+      _handleNavIndexChange(_bottomNavController!.selectedIndex.value);
+    } else if (profileController.isVerifiedApproved) {
       _triggerVerifiedLoad();
-    } else {
-      _verificationWorker = ever<String?>(profileController.isVerified, (_) {
-        if (profileController.isVerifiedApproved &&
-            !_hasTriggeredVerifiedLoad) {
-          _triggerVerifiedLoad();
-        }
-      });
     }
+    _verificationWorker = ever<String?>(profileController.isVerified, (_) {
+      if (profileController.isVerifiedApproved &&
+          _shouldTriggerVerifiedLoad &&
+          !_hasTriggeredVerifiedLoad) {
+        _triggerVerifiedLoad();
+      }
+    });
   }
 
   @override
   void dispose() {
     mapController.detachMapController();
     _verificationWorker?.dispose();
+    _navIndexWorker?.dispose();
     super.dispose();
   }
 
+  bool get _isMapTabActive =>
+      _bottomNavController?.selectedIndex.value == 2;
+
+  bool get _shouldTriggerVerifiedLoad =>
+      _bottomNavController == null || _isMapTabActive;
+
+  void _handleNavIndexChange(int index) {
+    if (index == 2 && profileController.isVerifiedApproved) {
+      final args = Get.arguments;
+      if (args is RiderOrder) {
+        return;
+      }
+      mapController.clearCurrentDelivery();
+      _triggerVerifiedLoad();
+    } else if (index != 2) {
+      _hasTriggeredVerifiedLoad = false;
+    }
+  }
+
   void _triggerVerifiedLoad() {
+    final args = Get.arguments;
+    if (args is RiderOrder) {
+      return;
+    }
     _hasTriggeredVerifiedLoad = true;
     debugPrint('MapScreen: opening, requesting current location...');
     mapController.requestCurrentLocation();
@@ -73,7 +109,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _loadCurrentOrder() async {
-    if (_isFetchingCurrentOrder) return;
+    if (_isFetchingCurrentOrder) return ;
     if (!profileController.isVerifiedApproved) {
       return;
     }
