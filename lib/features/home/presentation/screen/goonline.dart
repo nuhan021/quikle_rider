@@ -101,18 +101,18 @@ class GoOnlinePage extends StatelessWidget {
   }
 
   void _handleYesPressed(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'You are now online and ready to receive orders!',
-          style: TextStyle(
-            fontFamily: 'Manrope',
-          ),
-        ),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text(
+    //       'You are now online and ready to receive orders!',
+    //       style: TextStyle(
+    //         fontFamily: 'Manrope',
+    //       ),
+    //     ),
+    //     backgroundColor: Colors.green,
+    //     duration: const Duration(seconds: 2), 
+    //   ),
+    // );
     Navigator.of(context).pop(true);
   }
 

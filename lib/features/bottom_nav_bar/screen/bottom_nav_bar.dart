@@ -5,9 +5,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/features/all_orders/presentation/screen/all_orders.dart';
 import 'package:quikle_rider/features/bottom_nav_bar/controller/bottom_nav_bar_controller.dart';
+import 'package:quikle_rider/features/bottom_nav_bar/widgets/startup_shimmer.dart';
 import 'package:quikle_rider/features/home/presentation/screen/homepage.dart';
 import 'package:quikle_rider/features/map/presentation/screen/map.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/profile.dart';
+import 'package:quikle_rider/features/splash_screen/controllers/splash_controller.dart';
 import 'package:quikle_rider/features/wallet/presentation/screen/wallet.dart';
 
 class BottomNavBar extends StatelessWidget {
@@ -18,6 +20,7 @@ class BottomNavBar extends StatelessWidget {
     // Use Get.find to reuse the existing BottomNavbarController instance
     final BottomNavbarController controller =
         Get.find<BottomNavbarController>();
+    final SplashController splashController = Get.find<SplashController>();
     final List<Widget> screens = [
       const HomeScreen(),
       const AllOrders(),
@@ -38,7 +41,12 @@ class BottomNavBar extends StatelessWidget {
         }
       },
       child: Scaffold(
-        body: Obx(() => screens[controller.selectedIndex.value]),
+        body: Obx(() {
+          if (splashController.isBootstrapping.value) {
+            return const StartupShimmer();
+          }
+          return screens[controller.selectedIndex.value];
+        }),
         bottomNavigationBar: _buildBottomNavigationBar(context, controller),
       ),
     );
