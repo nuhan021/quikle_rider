@@ -40,7 +40,7 @@ class AuthController extends GetxController {
   final fullNameController = TextEditingController();
   final accountPhoneController = TextEditingController();
   final drivingLicenseController = TextEditingController();
-  final vehicleLicenseController = TextEditingController();
+  final nidcontroller = TextEditingController();
   final formKey = GlobalKey<FormState>();
   final termsAccepted = false.obs;
 
@@ -72,7 +72,7 @@ class AuthController extends GetxController {
     fullNameController.dispose();
     accountPhoneController.dispose();
     drivingLicenseController.dispose();
-    vehicleLicenseController.dispose();
+    nidcontroller.dispose();
     super.onClose();
   }
 
@@ -170,15 +170,10 @@ class AuthController extends GetxController {
     final name = fullNameController.text.trim();
     final phoneDigits = accountPhoneController.text.trim();
     final phone = '+91$phoneDigits';
-    final drivingLicense = drivingLicenseController.text.trim();
-    final nid = vehicleLicenseController.text.trim();
+    // final drivingLicense = drivingLicenseController.text.trim();
+    final nid = nidcontroller.text.trim();
 
-    _pendingSignupPayload = {
-      'name': name,
-      'phone': phone,
-      'driving_license': drivingLicense,
-      'nid': nid,
-    };
+    _pendingSignupPayload = {'name': name, 'phone': phone, 'nid': nid};
     _isSignupFlow = true;
 
     final otpSent = await _requestOtp(
@@ -340,7 +335,7 @@ class AuthController extends GetxController {
           0,
           'OTP Sent',
           '${response.responseData['message']}',
-          
+
           NotificationDetails(
             android: AndroidNotificationDetails(
               'otp_notification_channel',
@@ -394,7 +389,7 @@ class AuthController extends GetxController {
       fullNameController.clear();
       accountPhoneController.clear();
       drivingLicenseController.clear();
-      vehicleLicenseController.clear();
+      nidcontroller.clear();
 
       Get.snackbar(
         'Account Created',

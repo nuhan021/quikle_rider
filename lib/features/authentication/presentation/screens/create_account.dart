@@ -98,7 +98,7 @@ class CreateAccount extends GetView<AuthController> {
                   SizedBox(height: 8.h),
                   _buildTextField(
                     controller: controller.accountPhoneController,
-                    hintText: "XXXXXX",
+                    hintText: "XXXXXXXX",
                     keyboardType: TextInputType.phone,
                     prefixText: "+91 ",
                     inputFormatters: [
@@ -115,25 +115,25 @@ class CreateAccount extends GetView<AuthController> {
                       return null;
                     },
                   ),
+                  // SizedBox(height: 20.h),
+                  // _buildLabel("Driving License Number"),
+                  // SizedBox(height: 8.h),
+                  // _buildTextField(
+                  //   controller: controller.drivingLicenseController,
+                  //   hintText: "Driving License Number",
+                  //   validator: (value) {
+                  //     if (value == null || value.isEmpty) {
+                  //       return 'Please enter your driving license number';
+                  //     }
+                  //     return null;
+                  //   },
+                  // ),
                   SizedBox(height: 20.h),
-                  _buildLabel("Driving License Number"),
+                  _buildLabel("Government ID Number"),
                   SizedBox(height: 8.h),
                   _buildTextField(
-                    controller: controller.drivingLicenseController,
-                    hintText: "Driving License Number",
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your driving license number';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 20.h),
-                  _buildLabel("Vehicle License Number"),
-                  SizedBox(height: 8.h),
-                  _buildTextField(
-                    controller: controller.vehicleLicenseController,
-                    hintText: "Vehicle License Number",
+                    controller: controller.nidcontroller,
+                    hintText: "Government ID Number",
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your vehicle license number';

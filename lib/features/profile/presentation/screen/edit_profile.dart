@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -21,7 +23,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _licenseController = TextEditingController();
+  // final TextEditingController _licenseController = TextEditingController();
   final TextEditingController _identityController = TextEditingController();
 
   @override
@@ -39,7 +41,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _nameController.text = profile.name;
     _emailController.text = profile.email;
     _phoneController.text = profile.phone;
-    _licenseController.text = profile.drivingLicense;
+    // _licenseController.text = profile.drivingLicense;
     _identityController.text = profile.nid;
   }
 
@@ -173,12 +175,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
             readOnly: true,
           ),
-          _buildEditField(
-            label: 'Driving License Number',
-            controller: _licenseController,
-            validator: (value) =>
-                _requiredValidator(value, 'Driving License Number'),
-          ),
+          // _buildEditField(
+          //   label: 'Driving License Number',
+          //   controller: _licenseController,
+          //   validator: (value) =>
+          //       _requiredValidator(value, 'Driving License Number'),
+          // ),
           _buildEditField(
             label: 'National Identity Number',
             controller: _identityController,
@@ -201,6 +203,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           child: ElevatedButton(
             onPressed: isSaving ? null : _handleSave,
             style: ElevatedButton.styleFrom(
+              side: BorderSide.none,
               backgroundColor: Colors.black,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -238,7 +241,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     final success = await _controller.updateProfileData(
       name: _nameController.text.trim(),
       email: _emailController.text.trim(),
-      drivingLicense: _licenseController.text.trim(),
+      // drivingLicense: _licenseController.text.trim(),
       nid: _identityController.text.trim(),
     );
 
@@ -331,7 +334,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
-    _licenseController.dispose();
+
     _identityController.dispose();
     super.dispose();
   }

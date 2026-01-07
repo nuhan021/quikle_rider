@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:quikle_rider/core/models/response_data.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/features/all_orders/data/services/order_services.dart';
 import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
@@ -10,7 +11,7 @@ import 'package:quikle_rider/features/profile/presentation/controller/profile_co
 
 class AllOrdersController extends GetxController {
   AllOrdersController({OrderServices? orderServices})
-      : _orderServices = orderServices ?? OrderServices();
+    : _orderServices = orderServices ?? OrderServices();
 
   final OrderServices _orderServices;
 
@@ -20,7 +21,6 @@ class AllOrdersController extends GetxController {
   RxBool hasConnection = true.obs;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   Worker? _verificationWorker;
-
   final RxBool isOrdersLoading = false.obs;
   final RxString ordersError = ''.obs;
   final RxList<RiderOrder> orders = <RiderOrder>[].obs;
@@ -40,8 +40,7 @@ class AllOrdersController extends GetxController {
     _profileController = Get.isRegistered<ProfileController>()
         ? Get.find<ProfileController>()
         : Get.put(ProfileController());
-    _verificationWorker =
-        ever<String?>(_profileController.isVerified, (_) {
+    _verificationWorker = ever<String?>(_profileController.isVerified, (_) {
       if (_profileController.isVerifiedApproved &&
           orders.isEmpty &&
           !isOrdersLoading.value) {
@@ -111,8 +110,8 @@ class AllOrdersController extends GetxController {
 
         final initialIndex =
             parsedOrders.isNotEmpty && _isCombinedOrder(parsedOrders.first)
-                ? 0
-                : 1;
+            ? 0
+            : 1;
         _selectTab(initialIndex);
       } else {
         orders.clear();
@@ -146,16 +145,53 @@ class AllOrdersController extends GetxController {
 
   void _initConnectivityMonitoring() {
     final connectivity = Connectivity();
-    _connectivitySubscription =
-        connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
-    connectivity.checkConnectivity().then(_updateConnectionStatus).catchError(
-      (_) => hasConnection.value = true,
+    _connectivitySubscription = connectivity.onConnectivityChanged.listen(
+      _updateConnectionStatus,
     );
+    connectivity
+        .checkConnectivity()
+        .then(_updateConnectionStatus)
+        .catchError((_) => hasConnection.value = true);
   }
 
   void _updateConnectionStatus(List<ConnectivityResult> results) {
-    hasConnection.value =
-        results.any((result) => result != ConnectivityResult.none);
+    hasConnection.value = results.any(
+      (result) => result != ConnectivityResult.none,
+    );
+  }
+
+  Future<ResponseData> markOrderOnWay({required String orderId}) async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null || accessToken.isEmpty) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 401,
+        errorMessage: 'Missing access token. Please login again.',
+        responseData: null,
+      );
+    }
+
+    return _orderServices.markOrderOnWay(
+      accessToken: accessToken,
+      orderId: orderId,
+    );
+  }
+
+  Future<ResponseData> markOrderDelivered({required String orderId}) async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null || accessToken.isEmpty) {
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 401,
+        errorMessage: 'Missing access token. Please login again.',
+        responseData: null,
+      );
+    }
+
+    return _orderServices.markOrderDelivered(
+      accessToken: accessToken,
+      orderId: orderId,
+    );
   }
 
   @override
