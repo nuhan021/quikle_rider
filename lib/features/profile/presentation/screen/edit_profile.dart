@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -201,6 +203,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           child: ElevatedButton(
             onPressed: isSaving ? null : _handleSave,
             style: ElevatedButton.styleFrom(
+              side: BorderSide.none,
               backgroundColor: Colors.black,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 14),

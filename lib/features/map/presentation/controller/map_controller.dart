@@ -9,6 +9,7 @@ import 'package:get/get.dart';
 import 'package:quikle_rider/core/utils/device/device_utility.dart';
 import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/map/presentation/model/delivery_model.dart';
+import 'package:quikle_rider/features/messages/presentation/massage_screen.dart';
 
 class MapController extends GetxController {
   // Load the key from .env or --dart-define (same as TrackingController).
@@ -396,8 +397,8 @@ class MapController extends GetxController {
 
   // Message customer
   void messageCustomer() {
-    // Implement message functionality
-    debugPrint('Messaging customer: ${currentDelivery.value?.customerName}');
+     Get.to(MassageScreen());
+
   }
 
   void handleMapTap(LatLng position) {

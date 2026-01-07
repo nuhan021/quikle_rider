@@ -11,7 +11,7 @@ import 'package:quikle_rider/features/profile/presentation/controller/profile_co
 
 class AllOrdersController extends GetxController {
   AllOrdersController({OrderServices? orderServices})
-      : _orderServices = orderServices ?? OrderServices();
+    : _orderServices = orderServices ?? OrderServices();
 
   final OrderServices _orderServices;
 
@@ -21,7 +21,6 @@ class AllOrdersController extends GetxController {
   RxBool hasConnection = true.obs;
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   Worker? _verificationWorker;
-
   final RxBool isOrdersLoading = false.obs;
   final RxString ordersError = ''.obs;
   final RxList<RiderOrder> orders = <RiderOrder>[].obs;
@@ -41,8 +40,7 @@ class AllOrdersController extends GetxController {
     _profileController = Get.isRegistered<ProfileController>()
         ? Get.find<ProfileController>()
         : Get.put(ProfileController());
-    _verificationWorker =
-        ever<String?>(_profileController.isVerified, (_) {
+    _verificationWorker = ever<String?>(_profileController.isVerified, (_) {
       if (_profileController.isVerifiedApproved &&
           orders.isEmpty &&
           !isOrdersLoading.value) {
@@ -112,8 +110,8 @@ class AllOrdersController extends GetxController {
 
         final initialIndex =
             parsedOrders.isNotEmpty && _isCombinedOrder(parsedOrders.first)
-                ? 0
-                : 1;
+            ? 0
+            : 1;
         _selectTab(initialIndex);
       } else {
         orders.clear();
@@ -147,16 +145,19 @@ class AllOrdersController extends GetxController {
 
   void _initConnectivityMonitoring() {
     final connectivity = Connectivity();
-    _connectivitySubscription =
-        connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
-    connectivity.checkConnectivity().then(_updateConnectionStatus).catchError(
-      (_) => hasConnection.value = true,
+    _connectivitySubscription = connectivity.onConnectivityChanged.listen(
+      _updateConnectionStatus,
     );
+    connectivity
+        .checkConnectivity()
+        .then(_updateConnectionStatus)
+        .catchError((_) => hasConnection.value = true);
   }
 
   void _updateConnectionStatus(List<ConnectivityResult> results) {
-    hasConnection.value =
-        results.any((result) => result != ConnectivityResult.none);
+    hasConnection.value = results.any(
+      (result) => result != ConnectivityResult.none,
+    );
   }
 
   Future<ResponseData> markOrderOnWay({required String orderId}) async {
