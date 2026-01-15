@@ -113,7 +113,7 @@ class HomepageController extends GetxController {
       if (result == true) {
         unawaited(_changeOnlineStatus(true));
         await _refreshUpcomingAssignments();
-        locationServices.sendCurrentLocation();
+        locationServices.connectAndStart();
       } else {
         isOnline.value = false;
         stats.clear();

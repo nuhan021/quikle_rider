@@ -39,14 +39,14 @@ class CombinedOrderController extends GetxController {
     _showSnackbar('Calling ${current.customerName}');
   }
 
-  void sendMessage([CombinedOrderModel? target]) {
-    final current = target ?? order.value;
-    if (current == null) {
-      _showSnackbar('No combined order loaded');
-      return;
-    }
-    _showSnackbar('Opening chat with ${current.customerName}');
-  }
+  // void sendMessage([CombinedOrderModel? target]) {
+  //   final current = target ?? order.value;
+  //   if (current == null) {
+  //     _showSnackbar('No combined order loaded');
+  //     return;
+  //   }
+  //   _showSnackbar('Opening chat with ${current.customerName}');
+  // }
 
   void _showSnackbar(String message) {
     Get.snackbar(

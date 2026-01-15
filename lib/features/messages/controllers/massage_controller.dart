@@ -15,14 +15,12 @@ import 'package:quikle_rider/features/messages/services/massage_socket_services.
 
 
 class MassageController {
-  MassageController({int? customerId})
-      : customerId = customerId ?? 1; // default customer side channel
-
-  final int customerId;
+ 
   final MassageSocketService _socketService = MassageSocketService();
   final StreamController<ChatMessage> _incomingController =
       StreamController<ChatMessage>.broadcast();
   StreamSubscription? _socketSubscription;
+  bool _chatStarted = false;
   final ValueNotifier<List<ChatMessage>> messages =
       ValueNotifier<List<ChatMessage>>([]);
   final ValueNotifier<bool> connectionStatus = ValueNotifier<bool>(false);
@@ -50,7 +48,7 @@ class MassageController {
     });
 
     // if (!_chatStarted) {
-    //   await _startChatSession();
+    //   await startChatSession();
     //   _chatStarted = true;
     // }
 
@@ -67,14 +65,15 @@ class MassageController {
     _appendMessage(message);
   }
 
-  void sendMessage(String text) {
+  void sendMessage(String text, int customerId) {
     final outgoing = ChatMessage(
       text: text,
       time: DateTime.now(),
       fromUser: true,
     );
     _appendMessage(outgoing);
-    _socketService.sendMessage(customerId: 2, text: text);
+    _socketService.sendMessage(customerId: customerId, text: text);
+    AppLoggerHelper.debug('➡️ sending chat with customer: $customerId');
   }
 
   void dispose() {
@@ -92,7 +91,7 @@ class MassageController {
     historyError.dispose();
   }
 
-  Future<void> startChatSession() async {
+  Future<void> startChatSession(int customerId) async {
     final riderId = _selfRiderId;
     final uri = Uri.parse(
       '$baseurl/rider/chat/start/riders/$riderId/customers/$customerId',
@@ -125,7 +124,7 @@ class MassageController {
     messages.value = current;
   }
 
-  Future<void> fetchChatHistory({int limit = 50}) async {
+  Future<void> fetchChatHistory({int limit = 50, int ?customerId}) async {
     historyLoading.value = true;
     historyError.value = null;
     final riderId = _selfRiderId;

@@ -42,7 +42,7 @@ class LocationServices {
       return;
     }
 
-    final wsUrl = Uri.parse('wss://quikle-u4dv.onrender.com/rider/ws/location/riders/$riderId');
+    final wsUrl = Uri.parse('ws://caditya619-backend-ng0e.onrender.com/rider/ws/location/riders/$riderId');
     final channel = WebSocketChannel.connect(wsUrl);
     _channel = channel;
 

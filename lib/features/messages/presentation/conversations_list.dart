@@ -19,9 +19,9 @@ class _ConversationsListScreenState extends State<ConversationsListScreen> {
   void initState() {
     super.initState();
     _controller = MassageController();
-    _controller.fetchChatPartners();
+    // _controller.fetchChatPartners();
     _controller.refreshActiveStatus();
-    _controller.startChatSession();
+    _controller.startChatSession(48);
     _controller.fetchChatHistory();
 
     

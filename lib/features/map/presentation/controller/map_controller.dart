@@ -89,7 +89,6 @@ class MapController extends GetxController {
           markerId: const MarkerId('selected-destination'),
           position: destination,
           icon: BitmapDescriptor.defaultMarkerWithHue(
-            
             BitmapDescriptor.hueAzure,
           ),
           infoWindow: InfoWindow(
@@ -152,7 +151,7 @@ class MapController extends GetxController {
   void onInit() {
     _loadDeliveryData(Get.arguments);
     requestCurrentLocation();
-    
+
     super.onInit();
   }
 
@@ -197,10 +196,12 @@ class MapController extends GetxController {
       baseRate: _parseDouble(order.baseRate),
       pickupDistanceKm: order.pickupDistanceKm,
       customerName: customerName.isNotEmpty ? customerName : 'Customer',
-      customerAddress:
-          deliveryAddress.isNotEmpty ? deliveryAddress : 'Delivery location',
-      deliveryAddress:
-          deliveryAddress.isNotEmpty ? deliveryAddress : 'Delivery location',
+      customerAddress: deliveryAddress.isNotEmpty
+          ? deliveryAddress
+          : 'Delivery location',
+      deliveryAddress: deliveryAddress.isNotEmpty
+          ? deliveryAddress
+          : 'Delivery location',
       estimatedTime: estimated,
       restaurantName: restaurantName.isNotEmpty ? restaurantName : 'Vendor',
       customerAvatar: 'assets/images/avatar.png',
@@ -211,7 +212,10 @@ class MapController extends GetxController {
 
     if (vendor?.storeLatitude != null && vendor?.storeLongitude != null) {
       vendorPickupAddress.value = 'Resolving pickup address...';
-      vendorPosition.value = LatLng(vendor!.storeLatitude!, vendor.storeLongitude!);
+      vendorPosition.value = LatLng(
+        vendor!.storeLatitude!,
+        vendor.storeLongitude!,
+      );
       _resolveVendorAddressFromCoordinates(vendorPosition.value!);
     } else {
       vendorPosition.value = null;
@@ -219,8 +223,7 @@ class MapController extends GetxController {
     }
 
     if (shipping?.latitude != null && shipping?.longitude != null) {
-      customerPosition.value =
-          LatLng(shipping!.latitude!, shipping.longitude!);
+      customerPosition.value = LatLng(shipping!.latitude!, shipping.longitude!);
     } else if ((shipping?.addressLine1 ?? '').trim().isNotEmpty) {
       _resolveCustomerCoordinatesFromAddress(shipping!.addressLine1!.trim());
     } else {
@@ -397,8 +400,7 @@ class MapController extends GetxController {
 
   // Message customer
   void messageCustomer() {
-     Get.to(MassageScreen());
-
+    Get.to(MassageScreen());
   }
 
   void handleMapTap(LatLng position) {
@@ -419,6 +421,11 @@ class MapController extends GetxController {
     selectedDestination.value = null;
     selectedDestinationAddress.value = '';
     _moveCameraToCurrentLocation();
+  }
+
+  /// Refresh route polylines - called when vendor/customer positions are updated
+  Future<void> refreshRoutePolylines() async {
+    await _buildRoutePolylines();
   }
 
   Future<void> openRouteInMaps() async {
@@ -693,5 +700,4 @@ class MapController extends GetxController {
       debugPrint('MapController: Failed to reverse-geocode vendor - $error');
     }
   }
-
 }
