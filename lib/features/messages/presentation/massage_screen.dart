@@ -33,7 +33,7 @@ class _MassageScreenState extends State<MassageScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = MassageController(customerId: _customerId);
+    _controller = MassageController();
     _controller.messages.addListener(_scrollToBottom);
     _initChat();
   }
@@ -361,7 +361,7 @@ class _MassageScreenState extends State<MassageScreen> {
     final text = _composerController.text.trim();
     if (text.isEmpty) return;
     _composerController.clear();
-    _controller.sendMessage(text);
+    _controller.sendMessage(text,48);
   }
 
   void _scrollToBottom() {
@@ -376,7 +376,7 @@ class _MassageScreenState extends State<MassageScreen> {
   }
 
   Future<void> _initChat() async {
-    _controller.startChatSession();
+    _controller.startChatSession(48);
     await _controller.fetchChatHistory();
     _initialHistoryLoaded = true;
     _controller.connect();

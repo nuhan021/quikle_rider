@@ -16,12 +16,11 @@ class MassageSocketService {
   Stream<bool> get connectionChanges => _connectionController.stream;
 
   bool get isConnected => _channel != null;
-
   void connect({required int myid}) {
     if (_channel != null) return;
 
     final url =
-        'wss://quikle-u4dv.onrender.com/rider/ws/chat/riders/$myid';
+        'ws://caditya619-backend-ng0e.onrender.com/rider/ws/chat/riders/$myid';
     AppLoggerHelper.debug('🔌 Connecting chat socket → $url');
 
     _channel = WebSocketChannel.connect(Uri.parse(url));
@@ -61,12 +60,12 @@ class MassageSocketService {
 
     final payload = {
       'to_type': 'customers',
-      'to_id': customerId.toString(),
+      'to_id': customerId,
       'text': text,
     };
 
     final encoded = jsonEncode(payload);
-    AppLoggerHelper.debug('➡️ sending chat: $encoded');
+    AppLoggerHelper.debug('➡️ sending chartrtrt: $customerId');
     _channel!.sink.add(encoded);
   }
 
