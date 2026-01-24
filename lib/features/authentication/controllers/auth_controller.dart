@@ -32,6 +32,7 @@ class AuthController extends GetxController {
   final resendTimer = 27.obs;
   final canResend = false.obs;
   final isVerifying = false.obs;
+  final isRequestingOtp = false.obs;
   Timer? _resendCountdown;
   bool _isSignupFlow = false;
   String _currentOtpPurpose = 'rider_login';
@@ -43,12 +44,18 @@ class AuthController extends GetxController {
   final nidcontroller = TextEditingController();
   final formKey = GlobalKey<FormState>();
   final termsAccepted = false.obs;
+  final errortext = ''.obs;
 
   static const _resendDuration = 27;
   String? _pendingPhoneNumber;
 
   String get phoneNumberForOtp =>
       (_pendingPhoneNumber ?? phoneController.text).trim();
+
+  bool isValidPhoneNumber(String value) {
+    final trimmed = value.trim();
+    return RegExp(r'^\+91\d{10}$').hasMatch(trimmed);
+  }
 
   @override
   void onInit() {
@@ -86,18 +93,25 @@ class AuthController extends GetxController {
       );
       return;
     }
+    if (isRequestingOtp.value) return;
 
     _isSignupFlow = false;
     _pendingSignupPayload = null;
-    final otpSent = await _requestOtp(
-      phoneNumber: phoneNumber,
-      purpose: 'rider_login',
-    );
-    if (otpSent) {
-      Get.toNamed(
-        AppRoute.getLoginOtp(),
-        arguments: {'phone': _pendingPhoneNumber},
+    isRequestingOtp.value = true;
+    try {
+      final otpSent = await _requestOtp(
+        phoneNumber: phoneNumber,
+        purpose: 'rider_login',
+        showLoader: false,
       );
+      if (otpSent) {
+        Get.toNamed(
+          AppRoute.getLoginOtp(),
+          arguments: {'phone': _pendingPhoneNumber},
+        );
+      }
+    } finally {
+      isRequestingOtp.value = false;
     }
   }
 
@@ -318,15 +332,19 @@ class AuthController extends GetxController {
   Future<bool> _requestOtp({
     required String phoneNumber,
     required String purpose,
+    bool showLoader = true,
   }) async {
     _pendingPhoneNumber = phoneNumber;
     _currentOtpPurpose = purpose;
 
-    final response = await _runWithLoader(
-      () => _authServices.sendOtp(phone: phoneNumber, purpose: purpose),
-    );
+    final response = showLoader
+        ? await _runWithLoader(
+            () => _authServices.sendOtp(phone: phoneNumber, purpose: purpose),
+          )
+        : await _authServices.sendOtp(phone: phoneNumber, purpose: purpose);
 
     if (response.isSuccess) {
+      errortext.value = '';
       _resetOtpFields();
       _startResendTimer();
 
@@ -349,15 +367,8 @@ class AuthController extends GetxController {
       return true;
     } else {
       AppLoggerHelper.error("error ${response.errorMessage}");
-      Get.snackbar(
-        'Failed to send OTP',
-        response.errorMessage.isNotEmpty
-            ? response.errorMessage
-            : 'Please try again later.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent,
-        colorText: Colors.white,
-      );
+      errortext.value = response.errorMessage;
+     
       return false;
     }
   }

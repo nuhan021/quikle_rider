@@ -3,18 +3,21 @@ import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/data/models/vehicle_model.dart';
-import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/vehicle_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/vehicle_information.dart';
 import 'package:quikle_rider/features/profile/presentation/widgets/profile_components/profile_list_shimmer_card.dart';
 
 class VehicleListPage extends StatelessWidget {
   VehicleListPage({super.key});
 
-  final ProfileController _profileController = Get.find<ProfileController>();
+  final VehicleController _vehicleController =
+      Get.isRegistered<VehicleController>()
+          ? Get.find<VehicleController>()
+          : Get.put(VehicleController());
 
   @override
   Widget build(BuildContext context) {
-    _profileController.ensureVehicleListLoaded();
+    _vehicleController.ensureVehicleListLoaded();
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: UnifiedProfileAppBar(
@@ -27,9 +30,9 @@ class VehicleListPage extends StatelessWidget {
         onPressed: () => Get.to(VehicleInformationPage()),
       ),
       body: Obx(() {
-        final isLoading = _profileController.isVehicleListLoading.value;
-        final vehicles = _profileController.vehicleList;
-        final error = _profileController.vehicleListError.value;
+        final isLoading = _vehicleController.isVehicleListLoading.value;
+        final vehicles = _vehicleController.vehicleList;
+        final error = _vehicleController.vehicleListError.value;
 
         if (isLoading) {
           return ListView.separated(
@@ -50,7 +53,7 @@ class VehicleListPage extends StatelessWidget {
             title: 'Unable to load vehicles',
             message: error,
             actionLabel: 'Retry',
-            onAction: () => _profileController.fetchVehiclesList(),
+            onAction: () => _vehicleController.fetchVehiclesList(),
           );
         }
 
@@ -61,12 +64,12 @@ class VehicleListPage extends StatelessWidget {
             message:
                 'Add your first vehicle to start receiving orders for that vehicle type.',
             actionLabel: 'Refresh',
-            onAction: () => _profileController.fetchVehiclesList(),
+            onAction: () => _vehicleController.fetchVehiclesList(),
           );
         }
 
         return RefreshIndicator(
-          onRefresh: _profileController.fetchVehiclesList,
+          onRefresh: _vehicleController.fetchVehiclesList,
           child: ListView.separated(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),

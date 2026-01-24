@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/features/profile/data/models/help_support_request.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/help_support_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/widgets/profile_components/profile_list_shimmer_card.dart';
 
@@ -14,9 +15,12 @@ class HelpSupportPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Reuse the bound instance to avoid creating duplicates.
-    final controller = Get.isRegistered<ProfileController>()
-        ? Get.find<ProfileController>()
-        : Get.put(ProfileController(), permanent: true);
+    if (!Get.isRegistered<ProfileController>()) {
+      Get.put(ProfileController(), permanent: true);
+    }
+    final controller = Get.isRegistered<HelpSupportController>()
+        ? Get.find<HelpSupportController>()
+        : Get.put(HelpSupportController(), permanent: true);
     controller.ensureSupportHistoryLoaded();
 
     return Scaffold(
@@ -78,7 +82,7 @@ class HelpSupportPage extends StatelessWidget {
     );
   }
 
-  Widget _buildReportIssueSection(ProfileController controller) {
+  Widget _buildReportIssueSection(HelpSupportController controller) {
     return _card(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -325,7 +329,7 @@ class HelpSupportPage extends StatelessWidget {
       ),
     );
   }
-  Widget _buildSupportHistorySection(ProfileController controller) {
+  Widget _buildSupportHistorySection(HelpSupportController controller) {
     return Obx(() {
       final isLoading = controller.isSupportHistoryLoading.value;
       final error = controller.supportHistoryError.value;

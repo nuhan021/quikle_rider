@@ -169,8 +169,8 @@ class UploadDocumentsPage extends StatelessWidget {
           ),
           child: isLoading
               ? Center(
-                  child: LoadingAnimationWidget.inkDrop(
-                    color: Colors.black,
+                child: LoadingAnimationWidget.inkDrop(
+                    color: Colors.amber,
                     size: 35.w,
                   ),
                 )

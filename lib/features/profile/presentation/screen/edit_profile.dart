@@ -247,7 +247,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     if (success) {
       Get.back();
-      Get.snackbar('Profile Updated', 'Your profile has been updated.');
+      
     } else {
       Get.snackbar('Update Failed', _controller.profileUpdateErrorText);
     }

@@ -248,26 +248,17 @@ class ProfileServices {
     });
 
     Future<void> addFile(String field, File? file) async {
-      if (file != null && await file.exists()) {
-        final mediaType = _mediaTypeForFile(file);
-        request.files.add(
-          await http.MultipartFile.fromPath(
-            field,
-            file.path,
-            contentType: mediaType,
-          ),
-        );
-      } else {
-        request.files.add(
-          http.MultipartFile(
-            field,
-            Stream.empty(),
-            0,
-            filename: '',
-            contentType: MediaType('application', 'octet-stream'),
-          ),
-        );
+      if (file == null || !(await file.exists())) {
+        return;
       }
+      final mediaType = _mediaTypeForFile(file);
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          field,
+          file.path,
+          contentType: mediaType,
+        ),
+      );
     }
 
     await addFile('pi', profileImage);
