@@ -33,11 +33,7 @@ class KycController extends GetxController {
   final ProfileServices _profileServices;
   final ImagePicker _picker = ImagePicker();
   final ProfileController _profileController = Get.find<ProfileController>();
-  static const List<String> idProofTypes = [
-    'Aadhaar',
-    'PAN',
-    'Voter ID',
-  ];
+  static const List<String> idProofTypes = ['Aadhaar', 'PAN', 'Voter ID'];
   final idProofType = idProofTypes.first.obs;
   final idProofNumberController = TextEditingController();
   final drivingLicenseNumberController = TextEditingController();
@@ -250,6 +246,29 @@ class KycController extends GetxController {
       return false;
     }
 
+    if (nationalId == null || drivingLicense == null) {
+      documentUploadError.value =
+          'National ID and driving license are required.';
+      return false;
+    }
+
+    if (idProofType.value.trim().isEmpty) {
+      documentUploadError.value = 'ID type is required.';
+      return false;
+    }
+    if (idProofNumberController.text.trim().isEmpty) {
+      documentUploadError.value = 'National ID number is required.';
+      return false;
+    }
+    if (drivingLicenseNumberController.text.trim().isEmpty) {
+      documentUploadError.value = 'Driving license number is required.';
+      return false;
+    }
+    if (vehicleRegistrationNumberController.text.trim().isEmpty) {
+      documentUploadError.value = 'Vehicle registration number is required.';
+      return false;
+    }
+
     final hasSelection = [
       profileImage,
       nationalId,
@@ -276,8 +295,8 @@ class KycController extends GetxController {
         idType: idProofType.value,
         nidNumber: idProofNumberController.text.trim(),
         drivingLicenseNumber: drivingLicenseNumberController.text.trim(),
-        vehicleRegistrationNumber:
-            vehicleRegistrationNumberController.text.trim(),
+        vehicleRegistrationNumber: vehicleRegistrationNumberController.text
+            .trim(),
       );
 
       if (response.isSuccess && response.responseData is Map<String, dynamic>) {

@@ -9,7 +9,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
-import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/referral_controller.dart';
 import 'package:quikle_rider/features/refferel/widgets/reffer_shimmer.dart';
 import 'dart:typed_data';
 import 'package:url_launcher/url_launcher.dart';
@@ -22,14 +22,14 @@ class ReferralProgramPage extends StatefulWidget {
 }
 
 class _ReferralProgramPageState extends State<ReferralProgramPage> {
-  late final ProfileController _controller;
+  late final ReferralController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = Get.isRegistered<ProfileController>()
-        ? Get.find<ProfileController>()
-        : Get.put(ProfileController());
+    _controller = Get.isRegistered<ReferralController>()
+        ? Get.find<ReferralController>()
+        : Get.put(ReferralController());
     _loadReferralData();
   }
 

@@ -8,11 +8,19 @@ import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/data/models/profile_model.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/vehicle_controller.dart';
 
 class VehicleInformationPage extends StatelessWidget {
   VehicleInformationPage({super.key});
 
-  final ProfileController _controller = Get.find<ProfileController>();
+  final ProfileController _profileController =
+      Get.isRegistered<ProfileController>()
+          ? Get.find<ProfileController>()
+          : Get.put(ProfileController());
+  final VehicleController _vehicleController =
+      Get.isRegistered<VehicleController>()
+          ? Get.find<VehicleController>()
+          : Get.put(VehicleController());
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +28,9 @@ class VehicleInformationPage extends StatelessWidget {
       backgroundColor: Colors.grey[50],
       appBar: UnifiedProfileAppBar(title: 'Vehicle Information'),
       body: Obx(() {
-        final ProfileModel? profile = _controller.profile.value;
-        final isLoading = _controller.isLoading.value && profile == null;
+        final ProfileModel? profile = _profileController.profile.value;
+        final isLoading =
+            _profileController.isLoading.value && profile == null;
 
         if (isLoading) {
           return Center(
@@ -38,7 +47,7 @@ class VehicleInformationPage extends StatelessWidget {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Form(
-                  key: _controller.vehicleFormKey,
+                  key: _vehicleController.vehicleFormKey,
                   child: Column(
                     children: [
                       const SizedBox(height: 24),
@@ -145,7 +154,7 @@ class VehicleInformationPage extends StatelessWidget {
           _buildVehicleTypeDropdown(),
           _buildTextField(
             label: 'License Plate Number',
-            controller: _controller.licensePlateController,
+            controller: _vehicleController.licensePlateController,
             validator: (value) {
               if (value == null || value.trim().isEmpty) {
                 return 'Please enter your license plate number';
@@ -156,7 +165,7 @@ class VehicleInformationPage extends StatelessWidget {
           ),
           _buildTextField(
             label: 'Vehicle Model (Optional)',
-            controller: _controller.vehicleModelController,
+            controller: _vehicleController.vehicleModelController,
           ),
           const SizedBox(height: 20),
         ],
@@ -166,7 +175,7 @@ class VehicleInformationPage extends StatelessWidget {
 
   Widget _buildVehicleSummary() {
     return Obx(() {
-      final vehicle = _controller.vehicleDetails.value;
+      final vehicle = _vehicleController.vehicleDetails.value;
       if (vehicle == null) return const SizedBox.shrink();
 
       return Container(
@@ -229,13 +238,14 @@ class VehicleInformationPage extends StatelessWidget {
 
   Widget _buildSaveButton() {
     return Obx(() {
-      final isSaving = _controller.isCreatingVehicle.value;
+      final isSaving = _vehicleController.isCreatingVehicle.value;
       return Container(
         margin: const EdgeInsets.all(20),
         width: double.infinity,
 
         child: ElevatedButton(
-          onPressed: isSaving ? null : _controller.submitVehicleInformation,
+          onPressed:
+              isSaving ? null : _vehicleController.submitVehicleInformation,
           style: ElevatedButton.styleFrom(
             side: BorderSide.none,
             backgroundColor: Colors.black,
@@ -280,7 +290,7 @@ class VehicleInformationPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Obx(() {
-            final value = _controller.selectedVehicleType.value;
+            final value = _vehicleController.selectedVehicleType.value;
             return Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -299,9 +309,9 @@ class VehicleInformationPage extends StatelessWidget {
                   style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                   onChanged: (String? newValue) {
                     if (newValue == null) return;
-                    _controller.setVehicleType(newValue);
+                    _vehicleController.setVehicleType(newValue);
                   },
-                  items: _controller.vehicleTypes
+                  items: _vehicleController.vehicleTypes
                       .map(
                         (type) => DropdownMenuItem<String>(
                           value: type,

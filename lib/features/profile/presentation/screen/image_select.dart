@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/vehicle_controller.dart';
 
 class ImageSelectPage extends StatefulWidget {
   const ImageSelectPage({Key? key}) : super(key: key);
@@ -14,7 +15,7 @@ class ImageSelectPage extends StatefulWidget {
 class _ImageSelectPageState extends State<ImageSelectPage> {
   File? selectedImage;
   final ImagePicker _picker = ImagePicker();
-  final ProfileController _profileController = Get.find<ProfileController>();
+  final VehicleController _profileController = Get.find<VehicleController>();
 
   @override
   void initState() {

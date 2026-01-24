@@ -1,21 +1,14 @@
 // ignore_for_file: deprecated_member_use
 
-import 'dart:io';
-import 'dart:typed_data';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
-import 'package:quikle_rider/features/profile/data/models/help_support_request.dart';
 import 'package:quikle_rider/features/profile/data/models/profile_completion_model.dart';
 import 'package:quikle_rider/features/profile/data/models/profile_model.dart';
-import 'package:quikle_rider/features/profile/data/models/referral_dashboard.dart';
 import 'package:quikle_rider/features/profile/data/models/rider_documents_model.dart';
 import 'package:quikle_rider/features/profile/data/models/training_resource.dart';
-import 'package:quikle_rider/features/profile/data/models/vehicle_model.dart';
 import 'package:quikle_rider/features/profile/data/services/profile_services.dart';
 
 class ProfileController extends GetxController {
@@ -27,13 +20,10 @@ class ProfileController extends GetxController {
   // 📊 State: profile & documents
   final RxBool isavaiabilityProfile = false.obs;
   final RxBool isLoading = false.obs;
-  final RxBool isprofilecompleted = false.obs;
   final RxnString errorMessage = RxnString();
   final Rxn<ProfileModel> profile = Rxn<ProfileModel>();
   final RxBool isUpdatingProfile = false.obs;
   final RxnString profileUpdateError = RxnString();
-  final RxBool isUploadingDocuments = false.obs;
-  final RxnString documentUploadError = RxnString();
   final Rxn<bool> isDocumentUploaded = Rxn<bool>();
   final RxBool isDocumentStatusLoading = false.obs;
   final RxnString documentStatusError = RxnString();
@@ -50,53 +40,11 @@ class ProfileController extends GetxController {
   bool _hasLoadedTrainingVideos = false;
   bool _hasLoadedTrainingPdfs = false;
 
-  // 🚗 State: vehicles
-  final RxBool isCreatingVehicle = false.obs;
-  final RxnString vehicleCreationError = RxnString();
-  final RxList<VehicleModel> vehicleList = <VehicleModel>[].obs;
-  final RxBool isVehicleListLoading = false.obs;
-  final RxnString vehicleListError = RxnString();
-  final Rxn<VehicleModel> vehicleDetails = Rxn<VehicleModel>();
-  final List<String> vehicleTypes = const ['Bike', 'Car', 'Truck', 'Van'];
-  late final RxString selectedVehicleType = vehicleTypes.first.obs;
-  final GlobalKey<FormState> vehicleFormKey = GlobalKey<FormState>();
-  final TextEditingController licensePlateController = TextEditingController();
-  final TextEditingController vehicleModelController = TextEditingController();
-  bool _hasRequestedVehicleList = false;
-
-  // 🆘 State: help & support
-  final RxBool isSubmittingHelpSupport = false.obs;
-  final RxnString helpSupportError = RxnString();
-  final RxList<HelpSupportRequest> supportHistory = <HelpSupportRequest>[].obs;
-  final RxBool isSupportHistoryLoading = false.obs;
-  final RxnString supportHistoryError = RxnString();
-  bool _hasLoadedSupportHistory = false;
-  final List<String> helpIssueTypes = const [
-    'Select an issue type',
-    'Account Issues',
-    'Payment Problems',
-    'Order Issues',
-    'App Technical Problems',
-    'Vehicle Registration',
-    'Other',
-  ];
-  late final RxString selectedHelpIssueType = helpIssueTypes.first.obs;
-  final TextEditingController helpDescriptionController =
-      TextEditingController();
-  final Rxn<File> helpAttachment = Rxn<File>();
-  final RxnString helpAttachmentName = RxnString();
-
-  // ✅ State: completion & referral
+  // ✅ State: completion
   final RxBool isProfileCompletionLoading = false.obs;
   final RxnString profileCompletionError = RxnString();
   final Rxn<ProfileCompletionModel> profileCompletion =
       Rxn<ProfileCompletionModel>();
-  final Rxn<ReferralDashboard> referralDashboard = Rxn<ReferralDashboard>();
-  final RxBool isReferralDashboardLoading = false.obs;
-  final RxnString referralDashboardError = RxnString();
-  final Rxn<Uint8List> referralQrImage = Rxn<Uint8List>();
-  final RxBool isReferralQrLoading = false.obs;
-  final RxnString referralQrError = RxnString();
 
   // ⏰ State: availability
   var startTime = TimeOfDay.now().obs;
@@ -176,29 +124,10 @@ class ProfileController extends GetxController {
     return trimmed;
   }
 
-  String? get phoneNumber => profile.value?.phone;
-
   String get profileUpdateErrorText =>
       profileUpdateError.value?.isNotEmpty == true
       ? profileUpdateError.value!
       : 'Unable to update profile.';
-
-  String get documentUploadErrorText =>
-      documentUploadError.value?.isNotEmpty == true
-      ? documentUploadError.value!
-      : 'Unable to upload documents.';
-  String get vehicleCreationErrorText =>
-      vehicleCreationError.value?.isNotEmpty == true
-      ? vehicleCreationError.value!
-      : 'Unable to save vehicle information.';
-  double get completionPercent =>
-      profileCompletion.value?.completionPercentage ?? 0;
-  List<String> get missingCompletionItems =>
-      profileCompletion.value?.missingFields ?? const <String>[];
-  String get completionMessage =>
-      profileCompletion.value?.message.isNotEmpty == true
-      ? profileCompletion.value!.message
-      : 'Complete your profile to unlock new tiers.';
 
   void resetProfileFetchState() {
     _hasAttemptedProfileFetch = false;
@@ -208,13 +137,10 @@ class ProfileController extends GetxController {
   void clearForLogout() {
     isavaiabilityProfile.value = false;
     isLoading.value = false;
-    isprofilecompleted.value = false;
     errorMessage.value = null;
     profile.value = null;
     isUpdatingProfile.value = false;
     profileUpdateError.value = null;
-    isUploadingDocuments.value = false;
-    documentUploadError.value = null;
     isDocumentUploaded.value = null;
     isDocumentStatusLoading.value = false;
     documentStatusError.value = null;
@@ -230,39 +156,9 @@ class ProfileController extends GetxController {
     trainingPdfsError.value = null;
     _hasLoadedTrainingVideos = false;
     _hasLoadedTrainingPdfs = false;
-
-    isCreatingVehicle.value = false;
-    vehicleCreationError.value = null;
-    vehicleList.clear();
-    isVehicleListLoading.value = false;
-    vehicleListError.value = null;
-    vehicleDetails.value = null;
-    selectedVehicleType.value = vehicleTypes.first;
-    vehicleFormKey.currentState?.reset();
-    licensePlateController.clear();
-    vehicleModelController.clear();
-    _hasRequestedVehicleList = false;
-
-    isSubmittingHelpSupport.value = false;
-    helpSupportError.value = null;
-    supportHistory.clear();
-    isSupportHistoryLoading.value = false;
-    supportHistoryError.value = null;
-    _hasLoadedSupportHistory = false;
-    selectedHelpIssueType.value = helpIssueTypes.first;
-    helpDescriptionController.clear();
-    helpAttachment.value = null;
-    helpAttachmentName.value = null;
-
     isProfileCompletionLoading.value = false;
     profileCompletionError.value = null;
     profileCompletion.value = null;
-    referralDashboard.value = null;
-    isReferralDashboardLoading.value = false;
-    referralDashboardError.value = null;
-    referralQrImage.value = null;
-    isReferralQrLoading.value = false;
-    referralQrError.value = null;
 
     startTime.value = TimeOfDay.now();
     endTime.value = TimeOfDay.now();
@@ -304,9 +200,6 @@ class ProfileController extends GetxController {
 
   @override
   void onClose() {
-    helpDescriptionController.dispose();
-    licensePlateController.dispose();
-    vehicleModelController.dispose();
     super.onClose();
   }
 
@@ -381,19 +274,6 @@ class ProfileController extends GetxController {
     endTime.value = time;
   }
 
-  // 🧾 Vehicle form helpers
-  void setVehicleType(String type) {
-    if (!vehicleTypes.contains(type)) return;
-    selectedVehicleType.value = type;
-  }
-
-  void resetVehicleForm() {
-    selectedVehicleType.value = vehicleTypes.first;
-    licensePlateController.clear();
-    vehicleModelController.clear();
-    vehicleFormKey.currentState?.reset();
-  }
-
   // ☎️ Availability API calls
   Future<void> fetchAvailabilitySettings() async {
     final token = StorageService.accessToken;
@@ -416,7 +296,6 @@ class ProfileController extends GetxController {
   // 👤 Profile fetch & update
   Future<void> fetchProfile() async {
     final accessToken = StorageService.accessToken;
-    debugPrint('access token in practice file: $accessToken');
     final refreshToken = StorageService.refreshToken;
     _hasAttemptedProfileFetch = true;
 
@@ -564,11 +443,6 @@ class ProfileController extends GetxController {
           response.responseData as Map<String, dynamic>,
           
         );
-        final isprofilecompleted = response.responseData['is_complete'] as bool;
-        AppLoggerHelper.debug("profile update: ${isprofilecompleted}");
-
-
-
       } else {
         profileCompletion.value = null;
         profileCompletionError.value = response.errorMessage.isNotEmpty
@@ -700,74 +574,6 @@ class ProfileController extends GetxController {
     }
   }
 
-  // 🎁 Referral program data
-  Future<void> fetchReferralDashboard() async {
-    final accessToken = StorageService.accessToken;
-    if (accessToken == null) {
-      referralDashboard.value = null;
-      referralDashboardError.value =
-          'Missing credentials. Please login again.';
-      return;
-    }
-
-    isReferralDashboardLoading.value = true;
-    referralDashboardError.value = null;
-    try {
-      final response = await _profileServices.getReferralDashboard(
-        accessToken: accessToken,
-      );
-
-      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
-        referralDashboard.value = ReferralDashboard.fromJson(
-          response.responseData as Map<String, dynamic>,
-        );
-      } else {
-        referralDashboard.value = null;
-        referralDashboardError.value = response.errorMessage.isNotEmpty
-            ? response.errorMessage
-            : 'Unable to load referral details.';
-      }
-    } finally {
-      isReferralDashboardLoading.value = false;
-    }
-  }
-
-  Future<void> fetchReferralQrImage() async {
-    final accessToken = StorageService.accessToken;
-    if (accessToken == null) {
-      referralQrImage.value = null;
-      referralQrError.value = 'Missing credentials. Please login again.';
-      return;
-    }
-
-    isReferralQrLoading.value = true;
-    referralQrError.value = null;
-    try {
-      final response = await _profileServices.getReferralQrImage(
-        accessToken: accessToken,
-      );
-
-      if (response.isSuccess) {
-        final data = response.responseData;
-        if (data is Uint8List) {
-          referralQrImage.value = data;
-        } else if (data is List<int>) {
-          referralQrImage.value = Uint8List.fromList(data);
-        } else {
-          referralQrImage.value = null;
-          referralQrError.value = 'QR code response invalid.';
-        }
-      } else {
-        referralQrImage.value = null;
-        referralQrError.value = response.errorMessage.isNotEmpty
-            ? response.errorMessage
-            : 'Unable to load referral QR.';
-      }
-    } finally {
-      isReferralQrLoading.value = false;
-    }
-  }
-
   // ✏️ Profile updates
   Future<bool> updateProfileData({
     required String name,
@@ -810,396 +616,6 @@ class ProfileController extends GetxController {
     } finally {
       isUpdatingProfile.value = false;
     }
-  }
-
-  // 📤 Document uploads
-  Future<bool> uploadDocuments({
-    File? profileImage,
-    File? nationalId,
-    File? drivingLicense,
-    File? vehicleRegistration,
-    File? vehicleInsurance,
-  }) async {
-    final accessToken = StorageService.accessToken;
-    if (accessToken == null) {
-      documentUploadError.value = 'Missing credentials. Please login again.';
-      return false;
-    }
-
-    final hasSelection = [
-      profileImage,
-      nationalId,
-      drivingLicense,
-      vehicleRegistration,
-      vehicleInsurance,
-    ].any((file) => file != null);
-
-    if (!hasSelection) {
-      documentUploadError.value = 'Select at least one document to upload.';
-      return false;
-    }
-
-    isUploadingDocuments.value = true;
-    documentUploadError.value = null;
-    try {
-      final response = await _profileServices.uploadDocuments(
-        accessToken: accessToken,
-        profileImage: profileImage,
-        nationalId: nationalId,
-        drivingLicense: drivingLicense,
-        vehicleRegistration: vehicleRegistration,
-        vehicleInsurance: vehicleInsurance,
-      );
-
-      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
-        final docs = RiderDocumentsModel.fromJson(
-          response.responseData as Map<String, dynamic>,
-        );
-        riderDocuments.value = docs;
-        final profileImageUrl = docs.profileImage;
-        if (profileImageUrl != null && profileImageUrl.isNotEmpty) {
-          final currentProfile = profile.value;
-          if (currentProfile != null) {
-            profile.value = currentProfile.copyWith(
-              profileImage: profileImageUrl,
-            );
-          }
-        }
-        return true;
-      } else {
-        documentUploadError.value = response.errorMessage.isNotEmpty
-            ? response.errorMessage
-            : 'Unable to upload documents.';
-        return false;
-      }
-    } finally {
-      isUploadingDocuments.value = false;
-    }
-  }
-
-  // 🚗 Vehicle create & list
-  Future<bool> createVehicle({
-    required String vehicleType,
-    required String licensePlateNumber,
-    String? model,
-  }) async {
-    final accessToken = StorageService.accessToken;
-    if (accessToken == null) {
-      vehicleCreationError.value = 'Missing credentials. Please login again.';
-      return false;
-    }
-
-    isCreatingVehicle.value = true;
-    vehicleCreationError.value = null;
-    try {
-      final response = await _profileServices.createVehicle(
-        accessToken: accessToken,
-        vehicleType: vehicleType,
-        licensePlateNumber: licensePlateNumber,
-        model: model,
-      );
-
-      if (response.isSuccess && response.responseData is Map<String, dynamic>) {
-        final vehicle = VehicleModel.fromJson(
-          response.responseData as Map<String, dynamic>,
-        );
-        vehicleDetails.value = vehicle;
-        final vehicleId = vehicle.id;
-        if (vehicleId != null) {
-          await fetchVehicleDetails(vehicleId: vehicleId);
-        }
-        await fetchVehiclesList();
-        return true;
-      } else {
-        vehicleCreationError.value = response.errorMessage.isNotEmpty
-            ? response.errorMessage
-            : 'Unable to save vehicle information.';
-        return false;
-      }
-    } finally {
-      isCreatingVehicle.value = false;
-    }
-  }
-
-  Future<void> submitVehicleInformation() async {
-    final formState = vehicleFormKey.currentState;
-    if (formState == null || !formState.validate()) {
-      return;
-    }
-
-    FocusManager.instance.primaryFocus?.unfocus();
-
-    final licensePlate = licensePlateController.text.trim();
-    final modelText = vehicleModelController.text.trim();
-
-    final success = await createVehicle(
-      vehicleType: selectedVehicleType.value.toLowerCase(),
-      licensePlateNumber: licensePlate,
-      model: modelText.isEmpty ? null : modelText,
-    );
-    resetVehicleForm();
-    Get.back();
-    if (success) {
-      Get.snackbar(
-        'Vehicle Saved',
-        'Vehicle information saved successfully.',
-        backgroundColor: Colors.green.withOpacity(0.2),
-        colorText: Colors.green[900],
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
-      );
-    } else {
-      Get.snackbar(
-        'Unable to save vehicle',
-        vehicleCreationErrorText,
-        backgroundColor: Colors.red.withOpacity(0.2),
-        colorText: Colors.red[900],
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
-      );
-    }
-  }
-
-  void updateHelpIssueType(String issueType) {
-    selectedHelpIssueType.value = issueType;
-  }
-
-  // 🆘 Help & support flows
-  Future<void> pickHelpAttachment() async {
-    try {
-      final result = await FilePicker.platform.pickFiles();
-      if (result == null || result.files.isEmpty) return;
-      final file = result.files.single;
-      final path = file.path;
-      if (path == null) return;
-      helpAttachment.value = File(path);
-      helpAttachmentName.value = file.name;
-    } catch (error) {
-      AppLoggerHelper.error('Help support attachment pick failed: $error');
-      Get.snackbar(
-        'Attachment Error',
-        'Unable to pick attachment. Please try again.',
-        backgroundColor: Colors.red.withOpacity(0.2),
-        colorText: Colors.red[900],
-      );
-    }
-  }
-
-  void removeHelpAttachment() {
-    helpAttachment.value = null;
-    helpAttachmentName.value = null;
-  }
-
-  void resetHelpSupportForm() {
-    selectedHelpIssueType.value = helpIssueTypes.first;
-    helpDescriptionController.clear();
-    removeHelpAttachment();
-  }
-
-  Future<bool> submitHelpSupportForm() async {
-    final subject = selectedHelpIssueType.value;
-    final description = helpDescriptionController.text.trim();
-
-    if (subject == helpIssueTypes.first || description.isEmpty) {
-      helpSupportError.value = 'Please fill in all required fields';
-      Get.snackbar(
-        'Missing Information',
-        helpSupportError.value!,
-        backgroundColor: Colors.red.withOpacity(0.2),
-        colorText: Colors.red[900],
-      );
-      return false;
-    }
-
-    final success = await submitHelpAndSupport(
-      subject: subject,
-      description: description,
-      attachment: helpAttachment.value,
-    );
-
-    if (success) {
-      Get.snackbar(
-        'Success',
-        'Your issue has been submitted successfully.',
-        backgroundColor: Colors.green.withOpacity(0.2),
-        colorText: Colors.green[900],
-        snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(16),
-      );
-      resetHelpSupportForm();
-      fetchSupportHistory();
-      return true;
-    } else {
-      final error =
-          helpSupportError.value ?? 'Unable to submit issue. Please try again.';
-      Get.snackbar(
-        'Submission Failed',
-        error,
-        backgroundColor: Colors.red.withOpacity(0.2),
-        colorText: Colors.red[900],
-      );
-      return false;
-    }
-  }
-
-  Future<void> fetchSupportHistory() async {
-    final token = StorageService.accessToken;
-    if (token == null) {
-      supportHistory.clear();
-      supportHistoryError.value = 'Missing credentials. Please login again.';
-      return;
-    }
-
-    isSupportHistoryLoading.value = true;
-    supportHistoryError.value = null;
-    try {
-      final response = await _profileServices.listHelpSupportRequests(
-        accessToken: token,
-      );
-
-      if (response.isSuccess && response.responseData is List) {
-        final raw = response.responseData as List<dynamic>;
-        final entries = raw
-            .whereType<Map<String, dynamic>>()
-            .map(HelpSupportRequest.fromJson)
-            .toList();
-        supportHistory.assignAll(entries);
-        _hasLoadedSupportHistory = true;
-      } else {
-        supportHistory.clear();
-        supportHistoryError.value = response.errorMessage.isNotEmpty
-            ? response.errorMessage
-            : 'Unable to load support history.';
-      }
-    } catch (error) {
-      supportHistory.clear();
-      supportHistoryError.value = 'Unable to load support history.';
-      AppLoggerHelper.error('Failed to fetch support history: $error');
-    } finally {
-      isSupportHistoryLoading.value = false;
-    }
-  }
-
-  Future<void> ensureSupportHistoryLoaded() async {
-    if (_hasLoadedSupportHistory) return;
-    await fetchSupportHistory();
-  }
-
-  Future<bool> submitHelpAndSupport({
-    required String subject,
-    required String description,
-    File? attachment,
-  }) async {
-    final accessToken = StorageService.accessToken;
-    if (accessToken == null) {
-      helpSupportError.value = 'Missing credentials. Please login again.';
-      return false;
-    }
-
-    isSubmittingHelpSupport.value = true;
-    helpSupportError.value = null;
-    try {
-      final response = await _profileServices.createHelpAndSupport(
-        accessToken: accessToken,
-        subject: subject,
-        description: description,
-        attachment: attachment,
-      );
-
-      if (response.isSuccess) {
-        return true;
-      } else {
-        helpSupportError.value = response.errorMessage.isNotEmpty
-            ? response.errorMessage
-            : 'Unable to submit help request.';
-        return false;
-      }
-    } finally {
-      isSubmittingHelpSupport.value = false;
-    }
-  }
-
-  // 🗺️ Demo route request placeholder for map features
-  RoutesApiRequest request = RoutesApiRequest(
-    origin: PointLatLng(37.7749, -122.4194),
-    destination: PointLatLng(37.3382, -121.8863),
-    travelMode: TravelMode.driving,
-    routeModifiers: RouteModifiers(
-      avoidTolls: true,
-      avoidHighways: false,
-      avoidFerries: true,
-      avoidIndoor: false,
-    ),
-    routingPreference: RoutingPreference.trafficAware,
-    units: Units.metric,
-    polylineQuality: PolylineQuality.highQuality,
-  );
-
-  // 🚛 Vehicle list fetch
-  Future<void> fetchVehiclesList() async {
-    final accessToken = StorageService.accessToken;
-    if (accessToken == null) {
-      vehicleList.clear();
-      vehicleListError.value = 'Missing credentials. Please login again.';
-      return;
-    }
-
-    _hasRequestedVehicleList = true;
-    isVehicleListLoading.value = true;
-    vehicleListError.value = null;
-    try {
-      final response = await _profileServices.listVehicles(
-        accessToken: accessToken,
-      );
-
-      if (response.isSuccess && response.responseData is List) {
-        final rawList = response.responseData as List<dynamic>;
-        final vehicles = rawList
-            .whereType<Map<String, dynamic>>()
-            .map(VehicleModel.fromJson)
-            .toList();
-        vehicleList.assignAll(vehicles);
-      } else {
-        vehicleList.clear();
-        vehicleListError.value = response.errorMessage.isNotEmpty
-            ? response.errorMessage
-            : 'Unable to fetch vehicles.';
-      }
-    } catch (error) {
-      vehicleList.clear();
-      vehicleListError.value = 'Unable to fetch vehicles.';
-      AppLoggerHelper.error('Vehicle list fetch failed: $error');
-    } finally {
-      isVehicleListLoading.value = false;
-    }
-  }
-
-  Future<void> ensureVehicleListLoaded() async {
-    if (_hasRequestedVehicleList && vehicleList.isNotEmpty) {
-      return;
-    }
-    await fetchVehiclesList();
-  }
-
-  Future<VehicleModel?> fetchVehicleDetails({required int vehicleId}) async {
-    final accessToken = StorageService.accessToken;
-    if (accessToken == null) {
-      return null;
-    }
-
-    final response = await _profileServices.getVehicle(
-      accessToken: accessToken,
-      vehicleId: vehicleId,
-    );
-
-    if (response.isSuccess && response.responseData is Map<String, dynamic>) {
-      final vehicle = VehicleModel.fromJson(
-        response.responseData as Map<String, dynamic>,
-      );
-      vehicleDetails.value = vehicle;
-      return vehicle;
-    }
-    return null;
   }
 
   // ⏱️ Availability save

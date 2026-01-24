@@ -5,7 +5,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/help_support_controller.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/language_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/referral_controller.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/vehicle_controller.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/add_paymentmethod.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/availability_settings.dart';
 import 'package:quikle_rider/features/profile/presentation/screen/delivery_zone.dart';
@@ -205,8 +209,11 @@ class ProfileMenuSection extends StatelessWidget {
   }
 
   void _showLanguageDialog(BuildContext context) {
-    final List<String> languages = ["English", "Spanish", "French", "German"];
-    String selectedLang = languages.first;
+    final languageController = Get.isRegistered<LanguageController>()
+        ? Get.find<LanguageController>()
+        : Get.put(LanguageController());
+    final List<String> languages = languageController.languages;
+    String selectedLang = languageController.selectedLanguage.value;
 
     showDialog(
       context: context,
@@ -256,7 +263,8 @@ class ProfileMenuSection extends StatelessWidget {
                           )
                           .toList(),
                       onChanged: (value) {
-                        setState(() => selectedLang = value!);
+                        if (value == null) return;
+                        setState(() => selectedLang = value);
                       },
                     ),
                     const SizedBox(height: 20),
@@ -272,6 +280,7 @@ class ProfileMenuSection extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
                         onPressed: () {
+                          languageController.setLanguage(selectedLang);
                           Navigator.pop(context);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -331,6 +340,18 @@ class ProfileMenuSection extends StatelessWidget {
               onPressed: () async {
                 await StorageService.logoutUser();
                 controller.clearForLogout();
+                if (Get.isRegistered<VehicleController>()) {
+                  Get.find<VehicleController>().clearForLogout();
+                }
+                if (Get.isRegistered<HelpSupportController>()) {
+                  Get.find<HelpSupportController>().clearForLogout();
+                }
+                if (Get.isRegistered<ReferralController>()) {
+                  Get.find<ReferralController>().clearForLogout();
+                }
+                if (Get.isRegistered<LanguageController>()) {
+                  Get.find<LanguageController>().clearForLogout();
+                }
                 Get.offAllNamed(AppRoute.loginScreen);
               },
               style: ElevatedButton.styleFrom(
