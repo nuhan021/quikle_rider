@@ -708,7 +708,6 @@ class ProfileController extends GetxController {
           snackPosition: SnackPosition.BOTTOM,
           margin: const EdgeInsets.all(16),
         );
-        await Future.delayed(const Duration(milliseconds: 600));
         Get.offAllNamed(AppRoute.getLoginScreen());
       } else {
         Get.snackbar(

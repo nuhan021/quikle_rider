@@ -45,6 +45,7 @@ class AuthController extends GetxController {
   final formKey = GlobalKey<FormState>();
   final termsAccepted = false.obs;
   final errortext = ''.obs;
+  final accountPhoneError = ''.obs;
 
   static const _resendDuration = 27;
   String? _pendingPhoneNumber;
@@ -411,7 +412,7 @@ class AuthController extends GetxController {
         duration: const Duration(seconds: 3),
       );
 
-      Get.offAllNamed(AppRoute.getWelcomeScreen());
+      Get.offAllNamed(AppRoute.getLoginScreen());
     } else {
       Get.snackbar(
         'Signup Failed',

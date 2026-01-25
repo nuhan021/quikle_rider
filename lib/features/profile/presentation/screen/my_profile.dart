@@ -97,7 +97,6 @@ class MyProfilePage extends StatelessWidget {
                           onPressed: isLoading
                               ? null
                               : () async {
-                                  Navigator.of(context).pop();
                                   await _controller.deleteriderprofile();
                                 },
                           style: ElevatedButton.styleFrom(

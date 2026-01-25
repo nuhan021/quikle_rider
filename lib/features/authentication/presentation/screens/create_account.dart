@@ -96,24 +96,44 @@ class CreateAccount extends GetView<AuthController> {
                   SizedBox(height: 20.h),
                   _buildLabel("Phone Number"),
                   SizedBox(height: 8.h),
-                  _buildTextField(
-                    controller: controller.accountPhoneController,
-                    hintText: "XXXXXXXX",
-                    keyboardType: TextInputType.phone,
-                    prefixText: "+91 ",
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                      LengthLimitingTextInputFormatter(10),
-                    ],
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your phone number';
-                      }
-                      if (value.length != 10) {
-                        return 'Please enter a 10-digit phone number';
-                      }
-                      return null;
-                    },
+                  Obx(
+                    () => _buildTextField(
+                      controller: controller.accountPhoneController,
+                      hintText: "XXXXXXXX",
+                      keyboardType: TextInputType.phone,
+                      prefixText: "+91 ",
+                      maxLength: 10,
+                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                      counterText: '',
+                      errorText: controller.accountPhoneError.value.isEmpty
+                          ? null
+                          : controller.accountPhoneError.value,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
+                      onChanged: (value) {
+                        if (value.trim().isEmpty) {
+                          controller.accountPhoneError.value = '';
+                          return;
+                        }
+                        final normalized = '+91${value.trim()}';
+                        controller.accountPhoneError.value =
+                            controller.isValidPhoneNumber(normalized)
+                                ? ''
+                                : 'Please enter a valid phone number';
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your phone number';
+                        }
+                        final normalized = '+91${value.trim()}';
+                        if (!controller.isValidPhoneNumber(normalized)) {
+                          return 'Please enter a valid phone number';
+                        }
+                        return null;
+                      },
+                    ),
                   ),
                   // SizedBox(height: 20.h),
                   // _buildLabel("Driving License Number"),
@@ -263,6 +283,11 @@ class CreateAccount extends GetView<AuthController> {
     TextInputType? keyboardType,
     String? prefixText,
     List<TextInputFormatter>? inputFormatters,
+    int? maxLength,
+    MaxLengthEnforcement? maxLengthEnforcement,
+    String? counterText,
+    String? errorText,
+    ValueChanged<String>? onChanged,
     String? Function(String?)? validator,
   }) {
     return SizedBox(
@@ -271,6 +296,9 @@ class CreateAccount extends GetView<AuthController> {
         controller: controller,
         keyboardType: keyboardType,
         inputFormatters: inputFormatters,
+        maxLength: maxLength,
+        maxLengthEnforcement: maxLengthEnforcement,
+        onChanged: onChanged,
         validator: validator,
         style: getTextStyle(
           font: CustomFonts.inter,
@@ -292,6 +320,9 @@ class CreateAccount extends GetView<AuthController> {
             fontWeight: FontWeight.w400,
             color: Colors.black,
           ),
+          errorText: errorText,
+          errorStyle: const TextStyle(height: 0.8),
+          counterText: counterText,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12.r),
             borderSide: const BorderSide(color: Color(0xFF7C7C7C), width: 1.0),
