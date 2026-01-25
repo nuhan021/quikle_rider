@@ -9,7 +9,6 @@ import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/all_orders/widgets/cards/delevery_process_card.dart';
 import 'package:quikle_rider/features/map/presentation/widgets/map_shimmer.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
-import 'package:quikle_rider/routes/app_routes.dart';
 
 class AllOrdersCombined extends StatelessWidget {
   const AllOrdersCombined({super.key});

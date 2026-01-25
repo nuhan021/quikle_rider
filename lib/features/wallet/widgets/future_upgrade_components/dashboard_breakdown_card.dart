@@ -58,7 +58,7 @@
 //         borderRadius: BorderRadius.circular(16.r),
 //         boxShadow: [
 //           BoxShadow(
-//             color: Colors.black.withOpacity(0.06),
+//             color: Colors.black.withValues(alpha: 0.06),
 //             blurRadius: 10.r,
 //             offset: Offset(0, 4.h),
 //           ),
@@ -117,7 +117,7 @@
 //         color: Colors.grey.shade50,
 //         borderRadius: BorderRadius.circular(12.r),
 //         // border: item.isTotal
-//         //     ? Border.all(color: item.color.withOpacity(0.3), width: 1.5)
+//         //     ? Border.all(color: item.color.withValues(alpha: 0.3), width: 1.5)
 //         //     : null,
 //       ),
 //       child: Row(
@@ -126,7 +126,7 @@
 //             height: 40.w,
 //             width: 40.w,
 //             decoration: BoxDecoration(
-//               color: item.color.withOpacity(0.12),
+//               color: item.color.withValues(alpha: 0.12),
 //               borderRadius: BorderRadius.circular(10.r),
 //             ),
 //             child: Icon(item.icon, color: item.color, size: 22.w),

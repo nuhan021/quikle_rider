@@ -76,7 +76,7 @@ class HelpSupportController extends GetxController {
       Get.snackbar(
         'Attachment Error',
         'Unable to pick attachment. Please try again.',
-        backgroundColor: Colors.red.withOpacity(0.2),
+        backgroundColor: Colors.red.withValues(alpha: 0.2),
         colorText: Colors.red[900],
       );
     }
@@ -102,7 +102,7 @@ class HelpSupportController extends GetxController {
       Get.snackbar(
         'Missing Information',
         helpSupportError.value!,
-        backgroundColor: Colors.red.withOpacity(0.2),
+        backgroundColor: Colors.red.withValues(alpha: 0.2),
         colorText: Colors.red[900],
       );
       return false;
@@ -118,7 +118,7 @@ class HelpSupportController extends GetxController {
       Get.snackbar(
         'Success',
         'Your issue has been submitted successfully.',
-        backgroundColor: Colors.green.withOpacity(0.2),
+        backgroundColor: Colors.green.withValues(alpha: 0.2),
         colorText: Colors.green[900],
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
@@ -132,7 +132,7 @@ class HelpSupportController extends GetxController {
       Get.snackbar(
         'Submission Failed',
         error,
-        backgroundColor: Colors.red.withOpacity(0.2),
+        backgroundColor: Colors.red.withValues(alpha: 0.2),
         colorText: Colors.red[900],
       );
       return false;

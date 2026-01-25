@@ -17,7 +17,6 @@ import 'package:quikle_rider/features/all_orders/data/services/order_services.da
 import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/bottom_nav_bar/controller/bottom_nav_bar_controller.dart';
 import 'package:quikle_rider/features/home/controllers/homepage_controller.dart';
-import 'package:quikle_rider/features/home/models/home_dashboard_models.dart';
 import 'package:quikle_rider/features/map/presentation/controller/map_controller.dart';
 import 'package:quikle_rider/features/map/presentation/model/delivery_model.dart';
 import 'package:quikle_rider/features/map/presentation/widgets/map_shimmer.dart';
@@ -303,7 +302,7 @@ class _MapScreenState extends State<MapScreen> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 10,
             offset: const Offset(0, -2),

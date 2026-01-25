@@ -609,7 +609,7 @@ class ProfileController extends GetxController {
       Get.snackbar(
         "Error",
         "Authentication token not found.",
-        backgroundColor: Colors.red.withOpacity(0.1),
+        backgroundColor: Colors.red.withValues(alpha: 0.1),
         colorText: Colors.red,
       );
       return;
@@ -638,7 +638,7 @@ class ProfileController extends GetxController {
         Get.snackbar(
           "Success",
           "Availability updated: $updatedFrom - $updatedTo",
-          backgroundColor: Colors.green.withOpacity(0.2),
+          backgroundColor: Colors.green.withValues(alpha: 0.2),
           colorText: Colors.green[900],
           snackPosition: SnackPosition.BOTTOM,
           margin: const EdgeInsets.all(16),
@@ -647,7 +647,7 @@ class ProfileController extends GetxController {
         Get.snackbar(
           "Failed",
           "Could not update settings. Please try again.",
-          backgroundColor: Colors.red.withOpacity(0.2),
+          backgroundColor: Colors.red.withValues(alpha: 0.2),
           colorText: Colors.red[900],
           snackPosition: SnackPosition.BOTTOM,
           margin: const EdgeInsets.all(16),
@@ -657,7 +657,7 @@ class ProfileController extends GetxController {
       Get.snackbar(
         "Error",
         "An unexpected error occurred: $e",
-        backgroundColor: Colors.red.withOpacity(0.2),
+        backgroundColor: Colors.red.withValues(alpha: 0.2),
         colorText: Colors.red[900],
       );
     } finally {
@@ -673,7 +673,7 @@ class ProfileController extends GetxController {
       Get.snackbar(
         "Error",
         "Authentication token not found.",
-        backgroundColor: Colors.red.withOpacity(0.1),
+        backgroundColor: Colors.red.withValues(alpha: 0.1),
         colorText: Colors.red,
       );
       return;
@@ -684,7 +684,7 @@ class ProfileController extends GetxController {
       Get.snackbar(
         "Error",
         "Rider profile id not found.",
-        backgroundColor: Colors.red.withOpacity(0.1),
+        backgroundColor: Colors.red.withValues(alpha: 0.1),
         colorText: Colors.red,
       );
       return;
@@ -703,7 +703,7 @@ class ProfileController extends GetxController {
         Get.snackbar(
           "Deleted",
           "Your account has been deleted.",
-          backgroundColor: Colors.green.withOpacity(0.2),
+          backgroundColor: Colors.green.withValues(alpha: 0.2),
           colorText: Colors.green[900],
           snackPosition: SnackPosition.BOTTOM,
           margin: const EdgeInsets.all(16),
@@ -716,7 +716,7 @@ class ProfileController extends GetxController {
           response.errorMessage.isNotEmpty
               ? response.errorMessage
               : "Could not delete account. Please try again.",
-          backgroundColor: Colors.red.withOpacity(0.2),
+          backgroundColor: Colors.red.withValues(alpha: 0.2),
           colorText: Colors.red[900],
           snackPosition: SnackPosition.BOTTOM,
           margin: const EdgeInsets.all(16),
@@ -726,7 +726,7 @@ class ProfileController extends GetxController {
       Get.snackbar(
         "Error",
         "An unexpected error occurred: $e",
-        backgroundColor: Colors.red.withOpacity(0.2),
+        backgroundColor: Colors.red.withValues(alpha: 0.2),
         colorText: Colors.red[900],
       );
     } finally {

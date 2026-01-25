@@ -33,7 +33,7 @@ class UnverifiedBanner extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(20.r),
         border: Border.all(
-          color: Colors.amber.withOpacity(0.18),
+          color: Colors.amber.withValues(alpha: 0.18),
         ),
         
       ),
@@ -58,7 +58,7 @@ class UnverifiedBanner extends StatelessWidget {
               fontFamily: 'Inter',
               fontSize: 13.sp,
               height: 1.4,
-              color: Colors.white.withOpacity(0.7),
+              color: Colors.white.withValues(alpha: 0.7),
             ),
           ),
           SizedBox(height: 16.h),
@@ -78,7 +78,7 @@ class UnverifiedBanner extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(8.w),
           decoration: BoxDecoration(
-            color: Colors.amber.withOpacity(0.22),
+            color: Colors.amber.withValues(alpha: 0.22),
             borderRadius: BorderRadius.circular(12.r),
           ),
           child: Icon(
@@ -91,7 +91,7 @@ class UnverifiedBanner extends StatelessWidget {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
           decoration: BoxDecoration(
-            color: Colors.amber.withOpacity(0.18),
+            color: Colors.amber.withValues(alpha: 0.18),
             borderRadius: BorderRadius.circular(999.r),
           ),
           child: Text(
@@ -146,7 +146,7 @@ class _CompleteVerificationButton extends StatelessWidget {
             boxShadow: enabled
                 ? [
                     BoxShadow(
-                      color: Colors.amber.withOpacity(0.35),
+                      color: Colors.amber.withValues(alpha: 0.35),
                       blurRadius: 12.r,
                       offset: const Offset(0, 6),
                     ),
@@ -174,7 +174,7 @@ class _CompleteVerificationButton extends StatelessWidget {
               SizedBox(width: 6.w),
               Icon(
                 Icons.arrow_forward_rounded,
-                color: Colors.black.withOpacity(0.9),
+                color: Colors.black.withValues(alpha: 0.9),
                 size: 18.sp,
               ),
             ],

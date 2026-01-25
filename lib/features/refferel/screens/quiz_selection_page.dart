@@ -130,7 +130,7 @@ class _QuizSelectionPageState extends State<QuizSelectionPage> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 14,
             offset: const Offset(0, 8),
           ),
@@ -186,7 +186,7 @@ class _QuizSelectionPageState extends State<QuizSelectionPage> {
                   width: 2,
                 ),
                 color: isSelected
-                    ? AppColors.primaryyellow.withOpacity(0.12)
+                    ? AppColors.primaryyellow.withValues(alpha: 0.12)
                     : null,
               ),
               child: isSelected
@@ -324,7 +324,7 @@ class _QuizSelectionPageState extends State<QuizSelectionPage> {
         'Quiz',
         err,
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.15),
+        backgroundColor: Colors.red.withValues(alpha: 0.15),
         colorText: Colors.red[800],
       );
     }

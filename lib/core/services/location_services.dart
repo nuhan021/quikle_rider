@@ -20,8 +20,8 @@ class LocationServices {
   Timer? _sendTimer;
   bool _isConnecting = false;
 
-  static const double _dummyLat = 28.6139;
-  static const double _dummyLng = 77.2090;
+  // static const double _dummyLat = 28.6139;
+  // static const double _dummyLng = 77.2090;
 
   bool get isConnected => _channel != null;
 

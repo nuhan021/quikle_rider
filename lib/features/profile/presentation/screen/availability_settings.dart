@@ -44,7 +44,7 @@ class _AvailabilitySettingsPageState extends State<AvailabilitySettingsPage> {
               borderRadius: BorderRadius.circular(12),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
+                  color: Colors.grey.withValues(alpha: 0.1),
                   spreadRadius: 1,
                   blurRadius: 6,
                   offset: const Offset(0, 2),
@@ -221,7 +221,7 @@ class _AvailabilitySettingsPageState extends State<AvailabilitySettingsPage> {
                             side: BorderSide.none,
                             backgroundColor: AppColors.primarygreen,
                             disabledBackgroundColor: AppColors.primarygreen
-                                .withOpacity(0.6),
+                                .withValues(alpha: 0.6),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),

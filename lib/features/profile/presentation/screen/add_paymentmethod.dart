@@ -365,8 +365,8 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
                       borderRadius: BorderRadius.circular(12.r),
                       border: Border.all(
                         color: error != null
-                            ? Colors.redAccent.withOpacity(0.4)
-                            : AppColors.primarygreen.withOpacity(0.4),
+                            ? Colors.redAccent.withValues(alpha: 0.4)
+                            : AppColors.primarygreen.withValues(alpha: 0.4),
                       ),
                     ),
                     child: Text(
@@ -530,7 +530,7 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
+            color: Colors.grey.withValues(alpha: 0.08),
             spreadRadius: 2,
             blurRadius: 10,
             offset: const Offset(0, 2), // changes position of shadow
@@ -547,7 +547,7 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
             Container(
               padding: EdgeInsets.all(10.r),
               decoration: BoxDecoration(
-                color: statusColor.withOpacity(0.1), // Light pastel background
+                color: statusColor.withValues(alpha: 0.1), // Light pastel background
                 shape: BoxShape.circle,
               ),
               child: Icon(statusIcon, color: statusColor, size: 24.r),
@@ -745,7 +745,7 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
       border: Border.all(color: Colors.grey[200]!),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.04),
+          color: Colors.black.withValues(alpha: 0.04),
           blurRadius: 10,
           offset: const Offset(0, 4),
         ),
