@@ -91,28 +91,44 @@ class MyProfilePage extends StatelessWidget {
                     ),
                     SizedBox(width: 12.w),
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          side: BorderSide.none,
-                          backgroundColor: const Color(0xFFE53935),
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
+                      child: Obx(() {
+                        final isLoading = _controller.isDeletingProfile.value;
+                        return ElevatedButton(
+                          onPressed: isLoading
+                              ? null
+                              : () async {
+                                  Navigator.of(context).pop();
+                                  await _controller.deleteriderprofile();
+                                },
+                          style: ElevatedButton.styleFrom(
+                            side: BorderSide.none,
+                            backgroundColor: const Color(0xFFE53935),
+                            padding: EdgeInsets.symmetric(vertical: 12.h),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            elevation: 0,
                           ),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          "Delete",
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                          child: isLoading
+                              ? SizedBox(
+                                  height: 18.sp,
+                                  width: 18.sp,
+                                  child: const CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor:
+                                        AlwaysStoppedAnimation<Color>(Colors.white),
+                                  ),
+                                )
+                              : Text(
+                                  "Delete",
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                        );
+                      }),
                     ),
                   ],
                 ),

@@ -434,5 +434,20 @@ class ProfileServices {
     return response;
   }
 
+  Future<ResponseData> deleteprofile({
+    required int riderProfileId,
+    String? accessToken,
+  }) {
+    return _networkCaller.deleteRequest(
+      '$baseurl/rider/rider-profile/me/?rider_profile_id=$riderProfileId',
+      headers: {
+        'accept': 'application/json',
+        if (accessToken != null && accessToken.trim().isNotEmpty)
+          'Authorization': 'Bearer $accessToken',
+      },
+      defaultErrorMessage: 'Unable to delete profile. Please try again.',
+    );
+  }
+
 
 }
