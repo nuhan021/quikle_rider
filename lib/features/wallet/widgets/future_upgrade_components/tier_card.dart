@@ -26,13 +26,13 @@
 
 //     return Card(
 //       elevation: 3,
-//       shadowColor: tierData['color'].withOpacity(0.3),
+//       shadowColor: tierData['color'].withValues(alpha: 0.3),
 //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.w)),
 //       child: Container(
 //         padding: EdgeInsets.all(16.w),
 //         decoration: BoxDecoration(
 //           gradient: LinearGradient(
-//             colors: [Colors.white, tierData['color'].withOpacity(0.08)],
+//             colors: [Colors.white, tierData['color'].withValues(alpha: 0.08)],
 //             begin: Alignment.topLeft,
 //             end: Alignment.bottomRight,
 //           ),
@@ -47,7 +47,7 @@
 //                 Container(
 //                   padding: EdgeInsets.all(10.w),
 //                   decoration: BoxDecoration(
-//                     color: tierData['color'].withOpacity(0.15),
+//                     color: tierData['color'].withValues(alpha: 0.15),
 //                     borderRadius: BorderRadius.circular(10.w),
 //                   ),
 //                   child: Icon(
@@ -93,7 +93,7 @@
 //               ],
 //             ),
 //             SizedBox(height: 16.h),
-//             Divider(color: Colors.white.withOpacity(0.28), thickness: 1),
+//             Divider(color: Colors.white.withValues(alpha: 0.28), thickness: 1),
 
 //             SizedBox(height: 12.h),
 //             Row(

@@ -396,6 +396,7 @@ class HomepageController extends GetxController {
     }
   }
 
+  // ignore: unused_element
   String _extractStatusMessage(dynamic data, bool goOnline) {
     if (data is Map<String, dynamic>) {
       final message = data['message'] ?? data['hint'];

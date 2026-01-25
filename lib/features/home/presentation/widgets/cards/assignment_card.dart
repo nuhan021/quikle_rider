@@ -142,7 +142,7 @@ class AssignmentCard extends StatelessWidget {
                   padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                   decoration: BoxDecoration(
                     color:
-                        statusColor?.withOpacity(0.12) ??
+                        statusColor?.withValues(alpha: 0.12) ??
                         const Color(0x11000000),
                     borderRadius: BorderRadius.circular(4.r),
                   ),

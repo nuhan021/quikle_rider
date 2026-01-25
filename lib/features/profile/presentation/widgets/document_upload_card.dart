@@ -7,7 +7,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
-import 'package:quikle_rider/core/utils/constants/enums.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/kyc_controller.dart';
 
 class DocumentUploadCard extends StatelessWidget {
@@ -39,7 +38,7 @@ class DocumentUploadCard extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -80,7 +79,7 @@ class DocumentUploadCard extends StatelessWidget {
         Container(
           padding: EdgeInsets.all(8.w),
           decoration: BoxDecoration(
-            color: _getBorderColor().withOpacity(0.1),
+            color: _getBorderColor().withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8.r),
           ),
           child: Icon(type.icon, color: _getBorderColor(), size: 20.sp),
@@ -293,7 +292,7 @@ class DocumentUploadCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: AppColors.primary.withOpacity(0.4),
+            color: AppColors.primary.withValues(alpha: 0.4),
             width: 2,
             style: BorderStyle.solid,
           ),
@@ -304,7 +303,7 @@ class DocumentUploadCard extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(

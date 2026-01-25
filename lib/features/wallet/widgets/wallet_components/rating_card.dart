@@ -18,7 +18,7 @@ class RatingCard extends StatelessWidget {
     return Card(
       color: Colors.white,
       elevation: 3,
-      shadowColor: Colors.black.withOpacity(0.2),
+      shadowColor: Colors.black.withValues(alpha: 0.2),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.w)),
       child: Padding(
         padding: EdgeInsets.all(16.w),

@@ -11,7 +11,6 @@ import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/referral_controller.dart';
 import 'package:quikle_rider/features/refferel/widgets/reffer_shimmer.dart';
-import 'dart:typed_data';
 import 'package:url_launcher/url_launcher.dart';
 
 class ReferralProgramPage extends StatefulWidget {
@@ -102,7 +101,7 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.25),
+            color: AppColors.primary.withValues(alpha: 0.25),
             blurRadius: 20,
             offset: const Offset(0, 6),
           ),
@@ -124,7 +123,7 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
             'Bonus: ₹2,000 for 5 referrals/month',
             style: getTextStyle(
               fontSize: 14,
-              color: AppColors.primaryblack.withOpacity(0.85),
+              color: AppColors.primaryblack.withValues(alpha: 0.85),
             ),
           ),
         ],
@@ -150,7 +149,7 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -355,7 +354,7 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -489,7 +488,7 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
       Get.snackbar(
         'Referral code missing',
         'Please wait for your code to load.',
-        backgroundColor: Colors.orangeAccent.withOpacity(0.2),
+        backgroundColor: Colors.orangeAccent.withValues(alpha: 0.2),
         colorText: Colors.black,
       );
       return;
@@ -505,7 +504,7 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
       Get.snackbar(
         'WhatsApp not available',
         'Could not open WhatsApp on this device.',
-        backgroundColor: Colors.red.withOpacity(0.15),
+        backgroundColor: Colors.red.withValues(alpha: 0.15),
         colorText: Colors.red[900],
       );
     }
@@ -517,7 +516,7 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
       Get.snackbar(
         'Referral code missing',
         'Please wait for your code to load.',
-        backgroundColor: Colors.orangeAccent.withOpacity(0.2),
+        backgroundColor: Colors.orangeAccent.withValues(alpha: 0.2),
         colorText: Colors.black,
       );
       return;
@@ -534,7 +533,7 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
       Get.snackbar(
         'SMS not available',
         'Could not open messaging app on this device.',
-        backgroundColor: Colors.red.withOpacity(0.15),
+        backgroundColor: Colors.red.withValues(alpha: 0.15),
         colorText: Colors.red[900],
       );
     }

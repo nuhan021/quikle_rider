@@ -208,8 +208,7 @@ class Assignment {
           basePayValue + distancePayValue,
     );
 
-    final rawId =
-        (json['order_id'] ?? json['offer_id'] ?? json['id'] ?? '—').toString();
+    (json['order_id'] ?? json['offer_id'] ?? json['id'] ?? '—').toString();
     // final orderId = rawId.isEmpty ? '—' : rawId;
     
 
@@ -321,7 +320,7 @@ class Assignment {
       'order_type': orderType,
       'is_urgent': isUrgent,
       'is_combined': isCombined,
-      'status': status.name,
+  
       'tier_label': tierLabel,
     };
   }

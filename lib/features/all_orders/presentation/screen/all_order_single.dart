@@ -8,7 +8,6 @@ import 'package:quikle_rider/features/all_orders/controllers/all_order_controlle
 import 'package:quikle_rider/features/all_orders/controllers/all_order_single.dart';
 import 'package:quikle_rider/features/all_orders/widgets/cards/order_card.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
-import 'package:quikle_rider/routes/app_routes.dart';
 
 class AllOrdersSingle extends StatelessWidget {
   const AllOrdersSingle({super.key});

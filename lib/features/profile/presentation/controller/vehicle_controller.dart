@@ -127,7 +127,7 @@ class VehicleController extends GetxController {
       Get.snackbar(
         'Vehicle Saved',
         'Vehicle information saved successfully.',
-        backgroundColor: Colors.green.withOpacity(0.2),
+        backgroundColor: Colors.green.withValues(alpha: 0.2),
         colorText: Colors.green[900],
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),
@@ -136,7 +136,7 @@ class VehicleController extends GetxController {
       Get.snackbar(
         'Unable to save vehicle',
         vehicleCreationErrorText,
-        backgroundColor: Colors.red.withOpacity(0.2),
+        backgroundColor: Colors.red.withValues(alpha: 0.2),
         colorText: Colors.red[900],
         snackPosition: SnackPosition.BOTTOM,
         margin: const EdgeInsets.all(16),

@@ -23,7 +23,7 @@ class AppTextFormFieldTheme {
       color: Colors.red,
     ),
     floatingLabelStyle: TextStyle(
-      color: Colors.black.withOpacity(0.8),
+      color: Colors.black.withValues(alpha: 0.8),
     ),
     border: const OutlineInputBorder(
       borderRadius: BorderRadius.all(Radius.circular(14)),

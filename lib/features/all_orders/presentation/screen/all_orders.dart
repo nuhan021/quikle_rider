@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/styles/global_text_style.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
-import 'package:quikle_rider/core/services/network/internet_services.dart';
 import 'package:quikle_rider/core/widgets/connection_lost.dart';
 import 'package:quikle_rider/custom_tab_bar/notifications.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_controller.dart';

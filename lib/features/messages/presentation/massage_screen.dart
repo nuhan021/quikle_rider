@@ -113,7 +113,7 @@ class _MassageScreenState extends State<MassageScreen> {
                             color: isOnline ? Colors.green : Colors.grey,
                             shape: BoxShape.circle,
                             boxShadow: isOnline
-                                ? [BoxShadow(color: Colors.green.withOpacity(0.4), blurRadius: 4, spreadRadius: 1)]
+                                ? [BoxShadow(color: Colors.green.withValues(alpha: 0.4), blurRadius: 4, spreadRadius: 1)]
                                 : null,
                           ),
                         ),
@@ -196,7 +196,7 @@ class _MassageScreenState extends State<MassageScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
+                    color: Colors.black.withValues(alpha: 0.06),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -229,7 +229,7 @@ class _MassageScreenState extends State<MassageScreen> {
                   Text(
                     _timeFormatter.format(msg.time),
                     style: TextStyle(
-                      color: isMe ? Colors.white.withOpacity(0.8) : Colors.grey.shade500,
+                      color: isMe ? Colors.white.withValues(alpha: 0.8) : Colors.grey.shade500,
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
                     ),
@@ -262,7 +262,7 @@ class _MassageScreenState extends State<MassageScreen> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
+                      color: Colors.black.withValues(alpha: 0.06),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
 
@@ -300,7 +300,7 @@ class _MassageScreenState extends State<MassageScreen> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.amber.withOpacity(0.3),
+                      color: Colors.amber.withValues(alpha: 0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),

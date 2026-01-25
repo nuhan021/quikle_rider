@@ -67,7 +67,7 @@ class _ProfileCompletionCardState extends State<ProfileCompletionCard>
             borderRadius: BorderRadius.circular(16.r),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF10B981).withOpacity(0.08),
+                color: const Color(0xFF10B981).withValues(alpha: 0.08),
                 blurRadius: 20.r,
                 offset: const Offset(0, 6),
                 spreadRadius: -2,
@@ -109,10 +109,10 @@ class _ProfileCompletionCardState extends State<ProfileCompletionCard>
           Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: const Color(0xFF10B981).withOpacity(0.15),
+              color: const Color(0xFF10B981).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(8.r),
               border: Border.all(
-                color: const Color(0xFF10B981).withOpacity(0.4),
+                color: const Color(0xFF10B981).withValues(alpha: 0.4),
               ),
             ),
             child: Text(

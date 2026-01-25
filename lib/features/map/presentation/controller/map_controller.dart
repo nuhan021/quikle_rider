@@ -509,6 +509,7 @@ class MapController extends GetxController {
     try {
       for (final leg in legs) {
         final result = await polylinePoints.getRouteBetweenCoordinates(
+          // ignore: deprecated_member_use
           request: PolylineRequest(
             origin: PointLatLng(leg.$1.latitude, leg.$1.longitude),
             destination: PointLatLng(leg.$2.latitude, leg.$2.longitude),

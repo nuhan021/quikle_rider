@@ -161,14 +161,14 @@ class _CustomTabBarState extends State<CustomTabBar>
                 boxShadow: _isPressed
                     ? [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
                       ]
                     : [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 4,
                           offset: const Offset(0, 1),
                         ),
@@ -190,7 +190,7 @@ class _CustomTabBarState extends State<CustomTabBar>
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.15),
+                            color: Colors.black.withValues(alpha: 0.15),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -203,8 +203,8 @@ class _CustomTabBarState extends State<CustomTabBar>
                           color: Colors.white,
                           border: Border.all(
                             color: widget.isOnline
-                                ? const Color(0xFFFFB800).withOpacity(0.3)
-                                : Colors.grey.withOpacity(0.3),
+                                ? const Color(0xFFFFB800).withValues(alpha: 0.3)
+                                : Colors.grey.withValues(alpha: 0.3),
                             width: _isPressed ? 2 : 0,
                           ),
                         ),

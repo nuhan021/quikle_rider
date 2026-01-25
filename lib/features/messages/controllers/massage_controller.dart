@@ -20,7 +20,6 @@ class MassageController {
   final StreamController<ChatMessage> _incomingController =
       StreamController<ChatMessage>.broadcast();
   StreamSubscription? _socketSubscription;
-  bool _chatStarted = false;
   final ValueNotifier<List<ChatMessage>> messages =
       ValueNotifier<List<ChatMessage>>([]);
   final ValueNotifier<bool> connectionStatus = ValueNotifier<bool>(false);

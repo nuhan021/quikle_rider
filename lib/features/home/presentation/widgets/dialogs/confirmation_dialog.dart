@@ -16,7 +16,7 @@ class ConfirmationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100]?.withOpacity(0.5),
+      backgroundColor: Colors.grey[100]?.withValues(alpha: 0.5),
       body: Center(
         child: Container(
           width: 360,
@@ -26,7 +26,7 @@ class ConfirmationDialog extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),

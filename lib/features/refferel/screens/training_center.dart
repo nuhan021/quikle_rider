@@ -80,7 +80,7 @@ class _TrainingCenterPageState extends State<TrainingCenterPage> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -261,7 +261,7 @@ class _TrainingCenterPageState extends State<TrainingCenterPage> {
       Get.snackbar(
         'Invalid link',
         'PDF link is not valid.',
-        backgroundColor: Colors.red.withOpacity(0.15),
+        backgroundColor: Colors.red.withValues(alpha: 0.15),
         colorText: Colors.red[900],
       );
       return;
@@ -272,7 +272,7 @@ class _TrainingCenterPageState extends State<TrainingCenterPage> {
       Get.snackbar(
         'Unable to open',
         'Could not open the PDF.',
-        backgroundColor: Colors.red.withOpacity(0.15),
+        backgroundColor: Colors.red.withValues(alpha: 0.15),
         colorText: Colors.red[900],
       );
     }
@@ -285,7 +285,7 @@ class _TrainingCenterPageState extends State<TrainingCenterPage> {
       Get.snackbar(
         'Invalid link',
         'Video link is not valid.',
-        backgroundColor: Colors.red.withOpacity(0.15),
+        backgroundColor: Colors.red.withValues(alpha: 0.15),
         colorText: Colors.red[900],
       );
       return;
@@ -302,7 +302,7 @@ class _TrainingCenterPageState extends State<TrainingCenterPage> {
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
@@ -436,7 +436,7 @@ class _VideoWebViewPageState extends State<_VideoWebViewPage> {
             Get.snackbar(
               'Load failed',
               error.description,
-              backgroundColor: Colors.red.withOpacity(0.15),
+              backgroundColor: Colors.red.withValues(alpha: 0.15),
               colorText: Colors.red[900],
             );
           },

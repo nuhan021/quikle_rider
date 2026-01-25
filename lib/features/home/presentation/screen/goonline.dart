@@ -10,7 +10,7 @@ class GoOnlinePage extends StatelessWidget {
     // The font family 'Obviously' needs to be added to your pubspec.yaml file
     // and included in your project assets for this to work correctly.
     return Scaffold(
-      backgroundColor: Colors.black.withOpacity(0.5),
+      backgroundColor: Colors.black.withValues(alpha: 0.5),
       body: Center(
         child: Container(
           width: 360,
@@ -21,7 +21,7 @@ class GoOnlinePage extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 spreadRadius: 2,
                 blurRadius: 10,
                 offset: const Offset(0, 4),

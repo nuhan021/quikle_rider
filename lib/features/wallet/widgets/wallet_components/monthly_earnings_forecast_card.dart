@@ -83,7 +83,7 @@ class _MonthlyEarningsForecastCardState
             borderRadius: BorderRadius.circular(20.r),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFB87700).withOpacity(0.12),
+                color: const Color(0xFFB87700).withValues(alpha: 0.12),
                 blurRadius: 24.r,
                 offset: const Offset(0, 8),
                 spreadRadius: -2,
@@ -128,15 +128,15 @@ class _MonthlyEarningsForecastCardState
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
             decoration: BoxDecoration(
               color: Color.lerp(
-                const Color(0xFFB87700).withOpacity(0.1),
-                const Color(0xFFB87700).withOpacity(0.2),
+                const Color(0xFFB87700).withValues(alpha: 0.1),
+                const Color(0xFFB87700).withValues(alpha: 0.2),
                 _pulse.value,
               ),
               borderRadius: BorderRadius.circular(8.r),
               border: Border.all(
                 color: Color.lerp(
-                  const Color(0xFFB87700).withOpacity(0.3),
-                  const Color(0xFFB87700).withOpacity(0.6),
+                  const Color(0xFFB87700).withValues(alpha: 0.3),
+                  const Color(0xFFB87700).withValues(alpha: 0.6),
                   _pulse.value,
                 )!,
               ),
@@ -179,7 +179,7 @@ class _MonthlyEarningsForecastCardState
               ],
             ),
             borderRadius: BorderRadius.circular(14.r),
-            border: Border.all(color: const Color(0xFFFFD966).withOpacity(0.5)),
+            border: Border.all(color: const Color(0xFFFFD966).withValues(alpha: 0.5)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,7 +207,7 @@ class _MonthlyEarningsForecastCardState
                         fontFamily: 'Inter',
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
-                        color: const Color(0xFFB87700).withOpacity(0.6),
+                        color: const Color(0xFFB87700).withValues(alpha: 0.6),
                       ),
                     ),
                   ),
@@ -219,7 +219,7 @@ class _MonthlyEarningsForecastCardState
                   Container(
                     height: 8.h,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Colors.white.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(10.r),
                     ),
                   ),
@@ -234,7 +234,7 @@ class _MonthlyEarningsForecastCardState
                         borderRadius: BorderRadius.circular(10.r),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFFB87700).withOpacity(0.4),
+                            color: const Color(0xFFB87700).withValues(alpha: 0.4),
                             blurRadius: 8.r,
                             offset: const Offset(0, 2),
                           ),
@@ -274,7 +274,7 @@ class _MonthlyEarningsForecastCardState
                 style: TextStyle(
                   fontFamily: 'Inter',
                   fontSize: 11.sp,
-                  color: const Color(0xFF92400E).withOpacity(0.8),
+                  color: const Color(0xFF92400E).withValues(alpha: 0.8),
                   fontWeight: FontWeight.w500,
                 ),
               ),
