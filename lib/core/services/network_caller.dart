@@ -13,6 +13,7 @@ class NetworkCaller {
   final http.Client _client;
   final int timeoutDuration;
 
+
   Future<ResponseData> getRequest(
     String url, {
     Map<String, String>? headers,
@@ -57,6 +58,24 @@ class NetworkCaller {
     log('PUT Request: $url');
     return _sendRequest(
       method: 'PUT',
+      url: url,
+      headers: headers,
+      body: body,
+      encodeJson: encodeJson,
+      defaultErrorMessage: defaultErrorMessage,
+    );
+  }
+
+  Future<ResponseData> deleteRequest(
+    String url, {
+    Map<String, String>? headers,
+    Object? body,
+    bool encodeJson = true,
+    String defaultErrorMessage = 'Unexpected error occurred.',
+  }) async {
+    log('DELETE Request: $url');
+    return _sendRequest(
+      method: 'DELETE',
       url: url,
       headers: headers,
       body: body,
@@ -121,6 +140,15 @@ class NetworkCaller {
         case 'PUT':
           response = await _client
               .put(
+                uri,
+                headers: headers,
+                body: _prepareBody(body, encodeJson),
+              )
+              .timeout(Duration(seconds: timeoutDuration));
+          break;
+        case 'DELETE':
+          response = await _client
+              .delete(
                 uri,
                 headers: headers,
                 body: _prepareBody(body, encodeJson),

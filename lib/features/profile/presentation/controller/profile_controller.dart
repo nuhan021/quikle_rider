@@ -10,6 +10,7 @@ import 'package:quikle_rider/features/profile/data/models/profile_model.dart';
 import 'package:quikle_rider/features/profile/data/models/rider_documents_model.dart';
 import 'package:quikle_rider/features/profile/data/models/training_resource.dart';
 import 'package:quikle_rider/features/profile/data/services/profile_services.dart';
+import 'package:quikle_rider/routes/app_routes.dart';
 
 class ProfileController extends GetxController {
   ProfileController({ProfileServices? profileServices})
@@ -40,6 +41,10 @@ class ProfileController extends GetxController {
   bool _hasLoadedTrainingVideos = false;
   bool _hasLoadedTrainingPdfs = false;
 
+  //deleting rider Profile 
+  final RxBool isDeletingProfile = false.obs;
+  final RxnString deleteProfileError = RxnString();
+
   // ✅ State: completion
   final RxBool isProfileCompletionLoading = false.obs;
   final RxnString profileCompletionError = RxnString();
@@ -59,6 +64,7 @@ class ProfileController extends GetxController {
         errorMessage.value != null && errorMessage.value!.isNotEmpty;
     return hasError && profile.value == null;
   }
+
   bool get hasAttemptedProfileFetch => _hasAttemptedProfileFetch;
 
   static const Map<String, String> verificationStatusLabels = {
@@ -173,10 +179,7 @@ class ProfileController extends GetxController {
       resetProfileFetchState();
     }
 
-    Future<void> safeFetch(
-      Future<void> Function() action,
-      String label,
-    ) async {
+    Future<void> safeFetch(Future<void> Function() action, String label) async {
       try {
         await action();
       } catch (error) {
@@ -393,8 +396,7 @@ class ProfileController extends GetxController {
         final data = response.responseData;
         String? status;
         if (data is Map<String, dynamic>) {
-          final value =
-              data['verification_status'] ?? data['is_verified'];
+          final value = data['verification_status'] ?? data['is_verified'];
           status = _normalizeVerificationStatus(value);
         } else if (data is String || data is bool) {
           status = _normalizeVerificationStatus(data);
@@ -441,7 +443,6 @@ class ProfileController extends GetxController {
       if (response.isSuccess && response.responseData is Map<String, dynamic>) {
         profileCompletion.value = ProfileCompletionModel.fromJson(
           response.responseData as Map<String, dynamic>,
-          
         );
       } else {
         profileCompletion.value = null;
@@ -478,10 +479,7 @@ class ProfileController extends GetxController {
         final parsed = raw
             .whereType<Map<String, dynamic>>()
             .map(
-              (item) => TrainingResource.fromJson(
-                item,
-                fallbackType: 'video',
-              ),
+              (item) => TrainingResource.fromJson(item, fallbackType: 'video'),
             )
             .where((item) => item.url.isNotEmpty)
             .toList();
@@ -525,12 +523,7 @@ class ProfileController extends GetxController {
       if (response.isSuccess && raw != null) {
         final parsed = raw
             .whereType<Map<String, dynamic>>()
-            .map(
-              (item) => TrainingResource.fromJson(
-                item,
-                fallbackType: 'pdf',
-              ),
-            )
+            .map((item) => TrainingResource.fromJson(item, fallbackType: 'pdf'))
             .where((item) => item.url.isNotEmpty)
             .toList();
         trainingPdfs.assignAll(parsed);
@@ -550,16 +543,11 @@ class ProfileController extends GetxController {
     }
   }
 
-  List<dynamic>? _extractListFromResponse(
-    dynamic data, {
-    String? primaryKey,
-  }) {
+  List<dynamic>? _extractListFromResponse(dynamic data, {String? primaryKey}) {
     if (data is List) return data;
     if (data is Map<String, dynamic>) {
-      final value = data[primaryKey] ??
-          data['results'] ??
-          data['data'] ??
-          data['items'];
+      final value =
+          data[primaryKey] ?? data['results'] ?? data['data'] ?? data['items'];
       if (value is List) return value;
     }
     return null;
@@ -592,12 +580,7 @@ class ProfileController extends GetxController {
     try {
       final response = await _profileServices.updateProfile(
         accessToken: accessToken,
-        payload: {
-          'name': name,
-          'email': email,
-      
-          'nid': nid,
-        },
+        payload: {'name': name, 'email': email, 'nid': nid},
       );
 
       if (response.isSuccess && response.responseData is Map<String, dynamic>) {
@@ -647,8 +630,6 @@ class ProfileController extends GetxController {
         endAt: endAtStr,
       );
 
-    
-
       // Handle Response
       if (result != null) {
         _updateAvailabilityFromResponse(result);
@@ -681,6 +662,75 @@ class ProfileController extends GetxController {
       );
     } finally {
       isavaiabilityProfile.value = false;
+    }
+  }
+
+
+  // Delete Profile data
+  Future<void> deleteriderprofile() async {
+    final token = StorageService.accessToken;
+    if (token == null || token.isEmpty) {
+      Get.snackbar(
+        "Error",
+        "Authentication token not found.",
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+      return;
+    }
+
+    final riderProfileId = StorageService.userId;
+    if (riderProfileId == null) {
+      Get.snackbar(
+        "Error",
+        "Rider profile id not found.",
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+      return;
+    }
+
+    try {
+      isDeletingProfile.value = true;
+      final response = await _profileServices.deleteprofile(
+        riderProfileId: riderProfileId,
+        accessToken: token,
+      );
+
+      if (response.isSuccess) {
+        await StorageService.logoutUser();
+        clearForLogout();
+        Get.snackbar(
+          "Deleted",
+          "Your account has been deleted.",
+          backgroundColor: Colors.green.withOpacity(0.2),
+          colorText: Colors.green[900],
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+        );
+        await Future.delayed(const Duration(milliseconds: 600));
+        Get.offAllNamed(AppRoute.getLoginScreen());
+      } else {
+        Get.snackbar(
+          "Failed",
+          response.errorMessage.isNotEmpty
+              ? response.errorMessage
+              : "Could not delete account. Please try again.",
+          backgroundColor: Colors.red.withOpacity(0.2),
+          colorText: Colors.red[900],
+          snackPosition: SnackPosition.BOTTOM,
+          margin: const EdgeInsets.all(16),
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        "An unexpected error occurred: $e",
+        backgroundColor: Colors.red.withOpacity(0.2),
+        colorText: Colors.red[900],
+      );
+    } finally {
+      isDeletingProfile.value = false;
     }
   }
 }
