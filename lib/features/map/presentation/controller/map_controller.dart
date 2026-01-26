@@ -274,11 +274,13 @@ class MapController extends GetxController {
         return;
       }
 
-      // Hardcoded for testing; swap back to Geolocator when ready.
-      currentPosition.value = _hardcodedLocation;
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      currentPosition.value = LatLng(position.latitude, position.longitude);
       debugPrint(
-        'MapController: Current location → lat=${_hardcodedLocation.latitude}, '
-        'lng=${_hardcodedLocation.longitude}',
+        'MapController: Current location → lat=${position.latitude}, '
+        'lng=${position.longitude}',
       );
       await _updateAddressFromCoordinates();
       if (hasActiveOrder) {

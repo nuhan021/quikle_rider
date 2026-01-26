@@ -1,8 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:async';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
@@ -29,7 +27,6 @@ class TrackingController extends GetxController {
   bool _initialized = false;
   StreamSubscription<Position>? positionSubscription;
   LatLng? _lastPolylineOrigin;
-  bool _partnerAndCustomerProvided = false;
 
   final LocationServices _locationServices = LocationServices.instance;
   StreamSubscription? _locationServiceSubscription;
@@ -61,10 +58,9 @@ class TrackingController extends GetxController {
       _setFixedMarkers();
       _buildRoutePolylines();
       _fitCameraToPoints();
+      _maybeStartTracking();
     });
 
-    // Start live tracking immediately so markers refresh as GPS updates.
-    await startLiveTracking();
     AppLoggerHelper.debug(
       'Current location after init: ${currentLocation.value}',
     );
@@ -75,12 +71,10 @@ class TrackingController extends GetxController {
     bool changed = false;
     if (vendor != null) {
       vendorLocation.value = vendor;
-      _partnerAndCustomerProvided = true;
       changed = true;
     }
     if (customer != null) {
       customerLocation.value = customer;
-      _partnerAndCustomerProvided = true;
       changed = true;
     }
 
@@ -88,6 +82,7 @@ class TrackingController extends GetxController {
       _setFixedMarkers();
       await _buildRoutePolylines();
       _fitCameraToPoints();
+      _maybeStartTracking();
     }
   }
 
@@ -180,12 +175,12 @@ class TrackingController extends GetxController {
 
       final newLocation = LatLng(position.latitude, position.longitude);
       currentLocation.value = newLocation;
-      _ensurePartnerAndCustomerNearCurrent(newLocation);
       _setCurrentMarker(newLocation);
       _setFixedMarkers();
       await _buildRoutePolylines();
       await _fitCameraToPoints();
       await _moveCameraToPosition(newLocation, 16);
+      _maybeStartTracking();
     } catch (e) {
       _showError('Unable to fetch GPS location.');
       _clearCurrentMarker();
@@ -223,7 +218,6 @@ class TrackingController extends GetxController {
       (Position position) {
         final newLocation = LatLng(position.latitude, position.longitude);
         currentLocation.value = newLocation;
-        _ensurePartnerAndCustomerNearCurrent(newLocation);
         _setCurrentMarker(newLocation);
         _buildRoutePolylines();
         _fitCameraToPoints();
@@ -239,6 +233,16 @@ class TrackingController extends GetxController {
     positionSubscription?.cancel();
     positionSubscription = null;
     isTrackingLive.value = false;
+  }
+
+  void _maybeStartTracking() {
+    if (isTrackingLive.value) return;
+    if (currentLocation.value == null ||
+        vendorLocation.value == null ||
+        customerLocation.value == null) {
+      return;
+    }
+    startLiveTracking();
   }
 
   void _clearCurrentMarker() {
@@ -423,41 +427,5 @@ class TrackingController extends GetxController {
         duration: const Duration(seconds: 4),
       ),
     );
-  }
-
-  void _ensurePartnerAndCustomerNearCurrent(LatLng origin) {
-    if (_partnerAndCustomerProvided) return;
-
-    final vendor = vendorLocation.value;
-    final customer = customerLocation.value;
-
-    if (vendor == null) {
-      vendorLocation.value = _offsetLatLng(
-        origin,
-        metersNorth: 140,
-        metersEast: 90,
-      );
-    }
-
-    if (customer == null) {
-      customerLocation.value = _offsetLatLng(
-        origin,
-        metersNorth: -120,
-        metersEast: -80,
-      );
-    }
-  }
-
-  LatLng _offsetLatLng(
-    LatLng origin, {
-    required double metersNorth,
-    required double metersEast,
-  }) {
-    const metersPerDegreeLat = 111320.0;
-    final dLat = metersNorth / metersPerDegreeLat;
-    final metersPerDegreeLng =
-        metersPerDegreeLat * cos(origin.latitude * pi / 180);
-    final dLng = metersEast / metersPerDegreeLng;
-    return LatLng(origin.latitude + dLat, origin.longitude + dLng);
   }
 }
