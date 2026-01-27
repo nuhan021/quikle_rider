@@ -198,6 +198,7 @@ class TrackingController extends GetxController {
   }
 
   Future<void> startLiveTracking() async {
+    
     if (isTrackingLive.value) return;
 
     if (currentLocation.value == null) {
@@ -232,6 +233,7 @@ class TrackingController extends GetxController {
   void stopLiveTracking() {
     positionSubscription?.cancel();
     positionSubscription = null;
+
     isTrackingLive.value = false;
   }
 
