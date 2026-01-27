@@ -21,6 +21,7 @@ class AssignmentCard extends StatelessWidget {
   final bool showActions;
   final VoidCallback? onAccept;
   final VoidCallback? onReject;
+  final bool isAccepting;
 
   const AssignmentCard({
     super.key,
@@ -39,6 +40,7 @@ class AssignmentCard extends StatelessWidget {
     this.showActions = true,
     this.onAccept,
     this.onReject,
+    this.isAccepting = false,
   });
 
   @override
@@ -314,7 +316,7 @@ class AssignmentCard extends StatelessWidget {
                   child: SizedBox(
                     height: 40.h,
                     child: ElevatedButton(
-                      onPressed: onAccept,
+                      onPressed: isAccepting ? null : onAccept,
                       style: ElevatedButton.styleFrom(
                         side: BorderSide.none,
                         backgroundColor: Colors.black,
@@ -324,15 +326,27 @@ class AssignmentCard extends StatelessWidget {
                         padding: EdgeInsets.symmetric(horizontal: 24.w),
                         elevation: 0,
                       ),
-                      child: Text(
-                        'Accept',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 14.sp,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      child:
+                          isAccepting
+                              ? SizedBox(
+                                width: 18.sp,
+                                height: 18.sp,
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Colors.white,
+                                  ),
+                                ),
+                              )
+                              : Text(
+                                'Accept',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 14.sp,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                     ),
                   ),
                 ),

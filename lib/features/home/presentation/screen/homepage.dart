@@ -136,6 +136,8 @@ class HomeScreen extends GetView<HomepageController> {
                     children: assignments.map((assignment) {
                       final isPending =
                           assignment.status == AssignmentStatus.pending;
+                      final isActionPending = controller
+                          .isAssignmentActionPending(assignment.id);
                       return Padding(
                         padding: EdgeInsets.only(bottom: 16.h),
                         child: AssignmentCard(
@@ -152,13 +154,10 @@ class HomeScreen extends GetView<HomepageController> {
                           status: assignment.status,
                           orderStatus: assignment.orderStatus,
                           showActions: isPending,
+                          isAccepting: isActionPending,
                           onAccept: isPending
                               ? () async {
-                                  final pending = controller
-                                      .isAssignmentActionPending(
-                                        assignment.id,
-                                      );
-                                  if (pending) return;
+                                  if (isActionPending) return;
 
                                   final success = await controller
                                       .acceptAssignment(assignment);
@@ -193,11 +192,7 @@ class HomeScreen extends GetView<HomepageController> {
 
                           onReject: isPending
                               ? () async {
-                                  final pending = controller
-                                      .isAssignmentActionPending(
-                                        assignment.id,
-                                      );
-                                  if (pending) return;
+                                  if (isActionPending) return;
 
                                   final success = await controller
                                       .rejectAssignment(assignment);
