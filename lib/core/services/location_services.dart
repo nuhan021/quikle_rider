@@ -21,8 +21,8 @@ class LocationServices {
   Timer? _sendTimer;
   bool _isConnecting = false;
 
-  // static const double _dummyLat = 28.6139;
-  // static const double _dummyLng = 77.2090;
+  static const double _dummyLat = 28.6139;
+  static const double _dummyLng = 77.2090;
 
   bool get isConnected => _channel != null;
 
@@ -101,17 +101,17 @@ class LocationServices {
           accuracy: LocationAccuracy.high,
         ),
       );
-      // final locationData = {
-      //   "lat": _dummyLat,
-      //   "lng": _dummyLng,
-      // };
+      final locationData = {
+        "lat": _dummyLat,
+        "lng": _dummyLng,
+      };
       final currentlocationdata = {
         "lat": position.latitude,
         "lng": position.longitude,
       };
 
-      _channel?.sink.add(jsonEncode(currentlocationdata));
-      AppLoggerHelper.debug('LocationServices: sent $currentlocationdata');
+      _channel?.sink.add(jsonEncode(locationData));
+      AppLoggerHelper.debug('LocationServices: sent $locationData');
     } catch (e) {
       AppLoggerHelper.debug('Unable to fetch location for websocket: $e');
     }
