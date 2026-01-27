@@ -15,7 +15,8 @@ class LocationServices {
 
   final _socketResponseController =
       StreamController<Map<String, double>>.broadcast();
-  Stream<Map<String, double>> get socketResponse => _socketResponseController.stream;
+  Stream<Map<String, double>> get socketResponse =>
+      _socketResponseController.stream;
 
   Timer? _sendTimer;
   bool _isConnecting = false;
@@ -31,7 +32,9 @@ class LocationServices {
 
     final riderId = StorageService.userId;
     if (riderId == null) {
-      AppLoggerHelper.debug('LocationServices: missing riderId, cannot connect');
+      AppLoggerHelper.debug(
+        'LocationServices: missing riderId, cannot connect',
+      );
       _isConnecting = false;
       return;
     }
@@ -42,7 +45,9 @@ class LocationServices {
       return;
     }
 
-    final wsUrl = Uri.parse('ws://caditya619-backend-ng0e.onrender.com/rider/ws/location/riders/$riderId');
+    final wsUrl = Uri.parse(
+      'ws://caditya619-backend-ng0e.onrender.com/rider/ws/location/riders/$riderId',
+    );
     final channel = WebSocketChannel.connect(wsUrl);
     _channel = channel;
 
@@ -82,7 +87,6 @@ class LocationServices {
       sendCurrentLocation();
     });
     AppLoggerHelper.debug('Location service started (10s interval)');
- 
   }
 
   Future<void> sendCurrentLocation() async {
@@ -101,11 +105,11 @@ class LocationServices {
       //   "lat": _dummyLat,
       //   "lng": _dummyLng,
       // };
-       final currentlocationdata = {
+      final currentlocationdata = {
         "lat": position.latitude,
         "lng": position.longitude,
       };
-      
+
       _channel?.sink.add(jsonEncode(currentlocationdata));
       AppLoggerHelper.debug('LocationServices: sent $currentlocationdata');
     } catch (e) {
@@ -147,6 +151,11 @@ class LocationServices {
       );
       return false;
     }
+    if (permission != LocationPermission.whileInUse &&
+        permission != LocationPermission.always) {
+      return false;
+    }
+
     return true;
   }
 

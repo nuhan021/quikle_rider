@@ -12,9 +12,10 @@ class StartupShimmer extends StatelessWidget {
       child: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
               Row(
                 children: [
                   Expanded(child: _StatCardShimmer(height: 78.h)),
@@ -90,9 +91,8 @@ class StartupShimmer extends StatelessWidget {
                   ],
                 ),
               ),
-              
-                
-            ],
+              ],
+            ),
           ),
         ),
       ),
