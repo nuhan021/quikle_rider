@@ -148,29 +148,7 @@ class SplashScreen extends GetView<SplashController> {
               );
             }),
 
-            /// Login slide-up
-            Obx(() {
-              return AnimatedPositioned(
-                duration: const Duration(milliseconds: 600),
-                curve: Curves.easeOutCubic,
-                left: 0,
-                right: 0,
-                bottom: controller.showLogin.value ? 0 : -1.sh,
-                height: 1.sh,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: controller.showLogin.value
-                        ? BorderRadius.zero
-                        : const BorderRadius.only(
-                            topLeft: Radius.circular(24),
-                            topRight: Radius.circular(24),
-                          ),
-                  ),
-                  child: const LoginOtp(),
-                ),
-              );
-            }),
+          
           ],
         ),
       ),

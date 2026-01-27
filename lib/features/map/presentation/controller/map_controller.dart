@@ -263,13 +263,19 @@ class MapController extends GetxController {
     return double.tryParse(value.toString());
   }
 
-  Future<void> requestCurrentLocation() async {
+  Future<void> requestCurrentLocation({
+    bool openSettingsOnDeniedForever = false,
+    bool openLocationSettingsIfDisabled = false,
+  }) async {
     isFetchingLocation.value = true;
     locationError.value = null;
     currentAddress.value = 'Fetching location...';
 
     try {
-      final hasPermission = await _ensurePermissions();
+      final hasPermission = await _ensurePermissions(
+        openSettingsOnDeniedForever: openSettingsOnDeniedForever,
+        openLocationSettingsIfDisabled: openLocationSettingsIfDisabled,
+      );
       if (!hasPermission) {
         return;
       }
@@ -301,11 +307,17 @@ class MapController extends GetxController {
     }
   }
 
-  Future<bool> _ensurePermissions() async {
+  Future<bool> _ensurePermissions({
+    bool openSettingsOnDeniedForever = false,
+    bool openLocationSettingsIfDisabled = false,
+  }) async {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       locationError.value =
           'Enable location services to view your position on the map.';
+      if (openLocationSettingsIfDisabled) {
+        await Geolocator.openLocationSettings();
+      }
       return false;
     }
 
@@ -317,6 +329,9 @@ class MapController extends GetxController {
     if (permission == LocationPermission.deniedForever) {
       locationError.value =
           'Location permission is permanently denied. Please enable it from Settings.';
+      if (openSettingsOnDeniedForever) {
+        await Geolocator.openAppSettings();
+      }
       return false;
     }
 

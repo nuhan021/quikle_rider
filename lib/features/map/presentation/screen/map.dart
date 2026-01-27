@@ -53,10 +53,10 @@ class _MapScreenState extends State<MapScreen> {
         _bottomNavController!.selectedIndex,
         _handleNavIndexChange,
       );
-      _handleNavIndexChange(_bottomNavController!.selectedIndex.value);
-    } else if (profileController.isVerifiedApproved) {
-      _triggerVerifiedLoad();
-    }
+    //   _handleNavIndexChange(_bottomNavController!.selectedIndex.value);
+    // } else if (profileController.isVerifiedApproved) {
+    //   _triggerVerifiedLoad();
+    // }
     _verificationWorker = ever<String?>(profileController.isVerified, (_) {
       if (profileController.isVerifiedApproved &&
           _shouldTriggerVerifiedLoad &&
@@ -64,6 +64,7 @@ class _MapScreenState extends State<MapScreen> {
         _triggerVerifiedLoad();
       }
     });
+    }
   }
 
   @override
@@ -270,6 +271,8 @@ class _MapScreenState extends State<MapScreen> {
     final address = controller.currentAddress.value.trim();
     final hasLocation = controller.hasUserLocation;
     final locationMessage = controller.locationError.value?.trim() ?? '';
+    final showEnableLocation =
+        !hasLocation && locationMessage.isNotEmpty && !controller.isFetchingLocation.value;
 
     return Container(
       width: double.infinity,
@@ -307,6 +310,21 @@ class _MapScreenState extends State<MapScreen> {
                     : 'Fetching your current location...'),
             style: getTextStyle(fontSize: 13, color: Colors.grey[700]),
           ),
+          if (showEnableLocation) ...[
+            SizedBox(height: 12.h),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  controller.requestCurrentLocation(
+                    openSettingsOnDeniedForever: true,
+                    openLocationSettingsIfDisabled: true,
+                  );
+                },
+                child: const Text('Enable location'),
+              ),
+            ),
+          ],
         ],
       ),
     );
