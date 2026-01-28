@@ -6,6 +6,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:get/get.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:quikle_rider/core/utils/device/device_utility.dart';
 import 'package:quikle_rider/features/all_orders/models/rider_order_model.dart';
 import 'package:quikle_rider/features/map/presentation/model/delivery_model.dart';
@@ -410,9 +412,55 @@ class MapController extends GetxController {
   }
 
   // Call customer
-  void callCustomer() {
-    // Implement call functionality
-    debugPrint('Calling customer: ${currentDelivery.value?.customerName}');
+  Future<void> callCustomer() async {
+    final rawPhone = currentDelivery.value?.customerPhone.trim() ?? '';
+    if (rawPhone.isEmpty) {
+      Get.snackbar(
+        'No phone number',
+        'Customer phone number is not available.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    final sanitizedPhone = rawPhone.replaceAll(RegExp(r'[^0-9+]'), '');
+    if (sanitizedPhone.isEmpty) {
+      Get.snackbar(
+        'Invalid phone number',
+        'Customer phone number is not valid.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    if (AppDeviceUtility.isAndroid()) {
+      final permission = await Permission.phone.request();
+      if (!permission.isGranted) {
+        Get.snackbar(
+          'Permission required',
+          'Enable phone permission to place calls.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+    }
+
+    try {
+      final placed = await FlutterPhoneDirectCaller.callNumber(sanitizedPhone);
+      if (placed != true) {
+        AppDeviceUtility.launchUrl('tel:$sanitizedPhone');
+      }
+    } catch (error) {
+      try {
+        AppDeviceUtility.launchUrl('tel:$sanitizedPhone');
+      } catch (_) {
+        Get.snackbar(
+          'Unable to call',
+          'Please try again later.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    }
   }
 
   // Message customer

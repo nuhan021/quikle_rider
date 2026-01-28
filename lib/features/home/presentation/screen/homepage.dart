@@ -167,13 +167,18 @@ class HomeScreen extends GetView<HomepageController> {
                                     context: context,
                                     barrierDismissible: false,
                                     builder: (context) {
-                                      return OrderStatusDialog(
+                                      final errorText =
+                                          (controller.errorMessage.value ?? '')
+                                              .trim();
+                                      return OrderStatusDialog( 
                                         imageUrl: success
                                             ? "assets/images/success.png"
                                             : "assets/images/cancel.png",
                                         text: success
                                             ? "Order Accepted"
-                                            : "Order failed to accept",
+                                            : errorText.isNotEmpty
+                                                ? "Order failed to accept\n$errorText"
+                                                : "Order failed to accept",
                                       );
                                     },
                                   );
@@ -202,13 +207,16 @@ class HomeScreen extends GetView<HomepageController> {
                                     context: context,
                                     barrierDismissible: false,
                                     builder: (context) {
+                                      final errorText =
+                                          (controller.errorMessage.value ?? '')
+                                              .trim();
                                       return OrderStatusDialog(
                                         imageUrl: success
                                             ? "assets/images/cancel.png"
                                             : "assets/images/success.png",
                                         text: success
                                             ? "Order Rejected"
-                                            : "Order failed to reject",
+                                            : "Order failed to reject${errorText.isNotEmpty ? " $errorText" : ""}",
                                       );
                                     },
                                   );

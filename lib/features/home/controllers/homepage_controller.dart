@@ -17,6 +17,7 @@ import 'package:quikle_rider/features/home/presentation/screen/goonline.dart';
 import 'package:quikle_rider/features/home/presentation/screen/gooffline.dart';
 import 'package:quikle_rider/custom_tab_bar/notifications.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
+import 'package:quikle_rider/features/profile/data/services/profile_services.dart';
 import 'package:quikle_rider/routes/app_routes.dart';
 
 class HomepageController extends GetxController {
@@ -24,8 +25,10 @@ class HomepageController extends GetxController {
     HomeService? homeService,
 
     InternetServices? internetServices,
+    ProfileServices? profileServices,
   }) : _homeService = homeService ?? HomeService(),
-       _internetServices = internetServices ?? InternetServices();
+       _internetServices = internetServices ?? InternetServices(),
+       _profileServices = profileServices ?? ProfileServices();
 
   var isOnline = false.obs;
   var isLoading = false.obs;
@@ -35,6 +38,7 @@ class HomepageController extends GetxController {
   final _pendingActions = <String>{}.obs;
   final HomeService _homeService;
   final InternetServices _internetServices;
+  final ProfileServices _profileServices;
   late final ProfileController _profileController;
 
   RxBool get hasConnection => _internetServices.hasConnection;
@@ -147,8 +151,36 @@ class HomepageController extends GetxController {
         ? Get.find<ProfileController>()
         : Get.put(ProfileController());
     _internetServices.startMonitoring(onReconnect: _handleReconnect);
+    _profileController.fetchAvailabilitySettings();
     fetchDashboardData();
     _syncFcmToken();
+    unawaited(_syncOnlineStatus());
+  }
+
+  Future<void> _syncOnlineStatus() async {
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null || accessToken.isEmpty) {
+      AppLoggerHelper.debug('Online status sync skipped: missing access token.');
+      return;
+    }
+
+    final response = await _profileServices.getOnlineStatus(
+      accessToken: accessToken,
+    );
+    if (!response.isSuccess || response.responseData is! Map<String, dynamic>) {
+      AppLoggerHelper.debug(
+        'Online status sync failed. Status: ${response.statusCode}',
+      );
+      return;
+    }
+
+    final data = response.responseData as Map<String, dynamic>;
+    final online = data['is_online'] == true;
+    if (online) {
+      isOnline.value = true;
+      unawaited(_refreshUpcomingAssignments());
+      locationServices.connectAndStart();
+    }
   }
 
   Future<void> fetchDashboardData() async {
