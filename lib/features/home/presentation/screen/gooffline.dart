@@ -104,16 +104,7 @@ class GoOfflinePage extends StatelessWidget {
   }
 
   void _handleYesPressed(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'You are now offline and will not receive new orders.',
-          style: const TextStyle(fontFamily: 'Manrope'),
-        ),
-        backgroundColor: Colors.orange,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+   
     Navigator.of(context).pop(true);
   }
 

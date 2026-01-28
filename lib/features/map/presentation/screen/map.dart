@@ -83,8 +83,7 @@ class _MapScreenState extends State<MapScreen> {
     super.dispose();
   }
 
-  bool get _isMapTabActive =>
-      _bottomNavController?.selectedIndex.value == 2;
+  bool get _isMapTabActive => _bottomNavController?.selectedIndex.value == 2;
 
   bool get _shouldTriggerVerifiedLoad =>
       _bottomNavController == null || _isMapTabActive;
@@ -257,8 +256,8 @@ class _MapScreenState extends State<MapScreen> {
                 ),
                 body: delivery == null
                     ? (_isFetchingCurrentOrder
-                        ? const Center(child: MapShimmer())
-                        : _buildNoActiveOrderView(controller))
+                          ? const Center(child: MapShimmer())
+                          : _buildNoActiveOrderView(controller))
                     : SingleChildScrollView(
                         child: Column(
                           children: [
@@ -355,10 +354,7 @@ class _MapScreenState extends State<MapScreen> {
                 SizedBox(height: 6.h),
                 Text(
                   locationLabel,
-                  style: getTextStyle(
-                    fontSize: 13,
-                    color: Colors.grey[700],
-                  ),
+                  style: getTextStyle(fontSize: 13, color: Colors.grey[700]),
                 ),
               ],
             ),
@@ -961,7 +957,9 @@ class _MapScreenState extends State<MapScreen> {
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            onPressed:(){},
+            onPressed: () {
+              mapController.callCustomer();
+            },
             icon: Image.asset(
               'assets/images/call.png',
               color: Colors.black87,

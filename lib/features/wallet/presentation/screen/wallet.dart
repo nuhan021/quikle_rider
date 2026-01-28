@@ -323,25 +323,25 @@ class WalletScreen extends GetView<WalletController> {
                               //     style: headingStyle2(color: Colors.black),
                               //   ),
                               // ),
-                              ListView.builder(
-                                itemCount: controller.deliveries.length,
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemBuilder: (context, index) {
-                                  final d = controller.deliveries[index];
-                                  return DeliveryCard(
-                                    box: cardBox,
-                                    orderId: d.id,
-                                    status: d.status,
-                                    amount: d.amount,
-                                    customerName: d.customer,
-                                    dateTime: d.dateTime,
-                                    distance: d.distance,
-                                    rightSubline: d.rightSubline,
-                                    bottomNote: d.bottomNote,
-                                  );
-                                },
-                              ),
+                              // ListView.builder(
+                              //   itemCount: controller.deliveries.length,
+                              //   shrinkWrap: true,
+                              //   physics: const NeverScrollableScrollPhysics(),
+                              //   itemBuilder: (context, index) {
+                              //     final d = controller.deliveries[index];
+                              //     return DeliveryCard(
+                              //       box: cardBox,
+                              //       orderId: d.id,
+                              //       status: d.status,
+                              //       amount: d.amount,
+                              //       customerName: d.customer,
+                              //       dateTime: d.dateTime,
+                              //       distance: d.distance,
+                              //       rightSubline: d.rightSubline,
+                              //       bottomNote: d.bottomNote,
+                              //     );
+                              //   },
+                              // ),
                               SizedBox(height: 24.h),
                             ],
                           );

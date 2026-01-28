@@ -181,9 +181,7 @@ class _ReferralProgramPageState extends State<ReferralProgramPage> {
                         await Clipboard.setData(
                           ClipboardData(text: referralCode),
                         );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Referral code copied')),
-                        );
+                        
                       }
                     : null,
               ),
