@@ -47,6 +47,7 @@ class AllOrdersCombined extends StatelessWidget {
         }
 
         return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

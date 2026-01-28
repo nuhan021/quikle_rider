@@ -7,6 +7,7 @@ import 'package:quikle_rider/core/widgets/unverified/unverified.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_controller.dart';
 import 'package:quikle_rider/features/all_orders/controllers/all_order_single.dart';
 import 'package:quikle_rider/features/all_orders/widgets/cards/order_card.dart';
+import 'package:quikle_rider/features/map/presentation/widgets/map_shimmer.dart';
 import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 
 class AllOrdersSingle extends StatelessWidget {
@@ -40,7 +41,7 @@ class AllOrdersSingle extends StatelessWidget {
 
         if (allOrdersController.isOrdersLoading.value &&
             allOrdersController.singleOrders.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: MapShimmer());
         }
         if (allOrdersController.singleOrders.isEmpty) {
           return Center(
@@ -55,6 +56,7 @@ class AllOrdersSingle extends StatelessWidget {
           );
         }
         return SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           child: Container(
             width: 360.w,
             child: Column(
