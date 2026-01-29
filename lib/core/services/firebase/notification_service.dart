@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
+import 'package:quikle_rider/core/models/response_data.dart';
 import 'package:quikle_rider/core/utils/constants/api_constants.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
 
@@ -17,6 +18,7 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   final http.Client _httpClient = http.Client();
   final Uri _saveTokenUri = Uri.parse('$baseurl/rider/save_token/');
+  final Uri _getNotificationsUri = Uri.parse('$baseurl/rider/get_notifications/');
   final Uri _sendNotificationUri = Uri.parse(
     '$baseurl/rider/send_notification/',
   );
@@ -279,6 +281,61 @@ class NotificationService {
     }
   }
 
+  Future<ResponseData> getNotifications({
+    required String authorization,
+  }) async {
+    try {
+      final response = await _httpClient
+          .get(
+            _getNotificationsUri,
+            headers: {
+              'accept': 'application/json',
+              'Authorization': authorization,
+            },
+          )
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () =>
+                throw TimeoutException('Notifications request timed out'),
+          );
+
+      final decodedBody = _decodeResponseBody(response.body);
+      final success = response.statusCode >= 200 && response.statusCode < 300;
+
+      if (success) {
+        AppLoggerHelper.debug('Notifications fetched successfully.');
+      } else {
+        AppLoggerHelper.debug(
+          'Failed to fetch notifications. Status: ${response.statusCode}',
+        );
+        AppLoggerHelper.debug('Response: ${response.body}');
+      }
+
+      return ResponseData(
+        isSuccess: success,
+        statusCode: response.statusCode,
+        errorMessage: success ? '' : _extractErrorMessage(decodedBody),
+        responseData: decodedBody,
+      );
+    } on TimeoutException catch (e) {
+      AppLoggerHelper.debug('⏱ Notifications fetch timeout: $e');
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 408,
+        errorMessage: 'Request timeout. Please try again later.',
+        responseData: e.toString(),
+      );
+    } catch (e) {
+      AppLoggerHelper.debug('✗ Error fetching notifications: $e');
+      return ResponseData(
+        isSuccess: false,
+        statusCode: 500,
+        errorMessage: 'Unable to fetch notifications.',
+        responseData: e.toString(),
+      );
+    }
+  }
+
   Future<void> _showLocalNotification({
     required String title,
     required String body,
@@ -296,5 +353,25 @@ class NotificationService {
     } catch (e) {
       AppLoggerHelper.debug('Error showing local notification: $e');
     }
+  }
+
+  dynamic _decodeResponseBody(String body) {
+    try {
+      return jsonDecode(body);
+    } catch (_) {
+      return body;
+    }
+  }
+
+  String _extractErrorMessage(dynamic decodedBody) {
+    if (decodedBody is Map<String, dynamic>) {
+      if (decodedBody['detail'] is String) {
+        return decodedBody['detail'] as String;
+      }
+      if (decodedBody['message'] is String) {
+        return decodedBody['message'] as String;
+      }
+    }
+    return 'Unable to load notifications. Please try again.';
   }
 }
