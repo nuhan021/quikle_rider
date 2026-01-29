@@ -7,6 +7,7 @@ import 'package:quikle_rider/core/services/location_services.dart';
 import 'package:quikle_rider/core/services/network/internet_services.dart';
 import 'package:quikle_rider/core/services/firebase/firebase_service.dart';
 import 'package:quikle_rider/core/services/firebase/notification_service.dart';
+import 'package:quikle_rider/core/services/network/webscoket_services.dart';
 import 'package:quikle_rider/core/services/storage_service.dart';
 import 'package:quikle_rider/core/utils/logging/logger.dart';
 import 'package:quikle_rider/features/home/data/home_service.dart';
@@ -44,6 +45,12 @@ class HomepageController extends GetxController {
 
   RxBool get hasConnection => _internetServices.hasConnection;
   final LocationServices locationServices = LocationServices.instance;
+  final NotificationWebSocketService _notificationSocket =
+      NotificationWebSocketService();
+  StreamSubscription<Map<String, dynamic>>? _notificationSubscription;
+  final Rxn<IncomingOrderNotification> incomingOffer =
+      Rxn<IncomingOrderNotification>();
+  String? _lastNotificationId;
 
   Future<void> onToggleSwitch() async {
     if (!isOnline.value) {
@@ -119,6 +126,7 @@ class HomepageController extends GetxController {
         unawaited(_changeOnlineStatus(true));
         // await _refreshUpcomingAssignments(assignmentsOnly: true,showLoader: false);
         locationServices.connectAndStart();
+        _connectNotificationSocket();
       } else {
         isOnline.value = false;
         stats.clear();
@@ -135,6 +143,7 @@ class HomepageController extends GetxController {
         isOnline.value = false;
         stats.clear();
         assignments.clear();
+        _disconnectNotificationSocket();
         unawaited(_changeOnlineStatus(false));
       }
     }
@@ -186,6 +195,7 @@ class HomepageController extends GetxController {
       isOnline.value = true;
       unawaited(_refreshUpcomingAssignments(assignmentsOnly: true));
       locationServices.connectAndStart();
+      _connectNotificationSocket();
     }
   }
 
@@ -393,6 +403,63 @@ class HomepageController extends GetxController {
     return result;
   }
 
+  Future<bool> acceptAssignmentById(String orderId) async {
+    final trimmedId = orderId.trim();
+    if (trimmedId.isEmpty) return false;
+    final result = await _performAssignmentAction(
+      assignmentId: trimmedId,
+      action: () async {
+        final response = await _homeService.acceptOfferedOrder(
+          orderId: trimmedId,
+        );
+        if (!response.isSuccess) {
+          _showStatusSnack(
+            duration: 3,
+            title: 'Accept failed',
+            message: response.errorMessage.isNotEmpty
+                ? response.errorMessage
+                : 'Unable to accept order. Please try again.',
+            success: false,
+          );
+        }
+        return response.isSuccess;
+      },
+    );
+    if (result) {
+      await refreshUpcomingAssignments();
+    }
+    return result;
+  }
+
+  Future<bool> rejectAssignmentById(String orderId) async {
+    final trimmedId = orderId.trim();
+    if (trimmedId.isEmpty) return false;
+    final result = await _performAssignmentAction(
+      assignmentId: trimmedId,
+      action: () async {
+        final response = await _homeService.rejectOfferedOrder(
+          orderId: trimmedId,
+          reason: 'Order Rejected',
+        );
+        if (!response.isSuccess) {
+          _showStatusSnack(
+            duration: 3,
+            title: 'Reject failed',
+            message: response.errorMessage.isNotEmpty
+                ? response.errorMessage
+                : 'Unable to reject order. Please try again.',
+            success: false,
+          );
+        }
+        return response.isSuccess;
+      },
+    );
+    if (result) {
+      _setAssignmentStatusById(trimmedId, AssignmentStatus.rejected);
+    }
+    return result;
+  }
+
   Future<bool> _performAssignmentAction({
     required String assignmentId,
     required Future<bool> Function() action,
@@ -416,9 +483,11 @@ class HomepageController extends GetxController {
         isOnline.value = goOnline;
         if (goOnline) {
           unawaited(_refreshUpcomingAssignments(assignmentsOnly: true));
+          _connectNotificationSocket();
         } else {
           stats.clear();
           assignments.clear();
+          _disconnectNotificationSocket();
         }
         // final message = _extractStatusMessage(response.responseData, goOnline);
         // _showStatusSnack(
@@ -541,10 +610,60 @@ class HomepageController extends GetxController {
     }
   }
 
+  void _setAssignmentStatusById(String assignmentId, AssignmentStatus status) {
+    final idx = assignments.indexWhere((item) => item.id == assignmentId);
+    if (idx != -1) {
+      assignments[idx] = assignments[idx].copyWith(status: status);
+    }
+  }
+
   @override
   void onClose() {
     _internetServices.dispose();
+    _disconnectNotificationSocket();
     super.onClose();
+  }
+
+  void _connectNotificationSocket() {
+    if (_notificationSocket.isConnected) return;
+    final riderId = StorageService.userId;
+    if (riderId == null) {
+      AppLoggerHelper.debug(
+        'Notification socket connect skipped: missing riderId.',
+      );
+      return;
+    }
+    _notificationSocket.connect(riderId);
+    _notificationSubscription?.cancel();
+    _notificationSubscription = _notificationSocket.notificationStream.listen(
+      _handleIncomingNotification,
+      onError: (error) {
+        AppLoggerHelper.debug('Notification socket error: $error');
+      },
+    );
+  }
+
+  void _disconnectNotificationSocket() {
+    _notificationSubscription?.cancel();
+    _notificationSubscription = null;
+    _notificationSocket.disconnect();
+  }
+
+  void _handleIncomingNotification(Map<String, dynamic> payload) {
+    final notification = IncomingOrderNotification.fromPayload(payload);
+    if (notification == null) return;
+    if (notification.notificationId == _lastNotificationId) return;
+    _lastNotificationId = notification.notificationId;
+    incomingOffer.value = notification;
+  }
+
+  bool consumeIncomingOffer(String notificationId) {
+    final current = incomingOffer.value;
+    if (current == null || current.notificationId != notificationId) {
+      return false;
+    }
+    incomingOffer.value = null;
+    return true;
   }
 
   List<Assignment> _mapAssignmentsResponse(dynamic data) {
@@ -584,5 +703,77 @@ class HomepageController extends GetxController {
     }
 
     return [];
+  }
+}
+
+class IncomingOrderNotification {
+  IncomingOrderNotification({
+    required this.notificationId,
+    required this.title,
+    required this.body,
+    this.orderId,
+    required this.raw,
+  });
+
+  final String notificationId;
+  final String title;
+  final String body;
+  final String? orderId;
+  final Map<String, dynamic> raw;
+
+  static IncomingOrderNotification? fromPayload(Map<String, dynamic> payload) {
+    if (payload.isEmpty) return null;
+    final type = payload['type']?.toString().toLowerCase();
+    if (type != null &&
+        type.isNotEmpty &&
+        type != 'notifications' &&
+        type != 'notification') {
+      return null;
+    }
+
+    final rawTitle = payload['title']?.toString();
+    final rawBody = payload['body']?.toString();
+    if ((rawTitle == null || rawTitle.isEmpty) &&
+        (rawBody == null || rawBody.isEmpty)) {
+      return null;
+    }
+    final title = rawTitle != null && rawTitle.isNotEmpty
+        ? rawTitle
+        : 'New Order Offer';
+    final body = rawBody ?? '';
+    final notificationId =
+        payload['notification_id']?.toString() ??
+        payload['id']?.toString() ??
+        DateTime.now().microsecondsSinceEpoch.toString();
+    final data = payload['data'];
+    String? orderId;
+    if (data is Map<String, dynamic>) {
+      orderId =
+          data['order_id']?.toString() ??
+          data['orderId']?.toString() ??
+          data['id']?.toString();
+    }
+    orderId ??= _extractOrderId(body);
+    if (orderId != null) {
+      orderId = orderId.replaceFirst('#', '');
+    }
+
+    return IncomingOrderNotification(
+      notificationId: notificationId,
+      title: title,
+      body: body,
+      orderId: orderId,
+      raw: payload,
+    );
+  }
+
+  static String? _extractOrderId(String body) {
+    if (body.trim().isEmpty) return null;
+    final hashMatch = RegExp(r'#([A-Za-z0-9_-]+)').firstMatch(body);
+    if (hashMatch != null) {
+      return hashMatch.group(1);
+    }
+    final ordMatch = RegExp(r'ORD[_-]?[A-Za-z0-9]+').firstMatch(body);
+    return ordMatch?.group(0);
   }
 }

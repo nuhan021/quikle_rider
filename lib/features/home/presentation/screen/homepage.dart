@@ -8,6 +8,7 @@ import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
 import 'package:quikle_rider/features/home/controllers/homepage_controller.dart';
 import 'package:quikle_rider/features/home/models/home_dashboard_models.dart';
 import 'package:quikle_rider/features/home/presentation/widgets/dialogs/alert_dialog.dart';
+import 'package:quikle_rider/features/home/presentation/widgets/dialogs/incoming_offer_notification_dialog.dart';
 import 'package:quikle_rider/features/home/presentation/widgets/cards/assignment_card.dart';
 import 'package:quikle_rider/features/home/presentation/widgets/cards/stat_card.dart';
 import 'package:quikle_rider/features/map/presentation/widgets/map_shimmer.dart';
@@ -17,8 +18,17 @@ class HomeScreen extends GetView<HomepageController> {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(
-      () => SafeArea(
+    return Obx(() {
+      final incomingOffer = controller.incomingOffer.value;
+      if (incomingOffer != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!controller.consumeIncomingOffer(incomingOffer.notificationId)) {
+            return;
+          }
+          _showIncomingOfferDialog(context, incomingOffer);
+        });
+      }
+      return SafeArea(
         child: Scaffold(
           backgroundColor: Colors.white,
           appBar: CustomTabBar(
@@ -33,8 +43,8 @@ class HomeScreen extends GetView<HomepageController> {
                     : _buildOfflineView())
               : const ConnectionLost(),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildOfflineView() {
@@ -73,8 +83,6 @@ class HomeScreen extends GetView<HomepageController> {
 
   Widget _buildOnlineView(BuildContext context) {
     return Obx(() {
-     
-
       final hasError = controller.errorMessage.value != null;
       final stats = controller.stats.isEmpty
           ? _fallbackStats()
@@ -297,6 +305,107 @@ class HomeScreen extends GetView<HomepageController> {
           ),
         ),
       );
+    });
+  }
+
+  void _showIncomingOfferDialog(
+    BuildContext context,
+    IncomingOrderNotification offer,
+  ) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        String? actionInProgress;
+        return StatefulBuilder(
+          builder: (context, setState) {
+            final isProcessing = actionInProgress != null;
+            final isAccepting = actionInProgress == 'accept';
+            final isRejecting = actionInProgress == 'reject';
+            return IncomingOfferNotificationDialog(
+              title: offer.title,
+              body: offer.body,
+              orderId: offer.orderId,
+              isProcessing: isProcessing,
+              isAccepting: isAccepting,
+              isRejecting: isRejecting,
+              onAccept: () async {
+                final orderId = offer.orderId?.trim() ?? '';
+                if (orderId.isEmpty) {
+                  _showMissingOrderIdSnack();
+                  return;
+                }
+                setState(() => actionInProgress = 'accept');
+                final success = await controller.acceptAssignmentById(orderId);
+                if (Navigator.of(dialogContext).canPop()) {
+                  Navigator.of(dialogContext).pop();
+                }
+                _showOrderStatusDialog(
+                  context,
+                  success: success,
+                  isAccept: true,
+                );
+              },
+              onReject: () async {
+                final orderId = offer.orderId?.trim() ?? '';
+                if (orderId.isEmpty) {
+                  _showMissingOrderIdSnack();
+                  return;
+                }
+                setState(() => actionInProgress = 'reject');
+                final success = await controller.rejectAssignmentById(orderId);
+                if (Navigator.of(dialogContext).canPop()) {
+                  Navigator.of(dialogContext).pop();
+                }
+                _showOrderStatusDialog(
+                  context,
+                  success: success,
+                  isAccept: false,
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showMissingOrderIdSnack() {
+    Get.snackbar(
+      'Order ID missing',
+      'Unable to extract order id from this offer.',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.redAccent,
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(16),
+      duration: const Duration(seconds: 2),
+    );
+  }
+
+  void _showOrderStatusDialog(
+    BuildContext context, {
+    required bool success,
+    required bool isAccept,
+  }) {
+    final imageUrl = isAccept
+        ? (success ? "assets/images/success.png" : "assets/images/cancel.png")
+        : (success ? "assets/images/cancel.png" : "assets/images/success.png");
+    final text = isAccept
+        ? (success ? "Order Accepted" : "Order failed to accept")
+        : (success ? "Order Rejected" : "Order failed to reject");
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return OrderStatusDialog(imageUrl: imageUrl, text: text);
+      },
+    );
+
+    Future.delayed(const Duration(seconds: 1), () {
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
     });
   }
 }
