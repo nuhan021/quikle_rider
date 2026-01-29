@@ -89,6 +89,7 @@ class SplashController extends GetxController {
   }
 
   Future<void> _handleNavigation() async{
+    profileController.hydrateStatusFromCache();
     AppLoggerHelper.debug(
       "Profile status ${profileController.isVerified.value}",
     );

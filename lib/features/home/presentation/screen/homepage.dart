@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:quikle_rider/core/services/storage_service.dart';
+import 'package:quikle_rider/core/utils/logging/logger.dart';
 import 'package:quikle_rider/core/widgets/connection_lost.dart';
 import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
 import 'package:quikle_rider/features/home/controllers/homepage_controller.dart';
@@ -71,25 +73,45 @@ class HomeScreen extends GetView<HomepageController> {
 
   Widget _buildOnlineView(BuildContext context) {
     return Obx(() {
-      if (controller.isLoading.value) {
-        return const Center(child: MapShimmer());
-      }
+     
 
       final hasError = controller.errorMessage.value != null;
       final stats = controller.stats.isEmpty
           ? _fallbackStats()
           : controller.stats;
       final assignments = hasError ? <Assignment>[] : controller.assignments;
+      final isAssignmentsLoading = controller.isAssignmentsLoading.value;
+      final isFetchingMore = controller.isFetchingMoreAssignments.value;
+      final hasMoreAssignments = controller.hasMoreAssignments.value;
+
+      final token = StorageService.accessToken;
+      AppLoggerHelper.debug('Access token: $token');
 
       return RefreshIndicator(
         onRefresh: controller.refreshUpcomingAssignments,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification.metrics.maxScrollExtent <= 0) {
+              return false;
+            }
+            final threshold = 200.0;
+            final shouldLoadMore = notification.metrics.pixels >=
+                (notification.metrics.maxScrollExtent - threshold);
+            if (shouldLoadMore &&
+                hasMoreAssignments &&
+                !isFetchingMore &&
+                !isAssignmentsLoading) {
+              controller.loadMoreAssignments();
+            }
+            return false;
+          },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                 SizedBox(height: 16.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -112,7 +134,36 @@ class HomeScreen extends GetView<HomepageController> {
                   ),
                 ),
                 SizedBox(height: 16.h),
-                if (assignments.isEmpty)
+                if (isAssignmentsLoading && assignments.isEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(vertical: 24.h),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(color: Colors.grey[200]!),
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 24.h,
+                          width: 24.h,
+                          child: const CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        SizedBox(height: 12.h),
+                        Text(
+                          'Loading assignments...',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: 'Inter',
+                            fontSize: 14.sp,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else if (assignments.isEmpty)
                   Container(
                     width: double.infinity,
                     padding: EdgeInsets.symmetric(vertical: 32.h),
@@ -167,18 +218,13 @@ class HomeScreen extends GetView<HomepageController> {
                                     context: context,
                                     barrierDismissible: false,
                                     builder: (context) {
-                                      final errorText =
-                                          (controller.errorMessage.value ?? '')
-                                              .trim();
-                                      return OrderStatusDialog( 
+                                      return OrderStatusDialog(
                                         imageUrl: success
                                             ? "assets/images/success.png"
                                             : "assets/images/cancel.png",
                                         text: success
                                             ? "Order Accepted"
-                                            : errorText.isNotEmpty
-                                                ? "Order failed to accept\n$errorText"
-                                                : "Order failed to accept",
+                                            : "Order failed to accept",
                                       );
                                     },
                                   );
@@ -207,16 +253,13 @@ class HomeScreen extends GetView<HomepageController> {
                                     context: context,
                                     barrierDismissible: false,
                                     builder: (context) {
-                                      final errorText =
-                                          (controller.errorMessage.value ?? '')
-                                              .trim();
                                       return OrderStatusDialog(
                                         imageUrl: success
                                             ? "assets/images/cancel.png"
                                             : "assets/images/success.png",
                                         text: success
                                             ? "Order Rejected"
-                                            : "Order failed to reject${errorText.isNotEmpty ? " $errorText" : ""}",
+                                            : "Order failed to reject",
                                       );
                                     },
                                   );
@@ -236,8 +279,20 @@ class HomeScreen extends GetView<HomepageController> {
                       );
                     }).toList(),
                   ),
+                if (isFetchingMore)
+                  Padding(
+                    padding: EdgeInsets.only(top: 4.h, bottom: 8.h),
+                    child: Center(
+                      child: SizedBox(
+                        height: 20.h,
+                        width: 20.h,
+                        child: const CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                  ),
                 SizedBox(height: 24.h),
               ],
+              ),
             ),
           ),
         ),

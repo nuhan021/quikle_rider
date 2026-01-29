@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/utils/constants/colors.dart';
-import 'package:quikle_rider/features/authentication/presentation/screens/login_otp.dart';
+
 
 import 'package:video_player/video_player.dart';
 import '../../controllers/splash_controller.dart';

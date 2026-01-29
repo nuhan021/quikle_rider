@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/services/location_services.dart';
-
 import 'package:quikle_rider/core/services/network/internet_services.dart';
 import 'package:quikle_rider/core/services/firebase/firebase_service.dart';
 import 'package:quikle_rider/core/services/firebase/notification_service.dart';
@@ -27,18 +25,21 @@ class HomepageController extends GetxController {
     InternetServices? internetServices,
     ProfileServices? profileServices,
   }) : _homeService = homeService ?? HomeService(),
-       _internetServices = internetServices ?? InternetServices(),
-       _profileServices = profileServices ?? ProfileServices();
+       _internetServices = internetServices ?? InternetServices();
 
   var isOnline = false.obs;
   var isLoading = false.obs;
+  var isAssignmentsLoading = false.obs;
+  var isFetchingMoreAssignments = false.obs;
+  var hasMoreAssignments = true.obs;
   final errorMessage = RxnString();
   final stats = <HomeStat>[].obs;
   final assignments = <Assignment>[].obs;
   final _pendingActions = <String>{}.obs;
+  static const int _assignmentsPageSize = 3;
+  int _assignmentsOffset = 0;
   final HomeService _homeService;
   final InternetServices _internetServices;
-  final ProfileServices _profileServices;
   late final ProfileController _profileController;
 
   RxBool get hasConnection => _internetServices.hasConnection;
@@ -116,7 +117,7 @@ class HomepageController extends GetxController {
       );
       if (result == true) {
         unawaited(_changeOnlineStatus(true));
-        await _refreshUpcomingAssignments();
+        // await _refreshUpcomingAssignments(assignmentsOnly: true,showLoader: false);
         locationServices.connectAndStart();
       } else {
         isOnline.value = false;
@@ -145,16 +146,21 @@ class HomepageController extends GetxController {
   }
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
     _profileController = Get.isRegistered<ProfileController>()
         ? Get.find<ProfileController>()
         : Get.put(ProfileController());
     _internetServices.startMonitoring(onReconnect: _handleReconnect);
-    _profileController.fetchAvailabilitySettings();
-    fetchDashboardData();
-    _syncFcmToken();
-    unawaited(_syncOnlineStatus());
+    unawaited(
+      Future.wait([
+        _syncOnlineStatus(),
+        _profileController.fetchAvailabilitySettings(),
+        fetchDashboardData(),
+        _syncFcmToken(),
+        _syncOnlineStatus(),
+      ]),
+    );
   }
 
   Future<void> _syncOnlineStatus() async {
@@ -164,7 +170,7 @@ class HomepageController extends GetxController {
       return;
     }
 
-    final response = await _profileServices.getOnlineStatus(
+    final response = await _homeService.getOnlineStatus(
       accessToken: accessToken,
     );
     if (!response.isSuccess || response.responseData is! Map<String, dynamic>) {
@@ -178,29 +184,41 @@ class HomepageController extends GetxController {
     final online = data['is_online'] == true;
     if (online) {
       isOnline.value = true;
-      unawaited(_refreshUpcomingAssignments());
+      unawaited(_refreshUpcomingAssignments(assignmentsOnly: true));
       locationServices.connectAndStart();
     }
   }
 
   Future<void> fetchDashboardData() async {
-    await _refreshUpcomingAssignments(showLoader: true);
+    await _refreshUpcomingAssignments(assignmentsOnly: true);
   }
 
   Future<void> refreshUpcomingAssignments() async {
-    await _refreshUpcomingAssignments();
+    await _refreshUpcomingAssignments(assignmentsOnly: true);
   }
 
-  Future<HomeDashboardData> _loadDashboardData() async {
-    final upcomingAssignments = await _fetchUpcomingAssignments();
+  Future<HomeDashboardData> _loadDashboardData({
+    int offset = 0,
+    int limit = _assignmentsPageSize,
+  }) async {
+    final upcomingAssignments = await _fetchUpcomingAssignments(
+      offset: offset,
+      limit: limit,
+    );
     return HomeDashboardData(
       stats: _buildStats(upcomingAssignments),
       assignments: upcomingAssignments,
     );
   }
 
-  Future<List<Assignment>> _fetchUpcomingAssignments() async {
-    final response = await _homeService.fetchOfferedOrders();
+  Future<List<Assignment>> _fetchUpcomingAssignments({
+    int offset = 0,
+    int limit = _assignmentsPageSize,
+  }) async {
+    final response = await _homeService.fetchOfferedOrders(
+      offset: offset,
+      limit: limit,
+    );
     if (!response.isSuccess) {
       throw response.errorMessage.isNotEmpty
           ? response.errorMessage
@@ -245,16 +263,37 @@ class HomepageController extends GetxController {
     ];
   }
 
-  Future<void> _refreshUpcomingAssignments({bool showLoader = false}) async {
+  void _updateStatsFromAssignments() {
+    final updated = _buildStats(assignments);
+    stats.assignAll(updated);
+  }
+
+  Future<void> _refreshUpcomingAssignments({
+    bool showLoader = false,
+    bool assignmentsOnly = false,
+  }) async {
     if (showLoader) {
       isLoading.value = true;
-      errorMessage.value = null;
     }
+    if (assignmentsOnly) {
+      isAssignmentsLoading.value = true;
+    }
+    errorMessage.value = null;
 
     try {
-      final data = await _loadDashboardData();
+      _assignmentsOffset = 0;
+      hasMoreAssignments.value = true;
+      assignments.clear();
+      final data = await _loadDashboardData(
+        offset: _assignmentsOffset,
+        limit: _assignmentsPageSize,
+      );
       stats.assignAll(data.stats);
       assignments.assignAll(data.assignments);
+      _assignmentsOffset = assignments.length;
+      if (data.assignments.length < _assignmentsPageSize) {
+        hasMoreAssignments.value = false;
+      }
     } catch (error) {
       if (showLoader) {
         errorMessage.value = error is String
@@ -265,6 +304,34 @@ class HomepageController extends GetxController {
       if (showLoader) {
         isLoading.value = false;
       }
+      if (assignmentsOnly) {
+        isAssignmentsLoading.value = false;
+      }
+    }
+  }
+
+  Future<void> loadMoreAssignments() async {
+    if (isFetchingMoreAssignments.value || !hasMoreAssignments.value) return;
+    isFetchingMoreAssignments.value = true;
+    try {
+      final next = await _fetchUpcomingAssignments(
+        offset: _assignmentsOffset,
+        limit: _assignmentsPageSize,
+      );
+      if (next.isEmpty) {
+        hasMoreAssignments.value = false;
+      } else {
+        assignments.addAll(next);
+        _assignmentsOffset += next.length;
+        _updateStatsFromAssignments();
+        if (next.length < _assignmentsPageSize) {
+          hasMoreAssignments.value = false;
+        }
+      }
+    } catch (_) {
+      // keep hasMoreAssignments as-is on failure
+    } finally {
+      isFetchingMoreAssignments.value = false;
     }
   }
 
@@ -348,7 +415,7 @@ class HomepageController extends GetxController {
       if (response.isSuccess) {
         isOnline.value = goOnline;
         if (goOnline) {
-          unawaited(_refreshUpcomingAssignments());
+          unawaited(_refreshUpcomingAssignments(assignmentsOnly: true));
         } else {
           stats.clear();
           assignments.clear();
@@ -459,7 +526,7 @@ class HomepageController extends GetxController {
   }
 
   void _handleReconnect() {
-    if (stats.isEmpty && !isLoading.value) {
+    if (stats.isEmpty && !isAssignmentsLoading.value) {
       fetchDashboardData();
     }
   }

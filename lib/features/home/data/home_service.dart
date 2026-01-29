@@ -30,7 +30,10 @@ class HomeService {
   //   );
   // }
 
-  Future<ResponseData> fetchOfferedOrders({int offset = 0, int limit = 50}) async {
+  Future<ResponseData> fetchOfferedOrders({
+    int offset = 0,
+    required int limit,
+  }) async {
     final accessToken = StorageService.accessToken;
     final tokenType = StorageService.tokenType ?? 'Bearer';
 
@@ -128,6 +131,18 @@ class HomeService {
       statusCode: 401,
       errorMessage: 'Not authenticated',
       responseData: null,
+    );
+  }
+    Future<ResponseData> getOnlineStatus({
+    required String accessToken,
+  }) {
+    return _networkCaller.getRequest(
+      '$baseurl/rider/is-online-status/',
+      headers: {
+        'accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      defaultErrorMessage: 'Unable to fetch online status. Please try again.',
     );
   }
 }
