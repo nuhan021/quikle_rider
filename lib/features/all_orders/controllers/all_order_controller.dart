@@ -68,7 +68,11 @@ class AllOrdersController extends GetxController {
     selectedIndex.value = index;
   }
 
-  Future<void> fetchOrders({int skip = 0, int limit = 10}) async {
+  Future<void> fetchOrders({
+    int skip = 0,
+    int limit = 10,
+    bool preserveTab = false,
+  }) async {
     final isVerified = _profileController.isVerifiedApproved;
     if (!isVerified) {
       ordersError.value = 'Your profile not verified.';
@@ -108,11 +112,13 @@ class AllOrdersController extends GetxController {
         combinedOrders.assignAll(parsedOrders.where(_isCombinedOrder));
         singleOrders.assignAll(parsedOrders.where((o) => !_isCombinedOrder(o)));
 
-        final initialIndex =
-            parsedOrders.isNotEmpty && _isCombinedOrder(parsedOrders.first)
-            ? 0
-            : 1;
-        _selectTab(initialIndex);
+        if (!preserveTab) {
+          final initialIndex =
+              parsedOrders.isNotEmpty && _isCombinedOrder(parsedOrders.first)
+              ? 0
+              : 1;
+          _selectTab(initialIndex);
+        }
       } else {
         orders.clear();
         combinedOrders.clear();

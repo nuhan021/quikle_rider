@@ -140,6 +140,21 @@ class ProfileController extends GetxController {
     errorMessage.value = null;
   }
 
+  void hydrateStatusFromCache() {
+    if (isVerified.value == null) {
+      final cachedStatus = StorageService.cachedVerificationStatus;
+      if (cachedStatus != null && cachedStatus.isNotEmpty) {
+        isVerified.value = cachedStatus;
+      }
+    }
+    if (isDocumentUploaded.value == null) {
+      final cachedDocumentStatus = StorageService.cachedDocumentUploadStatus;
+      if (cachedDocumentStatus != null) {
+        isDocumentUploaded.value = cachedDocumentStatus;
+      }
+    }
+  }
+
   void clearForLogout() {
     isavaiabilityProfile.value = false;
     isLoading.value = false;
@@ -178,6 +193,8 @@ class ProfileController extends GetxController {
     } else {
       resetProfileFetchState();
     }
+
+    hydrateStatusFromCache();
 
     Future<void> safeFetch(Future<void> Function() action, String label) async {
       try {
@@ -362,6 +379,9 @@ class ProfileController extends GetxController {
           uploaded = data;
         }
         isDocumentUploaded.value = uploaded;
+        if (uploaded != null) {
+          await StorageService.cacheDocumentUploadStatus(uploaded);
+        }
       } else {
         documentStatusError.value = response.errorMessage.isNotEmpty
             ? response.errorMessage
@@ -402,6 +422,9 @@ class ProfileController extends GetxController {
           status = _normalizeVerificationStatus(data);
         }
         isVerified.value = status;
+        if (status != null && status.isNotEmpty) {
+          await StorageService.cacheVerificationStatus(status);
+        }
       } else {
         verificationError.value = response.errorMessage.isNotEmpty
             ? response.errorMessage

@@ -32,7 +32,11 @@ class _AllOrdersState extends State<AllOrders>
       final currentTabController = controller.tabController;
       if (currentTabController == null) return;
       if (!currentTabController.indexIsChanging) {
-        controller.selectedIndex.value = currentTabController.index;
+        final currentIndex = currentTabController.index;
+        if (controller.selectedIndex.value != currentIndex) {
+          controller.selectedIndex.value = currentIndex;
+          controller.fetchOrders(preserveTab: true);
+        }
       }
     });
   }
@@ -87,12 +91,16 @@ class _AllOrdersState extends State<AllOrders>
                       ),
                       SizedBox(height: 16.h),
                       Expanded(
-                        child: TabBarView(
-                          controller: controller.tabController,
-                          children: const [
-                            AllOrdersCombined(),
-                            AllOrdersSingle(),
-                          ],
+                        child: RefreshIndicator(
+                          onRefresh: () =>
+                              controller.fetchOrders(preserveTab: true),
+                          child: TabBarView(
+                            controller: controller.tabController,
+                            children: const [
+                              AllOrdersCombined(),
+                              AllOrdersSingle(),
+                            ],
+                          ),
                         ),
                       ),
                     ],

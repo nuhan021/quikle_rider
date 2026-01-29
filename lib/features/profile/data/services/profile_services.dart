@@ -69,18 +69,7 @@ class ProfileServices {
     );
   }
 
-  Future<ResponseData> getOnlineStatus({
-    required String accessToken,
-  }) {
-    return _networkCaller.getRequest(
-      '$baseurl/rider/is-online-status/',
-      headers: {
-        'accept': 'application/json',
-        'Authorization': 'Bearer $accessToken',
-      },
-      defaultErrorMessage: 'Unable to fetch online status. Please try again.',
-    );
-  }
+
 
   Future<ResponseData> getTrainingVideos({
     required String accessToken,

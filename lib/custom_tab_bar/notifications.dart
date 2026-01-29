@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/common/widgets/common_appbar.dart';
-import 'package:quikle_rider/core/utils/logging/logger.dart';
 import 'package:quikle_rider/features/notifications/controller/notification_controller.dart';
 
-class NotificationsPage extends StatelessWidget {
+class NotificationsPage extends StatefulWidget {
   const NotificationsPage({super.key});
+
+  @override
+  State<NotificationsPage> createState() => _NotificationsPageState();
+}
+
+class _NotificationsPageState extends State<NotificationsPage> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final controller = NotificationController.to;
+      controller.fetchNotifications(
+        showLoader: controller.notifications.isEmpty,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,32 +32,63 @@ class NotificationsPage extends StatelessWidget {
       body: Obx(() {
         final notifications = controller.notifications;
         final hasUnread = controller.hasUnread;
+        final isLoading = controller.isLoading.value;
+        final errorMessage = controller.errorMessage.value;
+
+        if (isLoading && notifications.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (errorMessage != null &&
+            errorMessage.isNotEmpty &&
+            notifications.isEmpty) {
+          return _buildErrorState(
+            errorMessage,
+            onRetry: () => controller.fetchNotifications(),
+          );
+        }
 
         return Column(
           children: [
             Expanded(
-              child: notifications.isEmpty
-                  ? _buildEmptyState()
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 20,
-                      ),
-                      itemCount: notifications.length,
-                      itemBuilder: (context, index) {
-                        AppLoggerHelper.debug("Notification title: ${notifications[index].title}");
-                        final notification = notifications[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _buildNotificationTile(
-                            context,
-                            controller,
-                            notification,
-                            screenWidth,
+              child: RefreshIndicator(
+                onRefresh: () =>
+                    controller.fetchNotifications(showLoader: false),
+                child: notifications.isEmpty
+                    ? ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 20,
+                        ),
+                        children: [
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.6,
+                            child: _buildEmptyState(),
                           ),
-                        );
-                      },
-                    ),
+                        ],
+                      )
+                    : ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 20,
+                        ),
+                        itemCount: notifications.length,
+                        itemBuilder: (context, index) {
+                          final notification = notifications[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _buildNotificationTile(
+                              context,
+                              controller,
+                              notification,
+                              screenWidth,
+                            ),
+                          );
+                        },
+                      ),
+              ),
             ),
             if (hasUnread)
               Padding(
@@ -112,6 +158,49 @@ class NotificationsPage extends StatelessWidget {
             style: TextStyle(fontSize: 14, color: Colors.grey[500]),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(
+    String message, {
+    required VoidCallback onRetry,
+  }) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              color: Colors.redAccent,
+              size: 52,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: onRetry,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
       ),
     );
   }

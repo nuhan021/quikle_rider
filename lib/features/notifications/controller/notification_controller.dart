@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:quikle_rider/core/services/firebase/notification_payload.dart';
 import 'package:quikle_rider/core/services/firebase/notification_service.dart';
+import 'package:quikle_rider/core/services/storage_service.dart';
+import 'package:quikle_rider/core/utils/logging/logger.dart';
 
 class AppNotification {
   const AppNotification({
@@ -15,6 +17,8 @@ class AppNotification {
     this.payload,
     this.isUrgent = false,
     this.isRead = false,
+    this.remoteId,
+    this.userId,
   });
 
   final int id;
@@ -24,6 +28,8 @@ class AppNotification {
   final String? payload;
   final bool isUrgent;
   final bool isRead;
+  final String? remoteId;
+  final int? userId;
 
   AppNotification copyWith({
     String? title,
@@ -32,6 +38,8 @@ class AppNotification {
     String? payload,
     bool? isUrgent,
     bool? isRead,
+    String? remoteId,
+    int? userId,
   }) {
     return AppNotification(
       id: id,
@@ -41,6 +49,8 @@ class AppNotification {
       payload: payload ?? this.payload,
       isUrgent: isUrgent ?? this.isUrgent,
       isRead: isRead ?? this.isRead,
+      remoteId: remoteId ?? this.remoteId,
+      userId: userId ?? this.userId,
     );
   }
 
@@ -62,6 +72,8 @@ class NotificationController extends GetxController {
 
   final NotificationService _notificationService;
   final RxList<AppNotification> notifications = <AppNotification>[].obs;
+  final RxBool isLoading = false.obs;
+  final RxnString errorMessage = RxnString();
   StreamSubscription<RemoteMessage>? _foregroundSubscription;
   StreamSubscription<RemoteMessage>? _openedAppSubscription;
 
@@ -69,7 +81,7 @@ class NotificationController extends GetxController {
   void onInit() {
     super.onInit();
     _initializeService();
-
+    unawaited(fetchNotifications());
   }
 
   @override
@@ -84,7 +96,43 @@ class NotificationController extends GetxController {
     _listenToFirebaseMessages();
   }
 
+  Future<void> fetchNotifications({bool showLoader = true}) async {
+    if (isLoading.value) return;
 
+    final accessToken = StorageService.accessToken;
+    if (accessToken == null || accessToken.isEmpty) {
+      errorMessage.value = 'Please log in to view notifications.';
+      return;
+    }
+
+    final authorization = _buildAuthorizationHeader(accessToken);
+
+    if (showLoader) {
+      isLoading.value = true;
+    }
+    errorMessage.value = null;
+
+    try {
+      final response = await _notificationService.getNotifications(
+        authorization: authorization,
+      );
+
+      if (response.isSuccess) {
+        final mapped = _mapApiNotifications(response.responseData);
+        notifications.assignAll(mapped);
+      } else {
+        final message = response.errorMessage.isNotEmpty
+            ? response.errorMessage
+            : 'Unable to load notifications.';
+        errorMessage.value = message;
+        AppLoggerHelper.debug('Notifications fetch failed: $message');
+      }
+    } finally {
+      if (showLoader) {
+        isLoading.value = false;
+      }
+    }
+  }
 
   void _listenToFirebaseMessages() {
     _foregroundSubscription?.cancel();
@@ -142,6 +190,90 @@ class NotificationController extends GetxController {
         });
       }
     });
+  }
+
+  List<AppNotification> _mapApiNotifications(dynamic data) {
+    if (data is! List) {
+      AppLoggerHelper.debug('Notifications response is not a list.');
+      return [];
+    }
+
+    final items = <AppNotification>[];
+    for (final entry in data) {
+      if (entry is Map) {
+        final mapped = _parseApiNotification(
+          Map<String, dynamic>.from(entry),
+        );
+        if (mapped != null) {
+          items.add(mapped);
+        }
+      }
+    }
+
+    items.sort((a, b) => b.receivedAt.compareTo(a.receivedAt));
+    return items;
+  }
+
+  AppNotification? _parseApiNotification(Map<String, dynamic> json) {
+    final title = json['title']?.toString().trim();
+    final body = json['body']?.toString().trim();
+    final receivedAt = _parseDate(json['created_at']);
+    final remoteId = json['id']?.toString();
+    final payload = json['payload']?.toString() ?? json['route']?.toString();
+
+    return AppNotification(
+      id: _generateLocalId(remoteId, receivedAt),
+      title: title != null && title.isNotEmpty ? title : 'Notification',
+      body: body ?? '',
+      receivedAt: receivedAt,
+      payload: payload != null && payload.isNotEmpty ? payload : null,
+      isRead: _parseBool(json['is_read']),
+      isUrgent: _parseBool(json['is_urgent'] ?? json['urgent']),
+      remoteId: remoteId,
+      userId: _parseInt(json['user_id']),
+    );
+  }
+
+  String _buildAuthorizationHeader(String accessToken) {
+    final tokenType = StorageService.tokenType;
+    final normalized = tokenType?.trim();
+    final resolvedType =
+        normalized == null || normalized.isEmpty ? 'Bearer' : normalized;
+    return '$resolvedType $accessToken';
+  }
+
+  DateTime _parseDate(dynamic value) {
+    final raw = value?.toString();
+    if (raw == null || raw.isEmpty) return DateTime.now();
+    final parsed = DateTime.tryParse(raw);
+    return parsed?.toLocal() ?? DateTime.now();
+  }
+
+  bool _parseBool(dynamic value) {
+    if (value == null) return false;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final normalized = value.toLowerCase();
+      return normalized == 'true' ||
+          normalized == '1' ||
+          normalized == 'yes' ||
+          normalized == 'urgent';
+    }
+    return false;
+  }
+
+  int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    return int.tryParse(value.toString());
+  }
+
+  int _generateLocalId(String? remoteId, DateTime receivedAt) {
+    if (remoteId != null && remoteId.isNotEmpty) {
+      return remoteId.hashCode & 0x7fffffff;
+    }
+    return receivedAt.millisecondsSinceEpoch.remainder(0x7fffffff);
   }
 
   Future<AppNotification> addNotification({
