@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:quikle_rider/core/services/storage_service.dart';
-import 'package:quikle_rider/core/utils/logging/logger.dart';
 import 'package:quikle_rider/core/widgets/connection_lost.dart';
 import 'package:quikle_rider/custom_tab_bar/custom_tab_bar.dart';
 import 'package:quikle_rider/features/home/controllers/homepage_controller.dart';
@@ -11,7 +9,7 @@ import 'package:quikle_rider/features/home/presentation/widgets/dialogs/alert_di
 import 'package:quikle_rider/features/home/presentation/widgets/dialogs/incoming_offer_notification_dialog.dart';
 import 'package:quikle_rider/features/home/presentation/widgets/cards/assignment_card.dart';
 import 'package:quikle_rider/features/home/presentation/widgets/cards/stat_card.dart';
-import 'package:quikle_rider/features/map/presentation/widgets/map_shimmer.dart';
+import 'package:quikle_rider/features/profile/presentation/controller/profile_controller.dart';
 
 class HomeScreen extends GetView<HomepageController> {
   const HomeScreen({super.key});
@@ -20,6 +18,8 @@ class HomeScreen extends GetView<HomepageController> {
   Widget build(BuildContext context) {
     return Obx(() {
       final incomingOffer = controller.incomingOffer.value;
+      final profileController = Get.find<ProfileController>();
+      final isVerified = profileController.isVerifiedForOnline;
       if (incomingOffer != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!controller.consumeIncomingOffer(incomingOffer.notificationId)) {
@@ -38,7 +38,7 @@ class HomeScreen extends GetView<HomepageController> {
             onToggle: controller.onToggleSwitch,
           ),
           body: controller.hasConnection.value
-              ? (controller.isOnline.value
+              ? (controller.isOnline.value && isVerified
                     ? _buildOnlineView(context)
                     : _buildOfflineView())
               : const ConnectionLost(),
@@ -92,9 +92,6 @@ class HomeScreen extends GetView<HomepageController> {
       final isFetchingMore = controller.isFetchingMoreAssignments.value;
       final hasMoreAssignments = controller.hasMoreAssignments.value;
 
-      final token = StorageService.accessToken;
-      AppLoggerHelper.debug('Access token: $token');
-
       return RefreshIndicator(
         onRefresh: controller.refreshUpcomingAssignments,
         child: NotificationListener<ScrollNotification>(
@@ -113,182 +110,214 @@ class HomeScreen extends GetView<HomepageController> {
             }
             return false;
           },
-          child: SingleChildScrollView(
+          child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                SizedBox(height: 16.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: stats.take(3).map((stat) {
-                    return StatCard(
-                      title: stat.title,
-                      value: stat.displayValue,
-                      subtitle: stat.subtitle,
-                    );
-                  }).toList(),
-                ),
-                SizedBox(height: 24.h),
-                Text(
-                  'Upcoming Assignments',
-                  style: TextStyle(
-                    fontFamily: 'Obviously',
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.black,
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 16.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: stats.take(3).map((stat) {
+                          return StatCard(
+                            title: stat.title,
+                            value: stat.displayValue,
+                            subtitle: stat.subtitle,
+                          );
+                        }).toList(),
+                      ),
+                      SizedBox(height: 24.h),
+                      Text(
+                        'Upcoming Assignments',
+                        style: TextStyle(
+                          fontFamily: 'Obviously',
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.black,
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+                    ],
                   ),
                 ),
-                SizedBox(height: 16.h),
-                if (isAssignmentsLoading && assignments.isEmpty)
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(vertical: 24.h),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(color: Colors.grey[200]!),
-                    ),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 24.h,
-                          width: 24.h,
-                          child: const CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                        SizedBox(height: 12.h),
-                        Text(
-                          'Loading assignments...',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: 'Inter',
-                            fontSize: 14.sp,
-                            color: Colors.grey[600],
+              ),
+              if (isAssignmentsLoading && assignments.isEmpty)
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  sliver: SliverToBoxAdapter(
+                    child: Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(vertical: 24.h),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: Colors.grey[200]!),
+                      ),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 24.h,
+                            width: 24.h,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  )
-                else if (assignments.isEmpty)
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(vertical: 32.h),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(color: Colors.grey[200]!),
-                    ),
-                    child: Text(
-                      'No upcoming assignments right now.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 14.sp,
-                        color: Colors.grey[600],
+                          SizedBox(height: 12.h),
+                          Text(
+                            'Loading assignments...',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Inter',
+                              fontSize: 14.sp,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  )
-                else
-                  Column(
-                    children: assignments.map((assignment) {
-                      final isPending =
-                          assignment.status == AssignmentStatus.pending;
-                      final isActionPending = controller
-                          .isAssignmentActionPending(assignment.id);
-                      return Padding(
-                        padding: EdgeInsets.only(bottom: 16.h),
-                        child: AssignmentCard(
-                          deleverystatus: assignment.deleverystatus,
-                          orderId: assignment.id,
-                          customerName: assignment.customerName,
-                          arrivalTime: assignment.formattedArrival,
-                          address: assignment.address,
-                          distance: assignment.formattedDistance,
-                          total: assignment.formattedTotal,
-                          breakdown: assignment.formattedBreakdown,
-                          isUrgent: assignment.isUrgent,
-                          isCombined: assignment.isCombined,
-                          status: assignment.status,
-                          orderStatus: assignment.orderStatus,
-                          showActions: isPending,
-                          isAccepting: isActionPending,
-                          onAccept: isPending
-                              ? () async {
-                                  if (isActionPending) return;
-
-                                  final success = await controller
-                                      .acceptAssignment(assignment);
-
-                                  // Show status dialog
-                                  showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (context) {
-                                      return OrderStatusDialog(
-                                        imageUrl: success
-                                            ? "assets/images/success.png"
-                                            : "assets/images/cancel.png",
-                                        text: success
-                                            ? "Order Accepted"
-                                            : "Order failed to accept",
-                                      );
-                                    },
-                                  );
-
-                                  // Auto close after 1 second
-                                  Future.delayed(
-                                    const Duration(seconds: 1),
-                                    () {
-                                      if (Navigator.of(context).canPop()) {
-                                        Navigator.of(context).pop();
-                                      }
-                                    },
-                                  );
-                                }
-                              : null,
-
-                          onReject: isPending
-                              ? () async {
-                                  if (isActionPending) return;
-
-                                  final success = await controller
-                                      .rejectAssignment(assignment);
-
-                                  // Show status dialog
-                                  showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (context) {
-                                      return OrderStatusDialog(
-                                        imageUrl: success
-                                            ? "assets/images/cancel.png"
-                                            : "assets/images/success.png",
-                                        text: success
-                                            ? "Order Rejected"
-                                            : "Order failed to reject",
-                                      );
-                                    },
-                                  );
-
-                                  // Auto close after 1 second
-                                  Future.delayed(
-                                    const Duration(seconds: 1),
-                                    () {
-                                      if (Navigator.of(context).canPop()) {
-                                        Navigator.of(context).pop();
-                                      }
-                                    },
-                                  );
-                                }
-                              : null,
-                        ),
-                      );
-                    }).toList(),
                   ),
-                if (isFetchingMore)
-                  Padding(
+                )
+              else if (assignments.isEmpty)
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  sliver: SliverToBoxAdapter(
+                    child: Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(vertical: 32.h),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(color: Colors.grey[200]!),
+                      ),
+                      child: Text(
+                        'No upcoming assignments right now.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 14.sp,
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final assignment = assignments[index];
+                        final isPending =
+                            assignment.status == AssignmentStatus.pending;
+                        return Obx(() {
+                          final isAcceptPending = controller
+                              .isAssignmentAcceptPending(assignment.id);
+                          final isRejectPending = controller
+                              .isAssignmentRejectPending(assignment.id);
+                          final isAnyPending =
+                              isAcceptPending || isRejectPending;
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 16.h),
+                            child: AssignmentCard(
+                              deleverystatus: assignment.deleverystatus,
+                              orderId: assignment.id,
+                              customerName: assignment.customerName,
+                              arrivalTime: assignment.formattedArrival,
+                              address: assignment.address,
+                              distance: assignment.formattedDistance,
+                              total: assignment.formattedTotal,
+                              breakdown: assignment.formattedBreakdown,
+                              isUrgent: assignment.isUrgent,
+                              isCombined: assignment.isCombined,
+                              status: assignment.status,
+                              orderStatus: assignment.orderStatus,
+                              showActions: isPending,
+                              isAccepting: isAcceptPending,
+                              isRejecting: isRejectPending,
+                              onAccept: isPending
+                                  ? () async {
+                                      if (isAnyPending) return;
+
+                                      final success = await controller
+                                          .acceptAssignment(assignment);
+
+                                      // Show status dialog
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (context) {
+                                          return OrderStatusDialog(
+                                            imageUrl: success
+                                                ? "assets/images/success.png"
+                                                : "assets/images/cancel.png",
+                                            text: success
+                                                ? "Order Accepted"
+                                                : "Order failed to accept",
+                                          );
+                                        },
+                                      );
+
+                                      // Auto close after 1 second
+                                      Future.delayed(
+                                        const Duration(seconds: 1),
+                                        () {
+                                          if (Navigator.of(context).canPop()) {
+                                            Navigator.of(context).pop();
+                                          }
+                                        },
+                                      );
+                                    }
+                                  : null,
+                              onReject: isPending
+                                  ? () async {
+                                      if (isAnyPending) return;
+
+                                      final success = await controller
+                                          .rejectAssignment(assignment);
+
+                                      // Show status dialog
+                                      showDialog(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (context) {
+                                          return OrderStatusDialog(
+                                            imageUrl: success
+                                                ? "assets/images/cancel.png"
+                                                : "assets/images/success.png",
+                                            text: success
+                                                ? "Order Rejected"
+                                                : "Order failed to reject",
+                                          );
+                                        },
+                                      );
+
+                                      // Auto close after 1 second
+                                      Future.delayed(
+                                        const Duration(seconds: 1),
+                                        () {
+                                          if (Navigator.of(context).canPop()) {
+                                            Navigator.of(context).pop();
+                                          }
+                                        },
+                                      );
+                                    }
+                                  : null,
+                            ),
+                          );
+                        });
+                      },
+                      childCount: assignments.length,
+                    ),
+                  ),
+                ),
+              if (isFetchingMore)
+                SliverToBoxAdapter(
+                  child: Padding(
                     padding: EdgeInsets.only(top: 4.h, bottom: 8.h),
                     child: Center(
                       child: SizedBox(
@@ -298,10 +327,9 @@ class HomeScreen extends GetView<HomepageController> {
                       ),
                     ),
                   ),
-                SizedBox(height: 24.h),
-              ],
-              ),
-            ),
+                ),
+              SliverToBoxAdapter(child: SizedBox(height: 24.h)),
+            ],
           ),
         ),
       );

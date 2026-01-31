@@ -22,6 +22,7 @@ class AssignmentCard extends StatelessWidget {
   final VoidCallback? onAccept;
   final VoidCallback? onReject;
   final bool isAccepting;
+  final bool isRejecting;
 
   const AssignmentCard({
     super.key,
@@ -41,6 +42,7 @@ class AssignmentCard extends StatelessWidget {
     this.onAccept,
     this.onReject,
     this.isAccepting = false,
+    this.isRejecting = false,
   });
 
   @override
@@ -288,7 +290,7 @@ class AssignmentCard extends StatelessWidget {
                   child: SizedBox(
                     height: 40.h,
                     child: OutlinedButton(
-                      onPressed: onReject,
+                      onPressed: isRejecting ? null : onReject,
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(
                           color: const Color(0xFFE03E1A),
@@ -299,15 +301,27 @@ class AssignmentCard extends StatelessWidget {
                         ),
                         padding: EdgeInsets.symmetric(horizontal: 24.w),
                       ),
-                      child: Text(
-                        'Reject',
-                        style: TextStyle(
-                          fontFamily: 'Inter',
-                          fontSize: 14.sp,
-                          color: const Color(0xFFFF0000),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
+                      child:
+                          isRejecting
+                              ? SizedBox(
+                                width: 18.sp,
+                                height: 18.sp,
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    Color(0xFFE03E1A),
+                                  ),
+                                ),
+                              )
+                              : Text(
+                                'Reject',
+                                style: TextStyle(
+                                  fontFamily: 'Inter',
+                                  fontSize: 14.sp,
+                                  color: const Color(0xFFFF0000),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                     ),
                   ),
                 ),

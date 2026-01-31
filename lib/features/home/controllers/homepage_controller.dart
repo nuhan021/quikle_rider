@@ -36,7 +36,7 @@ class HomepageController extends GetxController {
   final errorMessage = RxnString();
   final stats = <HomeStat>[].obs;
   final assignments = <Assignment>[].obs;
-  final _pendingActions = <String>{}.obs;
+  final RxMap<String, String> _pendingActionType = <String, String>{}.obs;
   static const int _assignmentsPageSize = 3;
   int _assignmentsOffset = 0;
   final HomeService _homeService;
@@ -54,7 +54,7 @@ class HomepageController extends GetxController {
 
   Future<void> onToggleSwitch() async {
     if (!isOnline.value) {
-      final isVerified = _profileController.isVerifiedApproved;
+      final isVerified = _profileController.isVerifiedForOnline;
       if (!isVerified) {
         Get.snackbar(
           '',
@@ -123,10 +123,9 @@ class HomepageController extends GetxController {
         transition: Transition.fade,
       );
       if (result == true) {
-        unawaited(_changeOnlineStatus(true));
-        // await _refreshUpcomingAssignments(assignmentsOnly: true,showLoader: false);
-        locationServices.connectAndStart();
-        _connectNotificationSocket();
+        // Only start upcoming assignments, location send, and notification socket.
+        unawaited(_startOnlineServices());
+        // unawaited(_changeOnlineStatus(true));
       } else {
         isOnline.value = false;
         stats.clear();
@@ -193,10 +192,16 @@ class HomepageController extends GetxController {
     final online = data['is_online'] == true;
     if (online) {
       isOnline.value = true;
-      unawaited(_refreshUpcomingAssignments(assignmentsOnly: true));
-      locationServices.connectAndStart();
-      _connectNotificationSocket();
+      unawaited(_startOnlineServices());
     }
+  }
+
+  Future<void> _startOnlineServices() async {
+    await Future.wait([
+      _refreshUpcomingAssignments(assignmentsOnly: true),
+      locationServices.connectAndStart(),
+      Future<void>.microtask(_connectNotificationSocket),
+    ]);
   }
 
   Future<void> fetchDashboardData() async {
@@ -346,11 +351,18 @@ class HomepageController extends GetxController {
   }
 
   bool isAssignmentActionPending(String assignmentId) =>
-      _pendingActions.contains(assignmentId);
+      _pendingActionType.containsKey(assignmentId);
+
+  bool isAssignmentAcceptPending(String assignmentId) =>
+      _pendingActionType[assignmentId] == 'accept';
+
+  bool isAssignmentRejectPending(String assignmentId) =>
+      _pendingActionType[assignmentId] == 'reject';
 
   Future<bool> acceptAssignment(Assignment assignment) async {
     final result = await _performAssignmentAction(
       assignmentId: assignment.id,
+      actionType: 'accept',
       action: () async {
         final response = await _homeService.acceptOfferedOrder(
           orderId: assignment.id,
@@ -379,6 +391,7 @@ class HomepageController extends GetxController {
   Future<bool> rejectAssignment(Assignment assignment) async {
     final result = await _performAssignmentAction(
       assignmentId: assignment.id,
+      actionType: 'reject',
       action: () async {
         final response = await _homeService.rejectOfferedOrder(
           orderId: assignment.id,
@@ -408,6 +421,7 @@ class HomepageController extends GetxController {
     if (trimmedId.isEmpty) return false;
     final result = await _performAssignmentAction(
       assignmentId: trimmedId,
+      actionType: 'accept',
       action: () async {
         final response = await _homeService.acceptOfferedOrder(
           orderId: trimmedId,
@@ -436,6 +450,7 @@ class HomepageController extends GetxController {
     if (trimmedId.isEmpty) return false;
     final result = await _performAssignmentAction(
       assignmentId: trimmedId,
+      actionType: 'reject',
       action: () async {
         final response = await _homeService.rejectOfferedOrder(
           orderId: trimmedId,
@@ -462,15 +477,16 @@ class HomepageController extends GetxController {
 
   Future<bool> _performAssignmentAction({
     required String assignmentId,
+    required String actionType,
     required Future<bool> Function() action,
   }) async {
-    if (_pendingActions.contains(assignmentId)) return false;
-    _pendingActions.add(assignmentId);
+    if (_pendingActionType.containsKey(assignmentId)) return false;
+    _pendingActionType[assignmentId] = actionType;
     try {
       final result = await action();
       return result;
     } finally {
-      _pendingActions.remove(assignmentId);
+      _pendingActionType.remove(assignmentId);
     }
   }
 

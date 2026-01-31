@@ -83,6 +83,14 @@ class ProfileController extends GetxController {
   bool get isVerifiedApproved =>
       _normalizeVerificationStatus(isVerified.value) == 'approved';
 
+  bool get isVerifiedForOnline {
+    final normalized = _normalizeVerificationStatus(isVerified.value);
+    if (normalized == null) return false;
+    return normalized == 'verified' ||
+        normalized == 'approved' ||
+        normalized == 'true';
+  }
+
   bool get isVerificationRejected =>
       _normalizeVerificationStatus(isVerified.value) == 'rejected';
 
