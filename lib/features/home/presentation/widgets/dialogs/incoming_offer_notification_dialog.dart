@@ -26,19 +26,30 @@ class IncomingOfferNotificationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final resolvedTitle = title.trim().isEmpty
+        ? 'Incoming Order'
+        : title.trim();
+    final resolvedBody = body.trim().isEmpty
+        ? 'A new order is available. Please respond now.'
+        : body.trim();
+    final resolvedOrderId = (orderId != null && orderId!.trim().isNotEmpty)
+        ? orderId!.trim()
+        : '--';
+
     return Dialog(
       insetPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
       backgroundColor: Colors.transparent,
       child: Container(
-        padding: EdgeInsets.all(16.w),
+        padding: EdgeInsets.all(18.w),
         decoration: BoxDecoration(
-          color: AppColors.background,
-          borderRadius: BorderRadius.circular(12.r),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18.r),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
           boxShadow: [
             BoxShadow(
-              color: const Color(0x0A606060),
-              blurRadius: 8.r,
-              offset: const Offset(0, 2),
+              color: const Color(0x1A000000),
+              blurRadius: 16.r,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
@@ -46,54 +57,137 @@ class IncomingOfferNotificationDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontFamily: 'Obviously',
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF484848),
+            Row(
+              children: [
+                Container(
+                  width: 36.w,
+                  height: 36.w,
+                  decoration: BoxDecoration(
+                    color: AppColors.beakYellow.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Icon(
+                    Icons.local_shipping_outlined,
+                    size: 20.sp,
+                    color: Colors.black87,
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        resolvedTitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: 'Obviously',
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF111827),
+                        ),
+                      ),
+                      SizedBox(height: 2.h),
+                      Text(
+                        'Action needed',
+                        style: TextStyle(
+                          fontFamily: 'Inter',
+                          fontSize: 12.sp,
+                          color: const Color(0xFF6B7280),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 14.h),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9FAFB),
+                borderRadius: BorderRadius.circular(10.r),
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Order ID',
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 11.sp,
+                      color: const Color(0xFF6B7280),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    resolvedOrderId,
+                    style: TextStyle(
+                      fontFamily: 'Inter',
+                      fontSize: 15.sp,
+                      color: const Color(0xFF111827),
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.2,
+                    ),
+                  ),
+                ],
               ),
             ),
-            SizedBox(height: 8.h),
+            SizedBox(height: 10.h),
             Text(
-              body,
+              resolvedBody,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: 'Inter',
-                fontSize: 14.sp,
-                color: Colors.black87,
+                fontSize: 13.sp,
+                color: const Color(0xFF4B5563),
                 fontWeight: FontWeight.w400,
+                height: 1.35,
               ),
             ),
-            if (orderId != null && orderId!.trim().isNotEmpty) ...[
-              SizedBox(height: 10.h),
-              Text(
-                'Order: $orderId',
+            SizedBox(height: 16.h),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFFF7E0),
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Text(
+                'Please accept or reject quickly.',
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontFamily: 'Inter',
                   fontSize: 12.sp,
-                  color: const Color(0xFF6B7280),
-                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF7C5A00),
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-            ],
-            SizedBox(height: 16.h),
+            ),
+            SizedBox(height: 14.h),
             Row(
               children: [
                 Expanded(
                   child: SizedBox(
-                    height: 40.h,
+                    height: 42.h,
                     child: OutlinedButton(
                       onPressed: isProcessing ? null : onReject,
                       style: OutlinedButton.styleFrom(
                         side: BorderSide(
-                          color: const Color(0xFFE03E1A),
+                          color: const Color(0xFFF87171),
                           width: 1.w,
                         ),
+                        backgroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6.r),
+                          borderRadius: BorderRadius.circular(10.r),
                         ),
-                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        padding: EdgeInsets.symmetric(horizontal: 18.w),
                       ),
                       child: isRejecting
                           ? SizedBox(
@@ -111,7 +205,7 @@ class IncomingOfferNotificationDialog extends StatelessWidget {
                               style: TextStyle(
                                 fontFamily: 'Inter',
                                 fontSize: 14.sp,
-                                color: const Color(0xFFFF0000),
+                                color: const Color(0xFFB91C1C),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -121,16 +215,16 @@ class IncomingOfferNotificationDialog extends StatelessWidget {
                 SizedBox(width: 8.w),
                 Expanded(
                   child: SizedBox(
-                    height: 40.h,
+                    height: 42.h,
                     child: ElevatedButton(
                       onPressed: isProcessing ? null : onAccept,
                       style: ElevatedButton.styleFrom(
                         side: BorderSide.none,
-                        backgroundColor: Colors.black,
+                        backgroundColor: const Color(0xFF111827),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6.r),
+                          borderRadius: BorderRadius.circular(10.r),
                         ),
-                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        padding: EdgeInsets.symmetric(horizontal: 18.w),
                         elevation: 0,
                       ),
                       child: isAccepting

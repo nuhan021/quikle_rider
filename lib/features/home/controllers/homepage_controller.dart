@@ -115,7 +115,6 @@ class HomepageController extends GetxController {
 
         return;
       }
-      isOnline.value = true;
       final result = await Get.to(
         () => const GoOnlinePage(),
         opaque: false,
@@ -123,13 +122,8 @@ class HomepageController extends GetxController {
         transition: Transition.fade,
       );
       if (result == true) {
-        // Only start upcoming assignments, location send, and notification socket.
-        unawaited(_startOnlineServices());
-        // unawaited(_changeOnlineStatus(true));
-      } else {
-        isOnline.value = false;
-        stats.clear();
-        assignments.clear();
+        isOnline.value = true;
+        _startOnlineServices();
       }
     } else {
       final result = await Get.to(
@@ -143,6 +137,7 @@ class HomepageController extends GetxController {
         stats.clear();
         assignments.clear();
         _disconnectNotificationSocket();
+        unawaited(locationServices.disconnect());
         unawaited(_changeOnlineStatus(false));
       }
     }
@@ -154,27 +149,22 @@ class HomepageController extends GetxController {
   }
 
   @override
-  void onInit() async {
+  void onInit() async{
     super.onInit();
     _profileController = Get.isRegistered<ProfileController>()
         ? Get.find<ProfileController>()
         : Get.put(ProfileController());
     _internetServices.startMonitoring(onReconnect: _handleReconnect);
-    unawaited(
-      Future.wait([
-        _syncOnlineStatus(),
-        _profileController.fetchAvailabilitySettings(),
-        fetchDashboardData(),
-        _syncFcmToken(),
-        _syncOnlineStatus(),
-      ]),
-    );
+    unawaited(_syncOnlineStatus());
+    unawaited(_syncFcmToken());
   }
 
-  Future<void> _syncOnlineStatus() async {
+  Future<void> _syncOnlineStatus({bool startOnlineServices = true}) async {
     final accessToken = StorageService.accessToken;
     if (accessToken == null || accessToken.isEmpty) {
-      AppLoggerHelper.debug('Online status sync skipped: missing access token.');
+      AppLoggerHelper.debug(
+        'Online status sync skipped: missing access token.',
+      );
       return;
     }
 
@@ -192,16 +182,19 @@ class HomepageController extends GetxController {
     final online = data['is_online'] == true;
     if (online) {
       isOnline.value = true;
-      unawaited(_startOnlineServices());
+      if (startOnlineServices) {
+        _startOnlineServices();
+      }
     }
   }
 
-  Future<void> _startOnlineServices() async {
-    await Future.wait([
-      _refreshUpcomingAssignments(assignmentsOnly: true),
-      locationServices.connectAndStart(),
-      Future<void>.microtask(_connectNotificationSocket),
-    ]);
+  void _startOnlineServices() {
+    // Fire in parallel and do not block UI.
+    unawaited(_changeOnlineStatus(true));
+    unawaited(_syncOnlineStatus(startOnlineServices: false));
+    unawaited(_refreshUpcomingAssignments(assignmentsOnly: true));
+    unawaited(locationServices.connectAndStart());
+    Future<void>.microtask(_connectNotificationSocket);
   }
 
   Future<void> fetchDashboardData() async {
@@ -497,10 +490,7 @@ class HomepageController extends GetxController {
       );
       if (response.isSuccess) {
         isOnline.value = goOnline;
-        if (goOnline) {
-          unawaited(_refreshUpcomingAssignments(assignmentsOnly: true));
-          _connectNotificationSocket();
-        } else {
+        if (!goOnline) {
           stats.clear();
           assignments.clear();
           _disconnectNotificationSocket();
